@@ -1,0 +1,21 @@
+body {
+  background: white;
+  margin: 10px;
+}
+
+body,
+input {
+  font-family: sans-serif;
+  font-size: 10pt;
+  color: black;
+}
+
+table {
+  border-collapse: collapse;
+  border: 0;
+}
+
+td {
+  border: 0;
+  padding: 0;
+}
