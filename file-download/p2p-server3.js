@@ -1,24 +1,13 @@
+var networkutil=require("./network-util");
+
 var socket = require("net");
 var fileSystem = require("fs");
 var bson = require('buffalo');
 
-
-function indexOfSplitter(buffer){
-    var i=0,NOT_FOUND=-1;
-    while(i<(buffer.length-4)){
-        if(buffer[i]==0x40 && buffer[i+1]==0x40 && buffer[i+2]==0x40 && buffer[i+3]==0x40  && buffer[i+4]==0x40){
-            return i;
-        }
-        i+=1;
-    }
-    return NOT_FOUND;
-}
-    
 function hasFileIndex(jsonData){
     return "index" in jsonData;
 }
     
-var SPLITTER='@@@@@';
 var connectionCnt = 0, users = {};
 var dataToProcess=new Buffer(0);
 
@@ -56,7 +45,7 @@ var server = socket.createServer(function (connection){
         ///var dataToProcess=Buffer.concat(chunks);
         dataToProcess=Buffer.concat([dataToProcess,data]);
         //greedy
-        var index=indexOfSplitter(dataToProcess);
+        var index=networkutil.indexOfSplitter(dataToProcess);
         while(index>-1) {
             //bson is here
             console.log("receiving size:"+dataToProcess.slice(0, index).length);
@@ -75,7 +64,7 @@ var server = socket.createServer(function (connection){
                     var toSend=bson.serialize({header:"media",content:data});
                     console.log("data size:"+data.length+" bson size:"+toSend.length);
                     connection.write(toSend);
-                    connection.write(SPLITTER);
+                    connection.write(networkutil.SPLITTER);
                 });
                 
                 readStream.on('end', function() {
@@ -86,8 +75,8 @@ var server = socket.createServer(function (connection){
                 console.log("Waning: bson is not a file content...");
             }            
             
-            dataToProcess=dataToProcess.slice(index+SPLITTER.length,dataToProcess.length);// Cuts off the processed chunk
-            index=indexOfSplitter(dataToProcess);
+            dataToProcess=dataToProcess.slice(index+networkutil.SPLITTER.length,dataToProcess.length);// Cuts off the processed chunk
+            index=networkutil.indexOfSplitter(dataToProcess);
         }        
     });
     connection.on('close', function(){
@@ -104,6 +93,8 @@ var server = socket.createServer(function (connection){
     }
     );
 });
+
+//exports.fileserver=server;
 
 server.listen(8803, function (){
     console.log('\033[96m   server listening on *:8803\033[39m');
