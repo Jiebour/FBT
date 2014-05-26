@@ -1,0 +1,17 @@
+{
+  "name": "p2p-file-share",
+  "version": "0.0.1",
+  "repository": "git://github.com/????",
+  "license": "LGPL",
+  "description": "node p2p file share",
+  "keywords": [
+    "file",
+    "share",
+    "p2p"
+  ],
+  "author": "bonelee <lizhihua2000@gmail.com>",
+  "dependencies": {
+    "buffalo": "0.1.3"
+  }
+}
+
