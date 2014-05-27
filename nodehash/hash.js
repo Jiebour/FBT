@@ -6,7 +6,7 @@ filepath = 'C:/Users/dell/Downloads/[SumiSora&CASO][Hanasakuiroha][BDRIP]';
 filepath2 = 'C:/Users/dell/Downloads/[青涩文学系列][Aoi Bungaku Series][BDrip][1080p][Vol.1-Vol.6 Fin][POPGO]';
 files = fs.readdirSync(filepath2);
 
-var filelist = new Array();
+var filelist = [];
 for (var i= 0; i< files.length; i++) {
     var filename = path.join(filepath2, files[i]);
     if (filename.slice(-3) == 'mkv')
@@ -16,7 +16,7 @@ for (var i= 0; i< files.length; i++) {
 }
 
 var output = '';
-var n = 0
+var n = 0;
 function hash(fullpath, time) {
     var hasher = new xxhash(0xCAFEBABE);
 
@@ -41,7 +41,6 @@ function hash(fullpath, time) {
             }
             else {
                 fs.appendFileSync('file.txt', output);
-                return;
             }
         }
     );
