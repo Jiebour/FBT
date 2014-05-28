@@ -34,7 +34,7 @@ function downloadFile(IP,PORT,remoteFile,localFile,blockID){
         client.write(networkutil.SPLITTER);//END mark
     });
 
-    var stream = fs.createWriteStream(localFile,{start: blockID*BLOCK_SIZE, end: blockID*BLOCK_SIZE+BLOCK_SIZE-1});//,{ flags: 'w',  encoding: 'binary',  mode: 0666 });
+    var stream = fs.createWriteStream(localFile,{start: blockID*BLOCK_SIZE});//,{ flags: 'w',  encoding: 'binary',  mode: 0666 });
     var dataToProcess=new Buffer(0);
 
     client.on('data', function(data) {
