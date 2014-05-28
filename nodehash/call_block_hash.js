@@ -1,3 +1,6 @@
 var block_hash = require('./block_hash');
 
-block_hash.dohash();
+var filepath = 'files/file1'
+  , seed = 0xAAAA;
+
+block_hash.dohash(filepath, seed);

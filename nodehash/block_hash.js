@@ -15,25 +15,23 @@ var xxhash = require('xxhash')
   , Datastore = require('nedb');
 
 
-function dohash() {
+function dohash(filepath, seed) {
     // 清理数据库
     var db = new Datastore({ filename: 'nedb_data/nedb.data', autoload: true });
     var old_data = [];
     db.find({}, function(err, docs) {
         old_data = docs;
-        console.log("old data number: %d", docs.length);
+        console.log("old record count: %d", docs.length);
     });
     db.remove({}, {multi: true}, function(err, numRemoved) {
         console.log("removed %d", numRemoved);
     });
 
 
-    var filepath = 'files/file1',
-        readable = fs.createReadStream(filepath),
+    var readable = fs.createReadStream(filepath),
         filesize = fs.statSync(filepath)['size'],
         M = 1024 * 1024,
-        flag = 0,
-        seed = 0xAAAA;
+        flag = 0;
 
     var count = 0, oneMdata, hash, hashlist=[], hashstring='', final_hash;
     readable.on('readable', function() {
@@ -50,7 +48,7 @@ function dohash() {
             flag = 0;
             oneMdata = readable.read();
             console.log('block count:' + ++count);
-            console.log(oneMdata.length);
+            console.log("last block size: " + oneMdata.length);
             hash = xxhash.hash(oneMdata, seed);
             hashlist.push(hash);
             hashstring += hash;
@@ -60,7 +58,7 @@ function dohash() {
                 'hashlist': hashlist,
                 'hash': final_hash
             }, function(err, newDoc) {
-                console.log(newDoc);
+                console.log("\nnew record: " + JSON.stringify(newDoc));
             });
         }
     });
