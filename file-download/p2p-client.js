@@ -57,7 +57,6 @@ function downloadFile(IP,PORT,remoteFile,localFile,blockID){
             dataToProcess=dataToProcess.slice(index+networkutil.SPLITTER.length,dataToProcess.length);// Cuts off the processed chunk
             index=networkutil.indexOfSplitter(dataToProcess);
         } 
-        return;
     });
 
     //handle closed
