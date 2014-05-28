@@ -6,7 +6,7 @@
 
 2. nedb
 
-调用 `call_block_hash.js` 中的 `dohash` 函数, 可参考 `call_block_hash.js` 中的代码:
+调用 `block_hash.js` 中的 `dohash` 函数, 可参考 `call_block_hash.js` 中的代码:
 
 ```javascript
 var block_hash = require('./block_hash');
