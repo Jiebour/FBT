@@ -1,12 +1,27 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
-    <title>FBT Demo</title>
-    <link rel="stylesheet" href="{{ static_url("fbt_index.css") }}" type="text/css"/>
-    <link rel="stylesheet" href="{{ static_url("fbt_common.css") }}" type="text/css"/>
+<html lang="en" class="dk_fouc has-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>FBT UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Loading Bootstrap -->
+    <link href="{{ static_url("css/bootstrap.min.css") }}" rel="stylesheet">
+
+    <!-- Loading Flat UI -->
+    <link href="{{ static_url("css/flat-ui.css") }}" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ static_url("img/favicon.ico") }}">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="//cdnjs.bootcss.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
+    <![endif]-->
+   
   </head>
   <body>
+    <div style="display:hidden" id="wrap_hide"></div>
+  <div id="wrap_all">
+
+  <link rel="stylesheet" href="{{ static_url("fbt_index.css") }}" type="text/css"/>
     <div id="nav">
       <b>{{ current_user }}</b> -
       <a href="/logout">{{ _("Sign out") }}</a>
@@ -18,7 +33,19 @@
       pwd:{{ users["pwd"] }}<br>
       time:{{ users["time"] }}
     </div>
-    <script src="{{ static_url("jquery-1.11.min.js") }}" type="text/javascript"></script>
-    <script src="{{ static_url("fbt_common.js") }}" type="text/javascript"></script>
+  </div>
+  <!-- Load JS here for greater good =============================-->
+    <script src="{{ static_url("js/jquery-1.11.min.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("Flat UI_files/jquery-ui-1.10.0.custom.min.js") }}">
+    </script>
+    <script src="{{ static_url("Flat UI_files/jquery.dropkick-1.0.0.js") }}"></script>
+    <script src="{{ static_url("Flat UI_files/custom_checkbox_and_radio.js") }}"></script>
+    <script src="{{ static_url("Flat UI_files/custom_radio.js") }}"></script>
+    <script src="{{ static_url("Flat UI_files/bootstrap-tooltip.js") }}"></script>
+    <script src="{{ static_url("Flat UI_files/jquery.tagsinput.js") }}"></script>
+    <script src="{{ static_url("Flat UI_files/jquery.placeholder.min.js") }}"></script>
+    <script src="{{ static_url("Flat UI_files/video.js") }}"></script>
+    <script src="{{ static_url("js/fbt_common.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("js/bootstrap-alert.js") }}" type="text/javascript"></script>
   </body>
 </html>

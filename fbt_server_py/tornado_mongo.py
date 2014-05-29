@@ -28,7 +28,6 @@ class Application(tornado.web.Application):
             (r"/registration", RegistrationHandler),
 	        (r"/login", LoginHandler),
 	        (r"/logout", LogoutHandler),
-            (r"/default", LogoutHandler),
         ]
 
         settings = dict(
@@ -42,10 +41,6 @@ class Application(tornado.web.Application):
         )
         tornado.web.Application.__init__(self, handlers, **settings)
 
-class DefaultHandler(BaseHandler):
-    def get(self):
-        token = self.xsrf_token
-        self.write(token)
 
 class MainHandler(BaseHandler):
     @tornado.web.authenticated
