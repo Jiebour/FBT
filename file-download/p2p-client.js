@@ -15,7 +15,7 @@ var BLOCK_SIZE=1024;
 var fileSize=439355;
 var filepath='fav-local.mp3';
 for(var i=0;i<(fileSize+1023)/1024;++i){
-	downloadFile('127.0.0.1',8800+rand3(),'fav.mp3',filepath,i);
+	downloadFile('127.0.0.1',8801,'fav.mp3',filepath,i);
 	//downloadFile('127.0.0.1',8801,'fav.mp3',filepath,i);
 }
 
