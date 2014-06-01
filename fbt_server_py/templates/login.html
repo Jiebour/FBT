@@ -16,7 +16,13 @@
     <!--[if lt IE 9]>
       <script src="//cdnjs.bootcss.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
     <![endif]-->
-<style>
+   
+  </head>
+  <body youdao="bind">
+    <div style="display:hidden" id="wrap_hide"></div>
+<div id="wrap_all">
+
+  <style>
 .btn:focus {
     outline: 5px auto #FFF;
 }
@@ -31,9 +37,7 @@ body{
 .show{
   display: block;
 }
-</style>    
-  </head>
-  <body youdao="bind">
+</style> 
 <br>
 <br>
 <div class="container" style="border-bottom: dashed 1px #cccccc; padding-bottom: 10px;">
@@ -98,7 +102,8 @@ body{
         </div>
       </div>
     </div>
-
+    <script src="{{ static_url("js/fbt_login.js") }}" type="text/javascript"></script>
+</div>
     
 
     <!-- Load JS here for greater good =============================-->
@@ -112,8 +117,6 @@ body{
     <script src="{{ static_url("Flat UI_files/jquery.tagsinput.js") }}"></script>
     <script src="{{ static_url("Flat UI_files/jquery.placeholder.min.js") }}"></script>
     <script src="{{ static_url("Flat UI_files/video.js") }}"></script>
-    
-    <script src="{{ static_url("js/fbt_login.js") }}" type="text/javascript"></script>
     <script src="{{ static_url("js/fbt_common.js") }}" type="text/javascript"></script>
     <script src="{{ static_url("js/bootstrap-alert.js") }}" type="text/javascript"></script>
 
