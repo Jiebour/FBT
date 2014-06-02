@@ -17,7 +17,7 @@ var xxhash = require('xxhash')
 
 function dohash(filepath, seed) {
     // 清理数据库
-    var db = new Datastore({ filename: 'nedb_data/nedb.data', autoload: true });
+    var db = new Datastore({ filename: '../nedb_data/res_block_hash', autoload: true });
     var old_data = [];
     db.find({}, function(err, docs) {
         old_data = docs;
@@ -66,4 +66,4 @@ function dohash(filepath, seed) {
     });
 }
 
-exports.dohash = dohash;
+exports.store_res_hash = dohash;
