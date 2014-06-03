@@ -11,7 +11,7 @@
     <!-- Loading awesome UI -->
     <link href="css/flat-ui.css" rel="stylesheet">
     <link href="css/docs.css" rel="stylesheet">  
-    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="shortcut icon" href="Flat UI_files/fbtLogo.png">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
@@ -43,6 +43,22 @@
 
         .modifyPassword{color: #da4f49;}
 
+    .item{
+    border-bottom: solid 1px #d8d8d8;
+    padding-top: 8px;
+    padding-bottom: 8px; 
+  }
+
+  .score{float: left; width: 33%; padding-bottom: 6px; color: red;}
+  .pcs{display: inline-block; width: 33%; text-align: right; padding-bottom: 6px;}
+  .doneWithComment{text-align: right;}
+  .status{float: left; width: 33%; padding-bottom: 6px; color: #1abc9c;}
+
+  .downloadingDiv{padding-right: 0px; height: 40px;}
+  .downloadingRow{padding-top: 10px;}
+  .downloadingCancelDiv{color: red; height: 40px;}
+  .downloadingCancelA{color: red;}
+
     </style>  
 
   </head>
@@ -58,7 +74,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">FBT</a>
+          <a class="navbar-brand" href="homePage.html">FBT</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -203,6 +219,108 @@
   </div>
     <!-- /.container -->
 
+
+
+
+
+
+
+
+<div class="container">
+
+        <div class="row item">
+        <div class="col-xs-3">
+          <img src="img/movie.jpg" class="img-responsive center-block img-rounded"> 
+        </div>
+        <div class="col-xs-8">
+          <a href="#"><h4>宠物/Despicable Me 2</h4></a>
+          <br>
+          <div class="row">
+            <div class="col-xs-3 downloadingDiv downloadCol">40M/100M&emsp;&emsp;40%</div>
+            <div class="col-xs-6 downloadingRow">
+
+<div class="progress progress-striped">
+  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+    <span class="sr-only">40% Complete (success)</span>
+  </div>
+</div>
+            </div>
+
+            <div class="col-xs-2 downloadingCancelDiv downloadCol">
+            <a class="downloadingCancelA" href="javascript:void(0)" onclick="pauseDownload()">
+              <span class="glyphicon glyphicon-pause"></span>
+              &emsp;
+            </a>
+
+            <a class="downloadingCancelA" href="javascript:void(0)" onclick="cancelDownload()">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>            
+            </div>
+
+          </div>
+
+        </div><!--col-8-->
+      </div><!--一个电影下载row的结束-->
+
+        <div class="row item">
+        <div class="col-xs-3">
+          <img src="img/movie.jpg" class="img-responsive center-block img-rounded"> 
+        </div>
+        <div class="col-xs-8">
+
+          <a href="#"><h4>宠物/Despicable Me 2</h4></a>
+          <p>2013-10-22(美国)/皮埃尔/...........推聊是一个基于极光推送的Android手机聊天系统。支持群聊与点对点聊天。当前包括Android客户端与Java服务器端。3分钟就可以整套系统跑起来。</p>
+
+              <div class="score">
+                9.1 
+                <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment1">(查看8888人评论)</a>
+              </div>
+
+            <div class="pcs">
+            <a data-toggle="collapse" data-toggle="collapse" href="#collapseMyComment1">评论| </a>
+            <a href="#">查看| </a>
+            <a href="#">删除</a>
+            </div>
+
+            <div class="status">
+              状态:共享中
+            </div>
+        
+        <div id="collapseAllComment1" class="collapse">
+          <div class="row">
+            <div class="col-xs-12">
+              评论全部放在这里<br>
+              评论全部放在这里<br>
+              评论全部放在这里<br>
+              评论全部放在这里
+            </div>
+          </div>
+        </div>
+
+        <div id="collapseMyComment1" class="collapse myCollapse">
+          <div class="row">
+            <div class="col-xs-12">
+              <input type="text" class="form-control" id="myComment1" placeholder="发表观后感吧(1000字最多)...">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-8" style="padding-top: 8px;">
+              <span class="glyphicon glyphicon-picture">图片</span>
+              <span class="glyphicon glyphicon-paperclip">附件</span>
+              <span >@好友</span>
+            </div>
+
+            <div class="col-xs-4 doneWithComment">
+              <button type="button" class="btn btn-sm btn-success">完成评论</button>
+            </div>
+          </div><!--评论第二行-->
+
+        </div><!--collapseMyComment-->
+        </div><!--col-9-->
+      </div><!--一个电影row的结束-->
+
+</div>
 
 
     <!-- Load JS here for greater good =============================-->
