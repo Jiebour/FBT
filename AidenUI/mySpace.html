@@ -15,7 +15,7 @@
     <!-- Custom styles form Jacob -->
     <link href="css/navbar-fixed-top.css" rel="stylesheet">
 
-    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="shortcut icon" href="Flat UI_files/fbtLogo.png">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
@@ -40,19 +40,51 @@
         .myActive{background-color: #bbbbbb;}
         .comment{background-color: #cccccc; margin-top: 20px;}
         .time{font-size: 12px; color: black;}
-        .QQDiv{background-color: #eeeeee; min-height: 500px; 
-                border: solid 3px #1abc9c; border-radius: 4px; padding-top: 10px; margin-top: 53px;}
+        .QQDiv{position: relative;
+                background-color: #eeeeee; min-height: 500px; 
+                border: solid 3px #1abc9c; border-radius: 4px; 
+                padding-top: 10px; margin-top: 53px;}
         .avatarDiv{padding-bottom: 10px; border-bottom: solid 1px white;}
         .name{font-size: 16px; color: #1abc9c;}
         .shuoShuo{padding-top: 10px;}
         .navUl{margin: 10px 0px 10px 0px;}
 
-        .myTextArea{width: 100%; border: solid 2px #1abc9c; 
-          }
+        .myTextArea{width: 100%; border: solid 2px #1abc9c;}
         textarea:focus{outline: #1abc9c auto 5px;}
         .publishButton{height: 100px; width: 100px; font-size: 100%;}
         .zpz{font-size: 100%; padding: 0;}
         .zan{text-align: center;}
+
+        /*这两行CSS模拟了flatUI典型的input样式*/
+        input{width: 100%; border: 2px solid #dce4ec; color: #34495e; border-radius: 6px;
+              transition: border linear .2s,box-shadow linear .2s;}
+        input:focus{border-color: #1abc9c; -webkit-box-shadow: none;
+                    -moz-box-shadow: none; box-shadow: none; outline: none;}
+
+        .textInSearch{font-size: 14px;}  
+        .divInSearch{border: solid 2px #1abc9c; border-radius: 3px; width: 32%; margin: 3px 3px 3px 3px;}
+        .noPaddingLR{padding-left: 2px; padding-right: 2px; padding-top: 2px;}
+        .addFriendDiv{text-align: right; background: #eeeeee;}
+
+        .searchDiv{padding-bottom: 10px; border-bottom: solid 1px #d8d8d8;}
+        .friendDiv{padding-top: 8px;}
+
+        .moreOperations{}
+        .textOfUnfriend{line-height: 24px; font-size: 12px; text-decoration: underline;}
+        .nameInFriendList{margin-bottom: 6px; border-bottom: dashed 1px #eeeeee;}
+
+.modal-dialog{
+    width: 60%; /* respsonsive width */
+    margin-left:10%; /* width/2) */ 
+}
+
+.modal-content{}        
+
+.glyphicon-th{font-size: 12px;}
+
+.nameOfLocalSearch{margin-bottom: 6px;}
+
+.bottomBar{position: absolute; bottom: 0;}
 
     </style>  
 
@@ -178,6 +210,17 @@
 
         <div class="col-lg-3 QQDiv pinned">
 
+<!--
+            <div class="col-xs-10">
+              <input id="nameOfLocalSearch" type="text" value="" placeholder="搜索我的好友...">
+            </div>
+            <div class="col-xs-2">
+              <a href="javascript:void(0)" onclick="showLocalSearchResult()">
+                <span class="glyphicon glyphicon-search"></span>
+              </a>
+            </div>        
+-->
+
           <!--这里是头像、名字、心情-->
           <div class="row avatarDiv">
             <div class="col-lg-4">
@@ -194,6 +237,8 @@
             <li><a href="#blog" data-toggle="tab">圈子</a></li>
           </ul>
 
+          <input class="nameOfLocalSearch" id="nameOfLocalSearch" type="text" value="" placeholder="输入昵称搜索我的好友...">
+
 <!--这个是经典的折叠collapse-->
 <div class="panel-group" id="accordion">
   <div class="panel panel-default">
@@ -206,8 +251,23 @@
     </div>
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body">
-        左遥<br>
-        张东杰
+      <div id="accordion1" class="row">
+        <div class="col-xs-10 nameInFriendList">张东杰</div>
+        <div class="col-xs-2 nameInFriendList">
+          <a data-toggle="collapse" data-toggle="collapse" data-parent="#accordion1" href="#name1">
+            <span class="glyphicon glyphicon-th"></span>
+          </a>
+        </div>
+        <div id="name1" class="col-xs-12 panel-collapse collapse moreOperations">
+          <a class="textOfUnfriend" href="javascript:void(0)" onclick="unfriend()">
+            <span class="glyphicon glyphicon-trash"></span>删除好友
+          </a>
+          &emsp;
+          <a class="textOfUnfriend" href="javascript:void(0)" onclick="unfriend()">
+            <span class="glyphicon glyphicon-star"></span>星标好友
+          </a>
+        </div>      
+      </div>
       </div>
     </div>
   </div>
@@ -244,7 +304,14 @@
 </div>
 
 
-<span class="fui-search"></span>
+
+<div class="row bottomBar">
+  <a class="textOfUnfriend" href="javascript:void(0)" data-toggle="modal" data-target="#searchModal">
+    <span class="glyphicon glyphicon-search"></span>FBT好友
+  </a>
+</div>
+
+
 
 
         </div>
@@ -252,6 +319,100 @@
     </div>
  
 
+
+   <!-- Modal of 搜索FBT好友 -->
+   <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h4 class="modal-title" id="myModalLabel">搜索好友:</h4>
+         </div>
+         <div class="modal-body">
+          <div class="row searchDiv">
+            <div class="col-xs-3"></div>
+            <div class="col-xs-5">
+              <input id="nameOfSearch" type="text" value="" placeholder="昵称/关键字...">
+            </div>
+            <div class="col-xs-1">
+              <a href="javascript:void(0)" onclick="showSearchResult()">
+                <span class="glyphicon glyphicon-search"></span>
+              </a>
+            </div>
+            <div class="col-xs-3"></div>
+          </div>
+            <div class="row friendDiv">
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div> 
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>                           
+                
+            </div>
+         </div>
+       </div><!-- /.modal-content -->
+     </div><!-- /.modal-dialog -->
+   </div><!-- /.modal -->
 
 
 
