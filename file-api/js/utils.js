@@ -15,6 +15,8 @@ function store_res_info(filepath) {
         'path': filepath,
         'size': filesize,
         'mtime': mtime
+    }, function(err, newDoc) {
+        return newDoc;
     });
 }
 

@@ -2,7 +2,7 @@
   "name": "fbt",
   "description": "fbt client",
   "version": "0.1.0",
-  "main": "main.html",
+  "main": "./html/main.html",
 
   "window": {
     "toolbar": false,

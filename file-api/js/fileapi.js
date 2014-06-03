@@ -6,8 +6,22 @@ var fs = require('fs'),
 
 function add_res(filepath) {
     var seed = 0xAAAA;
-    block_hash.store_res_hash(filepath, seed);
-    utils.store_res_info(filepath);
+    try {
+        var doc_hash = block_hash.store_res_hash(filepath, seed);
+        if (doc_hash == undefined)
+            throw "res_hash collection insert failed!";
+        var doc_info = utils.store_res_info(filepath);
+        if (doc_info == undefined)
+            throw "res_info collection insert failed!";
+        return {
+            doc_hash: doc_hash,
+            doc_info: doc_info
+        };
+    }
+    catch(err) {
+        console.log(err);
+        return err;
+    }
 }
 
 

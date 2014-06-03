@@ -61,6 +61,7 @@ function dohash(filepath, seed) {
                 'hash': final_hash
             }, function(err, newDoc) {
                 console.log("\nnew record: " + JSON.stringify(newDoc));
+                return newDoc;
             });
         }
     });
