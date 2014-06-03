@@ -15,7 +15,7 @@ var BLOCK_SIZE=1024;
 var fileSize=439355;
 var filepath='fav-local.mp3';
 for(var i=0;i<(fileSize+1023)/1024;++i){
-	downloadFile('127.0.0.1',8800+rand3(),'fav.mp3',filepath,i);
+	downloadFile('127.0.0.1',8801,'fav.mp3',filepath,i);
 	//downloadFile('127.0.0.1',8801,'fav.mp3',filepath,i);
 }
 
@@ -34,7 +34,7 @@ function downloadFile(IP,PORT,remoteFile,localFile,blockID){
         client.write(networkutil.SPLITTER);//END mark
     });
 
-    var stream = fs.createWriteStream(localFile,{start: blockID*BLOCK_SIZE, end: blockID*BLOCK_SIZE+BLOCK_SIZE-1});//,{ flags: 'w',  encoding: 'binary',  mode: 0666 });
+    var stream = fs.createWriteStream(localFile,{start: blockID*BLOCK_SIZE});//,{ flags: 'w',  encoding: 'binary',  mode: 0666 });
     var dataToProcess=new Buffer(0);
 
     client.on('data', function(data) {
@@ -57,7 +57,6 @@ function downloadFile(IP,PORT,remoteFile,localFile,blockID){
             dataToProcess=dataToProcess.slice(index+networkutil.SPLITTER.length,dataToProcess.length);// Cuts off the processed chunk
             index=networkutil.indexOfSplitter(dataToProcess);
         } 
-        return;
     });
 
     //handle closed

@@ -1,3 +1,12 @@
+$("a").click(function(e){
+    e.preventDefault();
+    $.get('$(this).attr("href")', function(data) {
+        /*optional stuff to do after success */
+        $("#wrap_hide").html(data);
+        $("#wrap_all").html($("#wrap_hide").find("#wrap_all").html());
+    });
+    return false;
+});
 function getCookie(name) {
     var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
     return r ? r[1] : undefined;
