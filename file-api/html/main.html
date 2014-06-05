@@ -4,13 +4,8 @@
   <meta charset="UTF-8">
   <title>node-webkit test</title>
 </head>
-<body>
+<body id="body">
 hello world!
-<script>
-  var fileapi = require('../js/fileapi');
-  var result = fileapi.add_res('../resources/file1.txt');
-  var doc_hash = result.doc_hash, doc_info = result.doc_info;
-  body.innerHTML = JSON.stringify(doc_hash) + '\n' + JSON.stringfy(doc_info);
-</script>
+<script src="../js/main.js"></script>
 </body>
 </html>

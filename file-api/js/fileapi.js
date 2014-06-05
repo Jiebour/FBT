@@ -1,25 +1,19 @@
 var fs = require('fs'),
     nedb = require('nedb'),
-    block_hash = require('./block_hash'),
     utils = require('./utils');
 
 
-function add_res(filepath) {
+function add_res(filepath, document) {
     var seed = 0xAAAA;
     try {
-        var doc_hash = block_hash.store_res_hash(filepath, seed);
-        if (doc_hash == undefined)
-            throw "res_hash collection insert failed!";
-        var doc_info = utils.store_res_info(filepath);
-        if (doc_info == undefined)
-            throw "res_info collection insert failed!";
-        return {
-            doc_hash: doc_hash,
-            doc_info: doc_info
-        };
+        utils.store_res_hash(filepath, seed, update_page_content);
+        utils.store_res_info(filepath, update_page_content);
+        function update_page_content(json) {
+            document.getElementById("body").innerHTML += '<br />' + JSON.stringify(json);
+        }
     }
     catch(err) {
-        console.log(err);
+        console.log(err.message);
         return err;
     }
 }
