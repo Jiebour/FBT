@@ -1,20 +1,15 @@
-var fs = require('fs'),
-    nedb = require('nedb'),
+var nedb = require('nedb'),
     utils = require('./utils');
 
 
 function add_res(filepath, document) {
     var seed = 0xAAAA;
     try {
-        utils.store_res_hash(filepath, seed, update_page_content);
-        utils.store_res_info(filepath, update_page_content);
-        function update_page_content(json) {
-            document.getElementById("body").innerHTML += '<br />' + JSON.stringify(json);
-        }
+        utils.store_res_hash(filepath, seed);
+        utils.store_res_info(filepath);
     }
-    catch(err) {
+   catch(err) {
         console.log(err.message);
-        return err;
     }
 }
 
@@ -22,8 +17,7 @@ function add_res(filepath, document) {
 function get_res_info(filename) {
     var res_info_collection = new Datastrore({filename: '../nedb_data/res_info', autoload: true});
     return res_info_collection.find({'name': filename}, function(err, docs) {
-        console.log(err);
-        console.log(JSON.stringify(docs));
+        utils.update_page_content(docs, 'get_res_file_info:\n');
     });  // 返回k-v形式的object, 如果没有返回{}
 }
 

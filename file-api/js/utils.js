@@ -9,13 +9,13 @@ final_hash 由分块 hash 的结果连起来做 hash 生成
  */
 
 
-var xxhash = require('xxhash')
-  , fs = require('fs')
+var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb');
 
 
-function store_res_hash(filepath, seed, update_page_content) {
+function store_res_hash(filepath, seed, todo) {
+    var xxhash = require('xxhash');
     // 清理数据库
     try {
         var db = new Datastore({ filename: 'nedb_data/res_block_hash', autoload: true });
@@ -63,7 +63,8 @@ function store_res_hash(filepath, seed, update_page_content) {
                     'hash': final_hash
                 }, function (err, newDoc) {
                     console.log("\nnew record: " + JSON.stringify(newDoc));
-                    update_page_content(newDoc);
+                    todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
+                    todo(newDoc);
                 });
             }
         });
@@ -74,7 +75,7 @@ function store_res_hash(filepath, seed, update_page_content) {
 }
 
 
-function store_res_info(filepath, update_page_content) {
+function store_res_info(filepath, todo) {
     /*存储资源的 名字, 在用户电脑中的绝对位置, 大小, mtime*/
     var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
         filename = path.basename(filepath),
@@ -87,10 +88,21 @@ function store_res_info(filepath, update_page_content) {
         'size': filesize,
         'mtime': mtime
     }, function(err, newDoc) {
-        update_page_content(newDoc);
+        todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
+        todo(newDoc);
     });
+}
+
+
+// 邓波请修改update_page_content函数, 因为资源信息在callback中才能获取, 所以没法作为返回值
+// 现在作为演示, 把资源信息显示在页面上, 实际中怎么用得你来考虑
+// 总之传入的参数是js object形式的资源信息
+function update_page_content(json, extra) {
+    extra = (typeof extra === "undefined") ? '' : extra;
+    document.getElementById("body").innerHTML += extra + '<br />' + JSON.stringify(json);
 }
 
 
 exports.store_res_hash = store_res_hash;
 exports.store_res_info = store_res_info;
+exports.update_page_content = update_page_content;
