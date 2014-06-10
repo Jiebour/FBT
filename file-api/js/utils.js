@@ -114,6 +114,25 @@ function store_res_info(filepath, todo) {
 }
 
 
+function remove_res_infohash(filepath, todo) {
+    var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
+        res_hash_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
+
+    var query = {'path': filepath};
+    res_info_collection.count(query, function(err, count) {
+        if (count != 1)
+            return;
+        res_hash_collection.count(query, function(err, count) {
+            if (count != 1)
+                return;
+            res_info_collection.remove(query, {});
+            res_hash_collection.remove(query, {});
+            todo();
+        });
+    });
+}
+
+
 // 邓波请修改update_page_content函数, 因为资源信息在callback中才能获取, 所以没法作为返回值
 // 现在作为演示, 把资源信息显示在页面上, 实际中怎么用得你来考虑
 // 总之传入的参数是js object形式的资源信息
@@ -125,4 +144,5 @@ function update_page_content(json, extra) {
 
 exports.store_res_hash = store_res_hash;
 exports.store_res_info = store_res_info;
+exports.remove_res_infohash = remove_res_infohash;
 exports.update_page_content = update_page_content;

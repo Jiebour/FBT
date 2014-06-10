@@ -30,6 +30,13 @@ function get_allres_info() {
 }
 
 
+function remove_res(filepath) {
+    utils.remove_res_infohash(filepath, function(){
+        console.log(filepath + ' removed');
+    });
+}
+
+
 function check_res_update() {
     //
 }
@@ -38,4 +45,5 @@ function check_res_update() {
 exports.add_res = add_res;
 exports.get_res_info = get_res_info;
 exports.get_allres_info = get_allres_info;
+exports.remove_res = remove_res;
 exports.check_res_update = check_res_update;
