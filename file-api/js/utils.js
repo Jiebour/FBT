@@ -1,11 +1,12 @@
 /*
 res_hash 存储格式
 {
-    {name: filename1, hashlist: [block1hash, block2hash, ...], hash: final_hash}
-    {name: filename2, hashlist: [block1hash, block2hash, ...], hash: final_hash}
+    {path: file1path, hashlist: [block1hash, block2hash, ...], hash: final_hash}
+    {path: file2path, hashlist: [block1hash, block2hash, ...], hash: final_hash}
     ...
 }
 final_hash 由分块 hash 的结果连起来做 hash 生成
+根据filepath确保每个文件的【唯一性】
  */
 
 
@@ -57,15 +58,24 @@ function store_res_hash(filepath, seed, todo) {
                 hashlist.push(hash);
                 hashstring += hash;
                 final_hash = xxhash.hash(Buffer(hashstring), seed);
-                db.insert({
-                    'filename': path.basename(filepath),
+                var newDoc = {
+                    'path': filepath,
                     'hashlist': hashlist,
                     'hash': final_hash
-                }, function (err, newDoc) {
-                    console.log("\nnew record: " + JSON.stringify(newDoc));
-                    todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
-                    todo(newDoc);
-                });
+                };
+                db.update(
+                    { 'path': filepath },
+                    newDoc,
+                    { 'multi': true, 'upsert': true },
+                    function (err, numReplaced) {
+                        if (numReplaced != 1) {
+                            console.log("has duplicate res_hash document!");
+                        }
+                        console.log("\nnew record: " + JSON.stringify(newDoc));
+                        todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
+                        todo(newDoc);
+                    }
+                );
             }
         });
     }
@@ -82,15 +92,25 @@ function store_res_info(filepath, todo) {
         filesize = fs.statSync(filepath)['size'],
         mtime = fs.statSync(filepath)['mtime'];
 
-    res_info_collection.insert({
+    var newDoc = {
         'name': filename,
         'path': filepath,
         'size': filesize,
         'mtime': mtime
-    }, function(err, newDoc) {
-        todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
-        todo(newDoc);
-    });
+    };
+
+    res_info_collection.update(
+        { 'path': filepath },
+        newDoc,
+        { 'multi': true, 'upsert': true },
+        function(err, numReplaced) {
+            if (numReplaced != 1) {
+                console.log("has duplicate res_info documents!");
+            }
+            todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
+            todo(newDoc);
+        }
+    );
 }
 
 

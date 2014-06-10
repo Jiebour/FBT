@@ -5,10 +5,10 @@ var nedb = require('nedb'),
 function add_res(filepath, document) {
     var seed = 0xAAAA;
     try {
-        utils.store_res_hash(filepath, seed);
         utils.store_res_info(filepath);
+        utils.store_res_hash(filepath, seed);
     }
-   catch(err) {
+    catch(err) {
         console.log(err.message);
     }
 }
