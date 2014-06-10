@@ -4,7 +4,7 @@
 https://github.com/mikeal/watch
 因为 release 版本有bug!
 
- 把文件修改信息添加到一个队列
+把文件修改信息添加到一个队列
 测试项目:
 1. add_res, 检测watcher.files
 2. 修改/删除文件, 检测队列变化
@@ -24,8 +24,7 @@ var output_queue = [];
 (function () {
 
     function is_watch_file(watchfile, f) {
-        return path.join(path.dirname(watchfile), path.basename(watchfile))
-        == path.join(path.dirname(f), path.basename(f))
+        return path.normalize(watchfile) == path.normalize(f)
     }
 
     //test add_res
