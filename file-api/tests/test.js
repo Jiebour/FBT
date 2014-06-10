@@ -14,12 +14,14 @@ https://github.com/mikeal/watch
 var utils = require('../js/utils'),
     fs = require('fs'),
     watch = require('watch'),
-    path = require('path');
+    path = require('path'),
+    fileapi = require('../js/fileapi');
 
 var file1 = 'resources/file1.txt',
     file2 = 'resources/file2.py';
 
 var output_queue = [];
+var monitors = [];
 
 (function () {
 
@@ -28,14 +30,19 @@ var output_queue = [];
     }
 
     //test add_res
-
+    utils.mock_store_res_hash(file1);
     (function(){
+        //mock because xxhash can only be used in node-webkit
+
         utils.store_res_info(file1, function(newDoc){
             var watch_root = path.dirname(newDoc.path);
             watch.createMonitor(watch_root, {'filter': function(f, stat){
                 if (path.basename(file1) == path.basename(f))
                     return true
             }}, function(monitor){
+
+                monitors.push(monitor);
+
                 monitor.on("created", function (f, stat) {
                     if (!is_watch_file(file1, f)) return;
                     if (f === null)
@@ -74,9 +81,6 @@ var output_queue = [];
                         setTimeout(function(){
                             console.log("start recreating");
                             fs.appendFileSync(file1, 'this is file 1');
-                            setTimeout(function(){
-                                monitor.stop();
-                            }, 3000);
                         }, 3000);
                     }, 5000);
                 } ,3000);
@@ -85,11 +89,21 @@ var output_queue = [];
     })();
 
 
-    // test remove_res
+    // test remove_res, wait for previous test to end
+    setTimeout(function() {
+        utils.remove_res_infohash(file1, function(){
+            var monitor1 = monitors.shift();
+            monitor1.stop();
+            fs.appendFileSync(file1, '\nthis is file 1');
+            setTimeout(function(){
+                console.log("\nfile has changed but should show nothing.\n");
 
-    (function(){
-        // do clean job, restore files
-
-    })();
+                // do clean job, restore files
+                fs.writeFile(file1, "this is file 1");
+                fileapi.get_allres_info();
+                fileapi.get_allres_hash();
+            }, 4000);
+        });
+    }, 20000);
 })();
 

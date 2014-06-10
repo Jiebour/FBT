@@ -15,11 +15,20 @@ var fs = require('fs')
   , Datastore = require('nedb');
 
 
+function mock_store_res_hash(file) {
+    var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
+    db.update(
+        { 'path': file },
+        { 'path': file, 'hashlist': [], 'hash': 111},
+        { 'multi': true, 'upsert': true }
+    );
+}
+
 function store_res_hash(filepath, seed, todo) {
     var xxhash = require('xxhash');
     // 清理数据库
     try {
-        var db = new Datastore({ filename: 'nedb_data/res_block_hash', autoload: true });
+        var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
         var old_data = [];
         db.find({}, function (err, docs) {
             old_data = docs;
@@ -142,6 +151,7 @@ function update_page_content(json, extra) {
 }
 
 
+exports.mock_store_res_hash = mock_store_res_hash;
 exports.store_res_hash = store_res_hash;
 exports.store_res_info = store_res_info;
 exports.remove_res_infohash = remove_res_infohash;
