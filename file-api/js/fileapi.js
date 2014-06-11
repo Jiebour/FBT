@@ -2,10 +2,10 @@ var Datastore = require('nedb'),
     utils = require('./utils');
 
 
-function add_res(filepath, document) {
+function add_res(filepath, monitors, document) {
     var seed = 0xAAAA;
     try {
-        utils.store_res_info(filepath);
+        utils.store_res_info(filepath, monitors);
         utils.store_res_hash(filepath, seed);
     }
     catch(err) {

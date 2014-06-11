@@ -33,7 +33,7 @@ var monitors = [];
     utils.mock_store_res_hash(file1); //mock because xxhash can only be used in node-webkit
 
     (function(){
-        utils.store_res_info(file1, function(newDoc){
+        utils.store_res_info(file1, monitors, function(newDoc){
             var watch_root = path.dirname(newDoc.path);
             watch.createMonitor(watch_root, {'filter': function(f, stat){
                 if (path.basename(file1) == path.basename(f))
@@ -90,7 +90,7 @@ var monitors = [];
 
     // test remove_res, wait for previous test to end
     setTimeout(function() {
-        utils.remove_res_infohash(file1, function(){
+        utils.remove_res_infohash(file1, monitors, function(events, monitors){
             var monitor1 = monitors.shift();
             monitor1.stop();
             fs.appendFileSync(file1, '\nthis is file 1');

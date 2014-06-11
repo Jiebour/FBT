@@ -26,18 +26,8 @@ function mock_store_res_hash(file) {
 
 function store_res_hash(filepath, seed, todo) {
     var xxhash = require('xxhash');
-    // 清理数据库
     try {
         var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
-        var old_data = [];
-        db.find({}, function (err, docs) {
-            old_data = docs;
-            console.log("old record count: %d", docs.length);
-        });
-        db.remove({}, {multi: true}, function (err, numRemoved) {
-            console.log("removed %d", numRemoved);
-        });
-
 
         var readable = fs.createReadStream(filepath),
             filesize = fs.statSync(filepath)['size'],
@@ -78,7 +68,7 @@ function store_res_hash(filepath, seed, todo) {
                     { 'multi': true, 'upsert': true },
                     function (err, numReplaced) {
                         if (numReplaced != 1) {
-                            console.log("has duplicate res_hash document!");
+                            console.log("found duplicate hash docs when storing");
                         }
                         console.log("\nnew record: " + JSON.stringify(newDoc));
                         todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
@@ -94,7 +84,7 @@ function store_res_hash(filepath, seed, todo) {
 }
 
 
-function store_res_info(filepath, todo) {
+function store_res_info(filepath, monitors, todo) {
     /*存储资源的 名字, 在用户电脑中的绝对位置, 大小, mtime*/
     var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
         filename = path.basename(filepath),
@@ -114,31 +104,71 @@ function store_res_info(filepath, todo) {
         { 'multi': true, 'upsert': true },
         function(err, numReplaced) {
             if (numReplaced != 1) {
-                console.log("has duplicate res_info documents!");
+                console.log("found duplicate info docs when storing");
             }
-            todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
-            todo(newDoc);
+            todo = (typeof(todo) === 'undefined') ? update_monitors : todo;
+            var events = {
+                'store': newDoc
+            };
+            if (todo === update_monitors)
+                todo(events, monitors);
+            else
+                todo(newDoc);
         }
     );
 }
 
 
-function remove_res_infohash(filepath, todo) {
+function remove_res_infohash(filepath, monitors, todo) {
     var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
         res_hash_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
 
     var query = {'path': filepath};
     res_info_collection.count(query, function(err, count) {
-        if (count != 1)
+        if (count != 1) {
+            console.log("found duplicate info docs when removing");
             return;
+        }
         res_hash_collection.count(query, function(err, count) {
-            if (count != 1)
+            if (count != 1) {
+                console.log("found duplicate info docs when removing");
                 return;
+            }
+            var events = {};
+            res_info_collection.findOne(query, function(err, doc) {
+                events.remove_info = doc;
+            });
+            res_hash_collection.findOne(query, function(err, doc) {
+                events.remove_hash = doc;
+            });
             res_info_collection.remove(query, {});
             res_hash_collection.remove(query, {});
-            todo();
+            todo = (typeof(todo) === 'undefined') ? update_monitors : todo;
+            todo(events, monitors);
         });
     });
+}
+
+
+function clear_db(monitors) {
+    var db_hash = new Datastore({ filename: 'nedb_data/res_hash', autoload: true }),
+        db_info = new Datastore({ filename: 'nedb_data/res_info', autoload: true });
+
+    db_hash.find({}, function (err, docs) {
+        console.log("\nold hash record:\n", JSON.stringify(docs));
+    });
+    db_hash.remove({}, {multi: true}, function (err, numRemoved) {
+        console.log("\nremoved %d hash record", numRemoved);
+    });
+    db_info.find({}, function (err, docs) {
+        console.log("\nold info record:\n", JSON.stringify(docs));
+    });
+    db_info.remove({}, {multi: true}, function (err, numRemoved) {
+        console.log("\nremoved %d info record", numRemoved);
+    });
+
+    var events = {'clear': true};
+    update_monitors(events, monitors);
 }
 
 
@@ -151,8 +181,17 @@ function update_page_content(json, extra) {
 }
 
 
+// 数据库操作之后, 更新monitors, 根据events决定是加入新monitor还是停止旧monitor
+// 不会在store_res_hash中调用
+function update_monitors(events, monitors) {
+
+}
+
+
+
 exports.mock_store_res_hash = mock_store_res_hash;
 exports.store_res_hash = store_res_hash;
 exports.store_res_info = store_res_info;
 exports.remove_res_infohash = remove_res_infohash;
+exports.clear_db = clear_db;
 exports.update_page_content = update_page_content;
