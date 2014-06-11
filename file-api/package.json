@@ -3,7 +3,7 @@
   "description": "fbt client",
   "version": "0.1.0",
   "main": "./html/main.html",
-
+  "node-main": "./js/main.js",
   "window": {
     "toolbar": false,
     "position": "center",

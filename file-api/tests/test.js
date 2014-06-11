@@ -30,10 +30,9 @@ var monitors = [];
     }
 
     //test add_res
-    utils.mock_store_res_hash(file1);
-    (function(){
-        //mock because xxhash can only be used in node-webkit
+    utils.mock_store_res_hash(file1); //mock because xxhash can only be used in node-webkit
 
+    (function(){
         utils.store_res_info(file1, function(newDoc){
             var watch_root = path.dirname(newDoc.path);
             watch.createMonitor(watch_root, {'filter': function(f, stat){
