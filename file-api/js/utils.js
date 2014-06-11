@@ -7,6 +7,8 @@ res_hash 存储格式
 }
 final_hash 由分块 hash 的结果连起来做 hash 生成
 根据filepath确保每个文件的【唯一性】
+凡是涉及数据库操作, 一律将path先规范化, path.normalize(path), Win和Unix分别用\和/
+服务器端可以存储res_hash或者res_info的_id来对应本地资源
  */
 
 
@@ -18,7 +20,7 @@ var fs = require('fs')
 function mock_store_res_hash(file) {
     var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
     db.update(
-        { 'path': file },
+        { 'path': path.normalize(file) },
         { 'path': file, 'hashlist': [], 'hash': 111},
         { 'multi': true, 'upsert': true }
     );
@@ -58,12 +60,12 @@ function store_res_hash(filepath, seed, todo) {
                 hashstring += hash;
                 final_hash = xxhash.hash(Buffer(hashstring), seed);
                 var newDoc = {
-                    'path': filepath,
+                    'path': path.normalize(filepath),
                     'hashlist': hashlist,
                     'hash': final_hash
                 };
                 db.update(
-                    { 'path': filepath },
+                    { 'path': path.normalize(filepath) },
                     newDoc,
                     { 'multi': true, 'upsert': true },
                     function (err, numReplaced) {
@@ -93,13 +95,13 @@ function store_res_info(filepath, monitors, todo) {
 
     var newDoc = {
         'name': filename,
-        'path': filepath,
+        'path': path.normalize(filepath),
         'size': filesize,
         'mtime': mtime
     };
 
     res_info_collection.update(
-        { 'path': filepath },
+        { 'path': path.normalize(filepath) },
         newDoc,
         { 'multi': true, 'upsert': true },
         function(err, numReplaced) {
@@ -123,7 +125,7 @@ function remove_res_infohash(filepath, monitors, todo) {
     var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
         res_hash_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
 
-    var query = {'path': filepath};
+    var query = {'path': path.normalize(filepath)};
     res_info_collection.count(query, function(err, count) {
         if (count != 1) {
             console.log("found duplicate info docs when removing");
@@ -134,17 +136,14 @@ function remove_res_infohash(filepath, monitors, todo) {
                 console.log("found duplicate info docs when removing");
                 return;
             }
-            var events = {};
+
+            todo = (typeof(todo) === 'undefined') ? update_monitors : todo;
             res_info_collection.findOne(query, function(err, doc) {
-                events.remove_info = doc;
-            });
-            res_hash_collection.findOne(query, function(err, doc) {
-                events.remove_hash = doc;
+                var events = {'remove': doc};
+                todo(events, monitors);
             });
             res_info_collection.remove(query, {});
             res_hash_collection.remove(query, {});
-            todo = (typeof(todo) === 'undefined') ? update_monitors : todo;
-            todo(events, monitors);
         });
     });
 }
@@ -156,15 +155,15 @@ function clear_db(monitors) {
 
     db_hash.find({}, function (err, docs) {
         console.log("\nold hash record:\n", JSON.stringify(docs));
-    });
-    db_hash.remove({}, {multi: true}, function (err, numRemoved) {
-        console.log("\nremoved %d hash record", numRemoved);
+        db_hash.remove({}, {multi: true}, function (err, numRemoved) {
+            console.log("\nremoved %d hash record", numRemoved);
+        });
     });
     db_info.find({}, function (err, docs) {
         console.log("\nold info record:\n", JSON.stringify(docs));
-    });
-    db_info.remove({}, {multi: true}, function (err, numRemoved) {
-        console.log("\nremoved %d info record", numRemoved);
+        db_info.remove({}, {multi: true}, function (err, numRemoved) {
+            console.log("\nremoved %d info record", numRemoved);
+        });
     });
 
     var events = {'clear': true};
@@ -184,7 +183,27 @@ function update_page_content(json, extra) {
 // 数据库操作之后, 更新monitors, 根据events决定是加入新monitor还是停止旧monitor
 // 不会在store_res_hash中调用
 function update_monitors(events, monitors) {
+    switch (Object.keys[0]) {
+        case 'clear':
+            monitors.forEach(function(monitor){
+                monitor.stop();
+            });
+            break;
+        case 'remove':
+            var path = events['remove'].path;
+            monitors.forEach(function(monitor){
+                if (path in Object.keys(monitor.files)) {
+                    monitor.stop();
+                }
+            });
+            break;
+        case 'store':
+            var newDoc = events['store'];
+            // 一个monitor和一个文件对应, 不能监视目录, 除非资源就是一个目录!
+            //TODO 完成这里
 
+
+    }
 }
 
 

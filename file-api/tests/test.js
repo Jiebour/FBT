@@ -36,6 +36,13 @@ var monitors = [];
         utils.store_res_info(file1, monitors, function(newDoc){
             var watch_root = path.dirname(newDoc.path);
             watch.createMonitor(watch_root, {'filter': function(f, stat){
+                /*
+                * exclude other files, but still watch the file's dir.
+                * in fact a monitor is forced to watch at least a dir,
+                * so in event handler we have to exclude unrelated events again.
+                * we could disuse filtering here, but it's not good to watch all
+                * and leave everything to be filtered in event handler.
+                */
                 if (path.basename(file1) == path.basename(f))
                     return true
             }}, function(monitor){
