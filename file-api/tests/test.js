@@ -43,14 +43,14 @@ var monitors = [];
                 * we could disuse filtering here, but it's not good to watch all
                 * and leave everything to be filtered in event handler.
                 */
-                if (path.basename(file1) == path.basename(f))
+                if (path.basename(newDoc.path) == path.basename(f))
                     return true
             }}, function(monitor){
 
                 monitors.push(monitor);
 
                 monitor.on("created", function (f, stat) {
-                    if (!is_watch_file(file1, f)) return;
+                    if (!is_watch_file(newDoc.path, f)) return;
                     if (f === null)
                         console.log("on create, filename is null");
                     else {
@@ -59,7 +59,7 @@ var monitors = [];
                     }
                 });
                 monitor.on("changed", function (f, curr, prev) {
-                    if (!is_watch_file(file1, f)) return;
+                    if (!is_watch_file(newDoc.path, f)) return;
                     if (f === null)
                         console.log("on change, filename is null");
                     else {
@@ -68,7 +68,7 @@ var monitors = [];
                     }
                 });
                 monitor.on("removed", function (f, stat) {
-                    if (!is_watch_file(file1, f)) return;
+                    if (!is_watch_file(newDoc.path, f)) return;
                     if (f === null)
                         console.log("on delete, filename is null");
                     else {
@@ -80,13 +80,13 @@ var monitors = [];
                 // file ops
                 setTimeout(function() {
                     console.log("start modifying");
-                    fs.appendFileSync(file1, 'me added');
+                    fs.appendFileSync(newDoc.path, 'me added');
                     setTimeout(function(){
                         console.log("start removing");
-                        fs.unlink(file1);
+                        fs.unlink(newDoc.path);
                         setTimeout(function(){
                             console.log("start recreating");
-                            fs.appendFileSync(file1, 'this is file 1');
+                            fs.appendFileSync(newDoc.path, 'this is file 1');
                         }, 3000);
                     }, 5000);
                 } ,3000);

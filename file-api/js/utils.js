@@ -89,12 +89,11 @@ function store_res_hash(filepath, seed, todo) {
 function store_res_info(filepath, monitors, todo) {
     /*存储资源的 名字, 在用户电脑中的绝对位置, 大小, mtime*/
     var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
-        filename = path.basename(filepath),
         filesize = fs.statSync(filepath)['size'],
         mtime = fs.statSync(filepath)['mtime'];
 
     var newDoc = {
-        'name': filename,
+        'name': path.basename(filepath),
         'path': path.normalize(filepath),
         'size': filesize,
         'mtime': mtime
