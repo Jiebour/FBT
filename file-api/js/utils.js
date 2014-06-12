@@ -1,11 +1,21 @@
 /*
 res_hash 存储格式
 {
-    {path: file1path, hashlist: [block1hash, block2hash, ...], hash: final_hash}
-    {path: file2path, hashlist: [block1hash, block2hash, ...], hash: final_hash}
-    ...
+    path: filepath,
+    hashlist: [block1hash, block2hash, ...],
+    hash: final_hash
+    verify: direct_file_hash
 }
 final_hash 由分块 hash 的结果连起来做 hash 生成
+direct_file_hash 直接hash文件得到, 用于检验文件是否被修改
+
+res_info 存储格式
+{
+    name: filename,
+    path: filepath,
+    size: filesize,
+    mtime: last modified time
+}
 
 根据path确保每个文件的【唯一性】, 这一点已经由store时的update操作保证,
 所以别的操作都可已直接用findOne({'path':path})
