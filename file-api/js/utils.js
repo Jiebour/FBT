@@ -14,7 +14,8 @@ final_hash 由分块 hash 的结果连起来做 hash 生成
 
 var fs = require('fs')
   , path = require('path')
-  , Datastore = require('nedb');
+  , Datastore = require('nedb')
+  , watch = require('watch') ;
 
 
 function mock_store_res_hash(file) {
@@ -178,6 +179,51 @@ function update_page_content(json, extra) {
     document.getElementById("body").innerHTML += extra + '<br />' + JSON.stringify(json);
 }
 
+function createMonitor(newDoc, monitors) {
+
+    function is_watch_file(watchfile, f) {
+        return path.normalize(watchfile) == path.normalize(f);
+    }
+
+    function createEventListener(monitor, res_path) {
+        monitor.on("created", function (f, stat) {
+            if (!is_watch_file(res_path, f)) return;
+            if (f === null)
+                console.log("on create, filename is null");
+            else {
+                console.log(f + " has been created.");
+            }
+        });
+        monitor.on("changed", function (f, curr, prev) {
+            if (!is_watch_file(res_path, f)) return;
+            if (f === null)
+                console.log("on change, filename is null");
+            else {
+                console.log(f + " has changed.");
+            }
+        });
+        monitor.on("removed", function (f, stat) {
+            if (!is_watch_file(res_path, f)) return;
+            if (f === null)
+                console.log("on delete, filename is null");
+            else {
+                console.log(f + " has been removed.");
+            }
+        });
+    }
+
+    var res_path = newDoc.path,
+        watch_root = path.dirname(res_path);
+
+    watch.createMonitor(watch_root, {'filter': function(f, stat){
+        if (path.basename(res_path) == path.basename(f))
+            return true
+    }}, function(monitor){
+        monitors.push(monitor);
+        createEventListener(monitor, res_path);
+    });
+}
+
 
 // 数据库操作之后, 更新monitors, 根据events决定是加入新monitor还是停止旧monitor
 // 不会在store_res_hash中调用
@@ -199,9 +245,7 @@ function update_monitors(events, monitors) {
         case 'store':
             var newDoc = events['store'];
             // 一个monitor和一个文件对应, 不能监视目录, 除非资源就是一个目录!
-            //TODO 完成这里
-
-
+            createMonitor(newDoc, monitors);
     }
 }
 
@@ -213,3 +257,4 @@ exports.store_res_info = store_res_info;
 exports.remove_res_infohash = remove_res_infohash;
 exports.clear_db = clear_db;
 exports.update_page_content = update_page_content;
+exports.createMonitor = createMonitor;

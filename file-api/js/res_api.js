@@ -18,7 +18,7 @@ function get_res_info(filename) {
     var res_info_collection = new Datastrore({filename: 'nedb_data/res_info', autoload: true});
     return res_info_collection.find({'name': filename}, function(err, docs) {
         utils.update_page_content(docs, 'get_res_file_info:\n');
-    });  // 返回k-v形式的object, 如果没有返回{}
+    });
 }
 
 

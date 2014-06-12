@@ -15,18 +15,17 @@ var utils = require('../js/utils'),
     fs = require('fs'),
     watch = require('watch'),
     path = require('path'),
-    fileapi = require('../js/fileapi');
+    fileapi = require('../js/res_api');
 
 var file1 = 'resources/file1.txt',
     file2 = 'resources/file2.py';
 
-var output_queue = [];
 var monitors = [];
 
 (function () {
 
     function is_watch_file(watchfile, f) {
-        return path.normalize(watchfile) == path.normalize(f)
+        return path.normalize(watchfile) == path.normalize(f);
     }
 
     //test add_res
@@ -55,7 +54,6 @@ var monitors = [];
                         console.log("on create, filename is null");
                     else {
                         console.log(f + " has been created.");
-                        output_queue.push(f);
                     }
                 });
                 monitor.on("changed", function (f, curr, prev) {
@@ -64,7 +62,6 @@ var monitors = [];
                         console.log("on change, filename is null");
                     else {
                         console.log(f + " has changed.");
-                        output_queue.push(f);
                     }
                 });
                 monitor.on("removed", function (f, stat) {
@@ -73,7 +70,6 @@ var monitors = [];
                         console.log("on delete, filename is null");
                     else {
                         console.log(f + " has been removed.");
-                        output_queue.push(f);
                     }
                 });
 
@@ -106,8 +102,8 @@ var monitors = [];
 
                 // do clean job, restore files
                 fs.writeFile(file1, "this is file 1");
-                fileapi.get_allres_info();
-                fileapi.get_allres_hash();
+                res_api.get_allres_info();
+                res_api.get_allres_hash();
             }, 4000);
         });
     }, 20000);
