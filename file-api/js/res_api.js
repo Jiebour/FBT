@@ -33,8 +33,8 @@ function get_allres_info() {
 
 
 function get_allres_hash() {
-    var hash_info_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
-    return hash_info_collection.find({}, function(err, docs) {
+    var res_hash_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
+    return res_hash_collection.find({}, function(err, docs) {
         if (err)
             console.log(err.message);
         console.log(docs);
@@ -49,8 +49,31 @@ function remove_res(filepath) {
 }
 
 
-function check_res_update() {
-    //
+function check_allres_update() {
+    /*
+    在开始监视文件之前必须检查文件在FBT客户端关闭的这段时间内的更改, 若有更改, 必须提示用户(其它操作待定)
+     */
+    var res_info_collection = new Dataore({filename: 'nedb_data/res_info', autoload: true}),
+        res_hash_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
+    res_info_collection.find({}, function(err, docs) {
+        docs.forEach(function(res_info){
+            res_hash_collection.findOne({'path': res_info.path}, function(err, res_hash){
+                utils.check_res_update(res_info, res_hash);
+            });
+        });
+    });
+}
+
+
+function watch_allres(monitors) {
+    var res_info_collection = new Dataore({filename: 'nedb_data/res_info', autoload: true});
+    res_info_collection.find({}, function(err, docs) {
+        if (err)
+            console.log(err.message);
+        docs.forEach(function(doc){
+            utils.createMonitor(doc, monitors);
+        });
+    });
 }
 
 
@@ -59,4 +82,5 @@ exports.get_res_info = get_res_info;
 exports.get_allres_info = get_allres_info;
 exports.get_allres_hash = get_allres_hash;
 exports.remove_res = remove_res;
-exports.check_res_update = check_res_update;
+exports.check_allres_update = check_allres_update;
+exports.watch_allres = watch_allres;

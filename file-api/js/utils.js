@@ -6,8 +6,12 @@ res_hash 存储格式
     ...
 }
 final_hash 由分块 hash 的结果连起来做 hash 生成
-根据filepath确保每个文件的【唯一性】
+
+根据path确保每个文件的【唯一性】, 这一点已经由store时的update操作保证,
+所以别的操作都可已直接用findOne({'path':path})
+
 凡是涉及数据库操作, 一律将path先规范化, path.normalize(path), Win和Unix分别用\和/
+
 服务器端可以存储res_hash或者res_info的_id来对应本地资源
  */
 
@@ -243,9 +247,31 @@ function update_monitors(events, monitors) {
             });
             break;
         case 'store':
-            var newDoc = events['store'];
+            var newDoc = events['store'];  // newDoc is res_info
             // 一个monitor和一个文件对应, 不能监视目录, 除非资源就是一个目录!
             createMonitor(newDoc, monitors);
+    }
+}
+
+
+function check_res_update(res_info, res_hash) {
+    var path = res_info.path;
+    try {
+        fs.stat(path, function(err, stats){
+            console.log("mtime in db: ", res_info.mtime);
+            console.log("last modified: ", stats['mtime']);
+            if (res_info.mtime != stats['mtime']) {
+                // 一旦mtime不同, 再检查hash, 如果相同, 那么只需要更新res_info的mtime
+                // 否则得调用store_res_info, store_res_hash进行更新
+                // TODO: 要把文件的直接hash结果在res_hash中, 否则这里没法进行[同步]的比较
+            }
+        });
+    }
+    catch(e) {
+        if (e.code === 'ENOENT')
+            console.log(path + ' has been removed.');
+        else
+            throw e;
     }
 }
 
@@ -258,3 +284,4 @@ exports.remove_res_infohash = remove_res_infohash;
 exports.clear_db = clear_db;
 exports.update_page_content = update_page_content;
 exports.createMonitor = createMonitor;
+exports.check_res_update = check_res_update;

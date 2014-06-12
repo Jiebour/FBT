@@ -1,9 +1,11 @@
 //require('nw.gui').Window.get().showDevTools();
-var fileapi = require('res_api');
+var res_api = require('res_api');
 
-function init_event_listener() {
+function init() {
     res_api.add_res('resources/file1.txt', document);
+    var monitors = [];
+    res_api.watch_allres(monitors);
 }
 
-exports.init_event_listener = init_event_listener;
+exports.init = init;
 
