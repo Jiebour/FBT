@@ -58,7 +58,7 @@ function check_allres_update() {
     res_info_collection.find({}, function(err, docs) {
         docs.forEach(function(res_info){
             res_hash_collection.findOne({'path': res_info.path}, function(err, res_hash){
-                utils.check_res_update(res_info, res_hash);
+                utils.check_res_update(res_info, res_hash, res_info_collection);
             });
         });
     });

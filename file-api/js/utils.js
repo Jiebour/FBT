@@ -29,7 +29,8 @@ res_info 存储格式
 var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb')
-  , watch = require('watch') ;
+  , watch = require('watch')
+  , xxhash = require('xxhash');
 
 
 function mock_store_res_hash(file) {
@@ -42,7 +43,6 @@ function mock_store_res_hash(file) {
 }
 
 function store_res_hash(filepath, seed, todo) {
-    var xxhash = require('xxhash');
     try {
         var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
 
@@ -77,7 +77,8 @@ function store_res_hash(filepath, seed, todo) {
                 var newDoc = {
                     'path': path.normalize(filepath),
                     'hashlist': hashlist,
-                    'hash': final_hash
+                    'hash': final_hash,
+                    'seed': seed
                 };
                 db.update(
                     { 'path': path.normalize(filepath) },
@@ -93,7 +94,18 @@ function store_res_hash(filepath, seed, todo) {
                     }
                 );
             }
-        });
+
+            // add verify field
+            var hasher = new xxhash(seed);
+            fs.createReadStream(filepath)
+                .on('data', function(data) {
+                    hasher.update(data);
+                })
+                .on('end', function(){
+                    var hashvalue = hasher.digest();
+                    db.update({'path': filepath}, {'$set': {'verify': hashvalue}}, {});
+                });
+            });
     }
     catch (err) {
         console.log(err.message);
@@ -229,7 +241,7 @@ function createMonitor(newDoc, monitors) {
     var res_path = newDoc.path,
         watch_root = path.dirname(res_path);
 
-    watch.createMonitor(watch_root, {'filter': function(f, stat){
+    watch.createMonitor(watch_root, {'filter': function(f){
         if (path.basename(res_path) == path.basename(f))
             return true
     }}, function(monitor){
@@ -264,7 +276,10 @@ function update_monitors(events, monitors) {
 }
 
 
-function check_res_update(res_info, res_hash) {
+function check_res_update(res_info, res_hash, res_info_collection) {
+    /*
+    * this function should not operatate on monitors, but only update db
+     */
     var path = res_info.path;
     try {
         fs.stat(path, function(err, stats){
@@ -273,7 +288,26 @@ function check_res_update(res_info, res_hash) {
             if (res_info.mtime != stats['mtime']) {
                 // 一旦mtime不同, 再检查hash, 如果相同, 那么只需要更新res_info的mtime
                 // 否则得调用store_res_info, store_res_hash进行更新
-                // TODO: 要把文件的直接hash结果在res_hash中, 否则这里没法进行[同步]的比较
+                var hasher = new xxhash(res_hash.seed);
+                fs.createReadStream(path)
+                    .on('data', function(data) {
+                        hasher.update(data);
+                    })
+                    .on('end', function(){
+                        var hashvalue = hasher.digest();
+                        if (hashvalue == res_hash.verify) {
+                            // file content unchanged, only need to update mtime
+                            res_info_collection.update(
+                                {'path': path},
+                                {'$set': {'mtime': stats['mtime']}}, {}
+                            );
+                        }
+                        else {
+                            // file content changed, update all, TODO: 其它操作, 待添加
+                            store_res_info(path, [], update_page_content);  // don't touch monitors
+                            store_res_hash(path, seed);
+                        }
+                    });
             }
         });
     }
