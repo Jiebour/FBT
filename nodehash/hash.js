@@ -42,8 +42,7 @@ function hash(fullpath, time) {
             else {
                 fs.appendFileSync('file.txt', output);
             }
-        }
-    );
+        });
 }
 
 time = process.hrtime();
