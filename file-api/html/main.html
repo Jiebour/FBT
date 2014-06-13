@@ -12,8 +12,6 @@
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.addEventListener("change", function (evt) {
-            console.log(this.value);
-
             var files = document.getElementById("fileDialog").files;
             for (var i = 0; i < files.length; ++i) {
                 console.log(window.document.monitors);

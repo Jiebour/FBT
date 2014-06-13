@@ -29,7 +29,11 @@ res_info 存储格式
 var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb')
-  , watch = require('watch');
+  , watch = require('watch')
+  , settings = require('./settings');
+
+var RES_INFO_PATH = settings.RES_INFO_PATH,
+    RES_HASH_PATH = settings.RES_HASH_PATH;
 
 var mode = "run";
 
@@ -40,7 +44,7 @@ else
 
 
 function mock_store_res_hash(file) {
-    var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
+    var db = new Datastore({ filename: RES_HASH_PATH, autoload: true });
     db.update(
         { 'path': path.normalize(file) },
         { 'path': file, 'hashlist': [], 'hash': 111},
@@ -48,10 +52,8 @@ function mock_store_res_hash(file) {
     );
 }
 
-function store_res_hash(filepath, seed, todo) {
+function store_res_hash(filepath, seed, res_hash_collection, todo) {
     try {
-        var db = new Datastore({ filename: 'nedb_data/res_hash', autoload: true });
-
         var readable = fs.createReadStream(filepath),
             filesize = fs.statSync(filepath)['size'],
             M = 1024 * 1024;
@@ -86,7 +88,7 @@ function store_res_hash(filepath, seed, todo) {
                     'hash': final_hash,
                     'seed': seed
                 };
-                db.update(
+                res_hash_collection.update(
                     { 'path': path.normalize(filepath) },
                     newDoc,
                     { 'multi': true, 'upsert': true },
@@ -108,7 +110,7 @@ function store_res_hash(filepath, seed, todo) {
                 })
                 .on('end', function(){
                     var hashvalue = hasher.digest();
-                    db.update({'path': filepath}, {'$set': {'verify': hashvalue}}, {});
+                    res_hash_collection.update({'path': filepath}, {'$set': {'verify': hashvalue}}, {});
                 });
             });
     }
@@ -118,11 +120,9 @@ function store_res_hash(filepath, seed, todo) {
 }
 
 
-function store_res_info(filepath, monitors, todo) {
+function store_res_info(filepath, monitors, res_info_collection, todo) {
     /*存储资源的 名字, 在用户电脑中的绝对位置, 大小, mtime*/
-
-    var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
-        stats = fs.statSync(filepath);
+    var stats = fs.statSync(filepath);
 
     var newDoc = {
         'name': path.basename(filepath),
@@ -153,8 +153,8 @@ function store_res_info(filepath, monitors, todo) {
 
 
 function remove_res_infohash(filepath, monitors, todo) {
-    var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
-        res_hash_collection = new Datastore({filename: 'nedb_data/res_hash', autoload: true});
+    var res_info_collection = new Datastore({filename: RES_INFO_PATH, autoload: true}),
+        res_hash_collection = new Datastore({filename: RES_HASH_PATH, autoload: true});
 
     var query = {'path': path.normalize(filepath)};
     res_info_collection.count(query, function(err, count) {
@@ -181,8 +181,8 @@ function remove_res_infohash(filepath, monitors, todo) {
 
 
 function clear_db(monitors) {
-    var db_hash = new Datastore({ filename: 'nedb_data/res_hash', autoload: true }),
-        db_info = new Datastore({ filename: 'nedb_data/res_info', autoload: true });
+    var db_hash = new Datastore({ filename: RES_HASH_PATH, autoload: true }),
+        db_info = new Datastore({ filename: RES_INFO_PATH, autoload: true });
 
     db_hash.find({}, function (err, docs) {
         console.log("\nold hash record:\n", JSON.stringify(docs));
@@ -218,6 +218,7 @@ function createMonitor(newDoc, monitors) {
     }
 
     function createEventListener(monitor, res_path) {
+        console.log("start watching file: ", res_path);
         monitor.on("created", function (f, stat) {
             if (!is_watch_file(res_path, f)) return;
             if (f === null)
@@ -276,13 +277,12 @@ function update_monitors(events, monitors) {
         case 'store':
             var newDoc = events['store'];  // newDoc is res_info
             // 一个monitor和一个文件对应, 不能监视目录, 除非资源就是一个目录!
-            console.log("start watching file: ", newDoc);
             createMonitor(newDoc, monitors);
     }
 }
 
 
-function check_res_update(res_info, res_hash, res_info_collection) {
+function check_res_update(res_info, res_hash, res_info_collection, res_hash_collection) {
     /*
     * this function should not operate on monitors, but only update db
      */
@@ -300,6 +300,7 @@ function check_res_update(res_info, res_hash, res_info_collection) {
                     .on('end', function(){
                         var hashvalue = hasher.digest();
                         if (hashvalue == res_hash.verify) {
+                            console.log(path, "modified but not changed");
                             // file content unchanged, only need to update mtime
                             res_info_collection.update(
                                 {'path': path},
@@ -308,8 +309,10 @@ function check_res_update(res_info, res_hash, res_info_collection) {
                         }
                         else {
                             // file content changed, update all, TODO: 其它操作, 待添加
-                            store_res_info(path, [], update_page_content);  // don't touch monitors
-                            store_res_hash(path, seed);
+                            console.log(path, "modified and changed");
+                            store_res_info(path, [], res_info_collection, update_page_content);
+                            // don't touch monitors
+                            store_res_hash(path, seed, res_hash_collection);
                         }
                     });
             }
