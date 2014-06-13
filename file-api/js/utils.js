@@ -278,7 +278,7 @@ function update_monitors(events, monitors) {
 
 function check_res_update(res_info, res_hash, res_info_collection) {
     /*
-    * this function should not operatate on monitors, but only update db
+    * this function should not operate on monitors, but only update db
      */
     var path = res_info.path;
     try {
