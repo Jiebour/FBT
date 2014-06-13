@@ -42,8 +42,7 @@ var monitors = [];
                 * we could disuse filtering here, but it's not good to watch all
                 * and leave everything to be filtered in event handler.
                 */
-                if (path.basename(newDoc.path) == path.basename(f))
-                    return true
+                return (path.basename(newDoc.path) == path.basename(f))
             }}, function(monitor){
 
                 monitors.push(monitor);

@@ -5,6 +5,29 @@
   <title>node-webkit test</title>
 </head>
 <body id="body" onload="process.mainModule.exports.init()">
-hello world!
+<input style="" id="fileDialog" type="file" multiple />
+
+<script>
+    var res_api = require('../js/res_api.js');
+    function chooseFile(name) {
+        var chooser = document.querySelector(name);
+        chooser.addEventListener("change", function (evt) {
+            console.log(this.value);
+
+            var files = document.getElementById("fileDialog").files;
+            for (var i = 0; i < files.length; ++i) {
+                console.log(window.document.monitors);
+                res_api.add_res(files[i].path, window.document.monitors);
+            }
+
+        }, false);
+
+        chooser.click();
+    }
+    chooseFile('#fileDialog');
+</script>
+
+
+
 </body>
 </html>

@@ -29,8 +29,14 @@ res_info 存储格式
 var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb')
-  , watch = require('watch')
-  , xxhash = require('xxhash');
+  , watch = require('watch');
+
+var mode = "run";
+
+if (mode == "test")
+    var xxhash = require('xxhash');     // xxhash for node
+else
+    var xxhash = require('xxhash_nw');  // rebuild xxhash for nw
 
 
 function mock_store_res_hash(file) {
@@ -88,7 +94,6 @@ function store_res_hash(filepath, seed, todo) {
                         if (numReplaced != 1) {
                             console.log("found duplicate hash docs when storing");
                         }
-                        console.log("\nnew record: " + JSON.stringify(newDoc));
                         todo = (typeof(todo) === 'undefined') ? update_page_content : todo;
                         todo(newDoc);
                     }
@@ -202,7 +207,8 @@ function clear_db(monitors) {
 // 总之传入的参数是js object形式的资源信息
 function update_page_content(json, extra) {
     extra = (typeof extra === "undefined") ? '' : extra;
-    document.getElementById("body").innerHTML += extra + '<br />' + JSON.stringify(json);
+//    document.getElementById("body").innerHTML += extra + '<br />' + JSON.stringify(json);
+    console.log(json, extra);
 }
 
 function createMonitor(newDoc, monitors) {
@@ -210,6 +216,7 @@ function createMonitor(newDoc, monitors) {
     function is_watch_file(watchfile, f) {
         return path.normalize(watchfile) == path.normalize(f);
     }
+    console.log("start watching file: ", newDoc.path);
 
     function createEventListener(monitor, res_path) {
         monitor.on("created", function (f, stat) {
@@ -242,8 +249,7 @@ function createMonitor(newDoc, monitors) {
         watch_root = path.dirname(res_path);
 
     watch.createMonitor(watch_root, {'filter': function(f){
-        if (path.basename(res_path) == path.basename(f))
-            return true
+        return (path.basename(res_path) == path.basename(f))
     }}, function(monitor){
         monitors.push(monitor);
         createEventListener(monitor, res_path);
