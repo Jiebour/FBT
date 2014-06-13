@@ -55,7 +55,7 @@ function check_allres_update() {
     /*
     在开始监视文件之前必须检查文件在FBT客户端关闭的这段时间内的更改, 若有更改, 必须提示用户(其它操作待定)
      */
-    if (!fs.existsSync('nedb/res_info')) {
+    if (!fs.existsSync('nedb_data/res_info')) {
         console.log("no res exists, stop checking update");
         return;
     }
@@ -75,7 +75,7 @@ function check_allres_update() {
 
 function watch_allres(monitors) {
 
-    if (!fs.existsSync('nedb/res_info')) {
+    if (!fs.existsSync('nedb_data/res_info')) {
         console.log("no res exists, stop watching res");
         return;
     }

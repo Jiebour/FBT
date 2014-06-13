@@ -120,15 +120,15 @@ function store_res_hash(filepath, seed, todo) {
 
 function store_res_info(filepath, monitors, todo) {
     /*存储资源的 名字, 在用户电脑中的绝对位置, 大小, mtime*/
+
     var res_info_collection = new Datastore({filename: 'nedb_data/res_info', autoload: true}),
-        filesize = fs.statSync(filepath)['size'],
-        mtime = fs.statSync(filepath)['mtime'];
+        stats = fs.statSync(filepath);
 
     var newDoc = {
         'name': path.basename(filepath),
         'path': path.normalize(filepath),
-        'size': filesize,
-        'mtime': mtime
+        'size': stats['size'],
+        'mtime': stats['mtime'].getTime()
     };
 
     res_info_collection.update(
@@ -216,7 +216,6 @@ function createMonitor(newDoc, monitors) {
     function is_watch_file(watchfile, f) {
         return path.normalize(watchfile) == path.normalize(f);
     }
-    console.log("start watching file: ", newDoc.path);
 
     function createEventListener(monitor, res_path) {
         monitor.on("created", function (f, stat) {
@@ -260,7 +259,7 @@ function createMonitor(newDoc, monitors) {
 // 数据库操作之后, 更新monitors, 根据events决定是加入新monitor还是停止旧monitor
 // 不会在store_res_hash中调用
 function update_monitors(events, monitors) {
-    switch (Object.keys[0]) {
+    switch (Object.keys(events)[0]) {
         case 'clear':
             monitors.forEach(function(monitor){
                 monitor.stop();
@@ -277,6 +276,7 @@ function update_monitors(events, monitors) {
         case 'store':
             var newDoc = events['store'];  // newDoc is res_info
             // 一个monitor和一个文件对应, 不能监视目录, 除非资源就是一个目录!
+            console.log("start watching file: ", newDoc);
             createMonitor(newDoc, monitors);
     }
 }
@@ -289,8 +289,6 @@ function check_res_update(res_info, res_hash, res_info_collection) {
     var path = res_info.path;
     try {
         fs.stat(path, function(err, stats){
-            console.log("mtime in db: ", res_info.mtime);
-            console.log("last modified: ", stats['mtime']);
             if (res_info.mtime != stats['mtime']) {
                 // 一旦mtime不同, 再检查hash, 如果相同, 那么只需要更新res_info的mtime
                 // 否则得调用store_res_info, store_res_hash进行更新
@@ -305,7 +303,7 @@ function check_res_update(res_info, res_hash, res_info_collection) {
                             // file content unchanged, only need to update mtime
                             res_info_collection.update(
                                 {'path': path},
-                                {'$set': {'mtime': stats['mtime']}}, {}
+                                {'$set': {'mtime': stats['mtime'].getTime()}}, {}
                             );
                         }
                         else {
