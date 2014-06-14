@@ -8,9 +8,8 @@ var RES_INFO_PATH = settings.RES_INFO_PATH,
 
 function init(res_info_collection, res_hash_collection) {
     global.monitors = [];
-
     res_api.check_allres_update(res_info_collection, res_hash_collection);
-    res_api.watch_allres(res_info_collection, global.monitors);
+    res_api.watch_allres(res_info_collection);
     //TODO: 全局monitors
 }
 

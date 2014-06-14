@@ -8,9 +8,12 @@ var RES_INFO_PATH = settings.RES_INFO_PATH;
 function add_res(filepath, res_info_collection, res_hash_collection) {
     var seed = 0xAAAA;
     try {
-        console.log(filepath);
         //DRBUG
-        console.log(global.monitors);
+        console.log("existing monitors:");
+        global.monitors.forEach(function(monitor){
+            console.log(monitor);
+        });
+
         utils.store_res_info(filepath, global.monitors, res_info_collection);
         utils.store_res_hash(filepath, seed, res_hash_collection);
     }
@@ -45,8 +48,8 @@ function get_allres_hash(res_hash_collection) {
 }
 
 
-function remove_res(filepath, monitors, res_info_collection, res_hash_collection) {
-    utils.remove_res_infohash(filepath, monitors, res_info_collection, res_hash_collection);
+function remove_res(filepath, res_info_collection, res_hash_collection) {
+    utils.remove_res_infohash(filepath, global.monitors, res_info_collection, res_hash_collection);
     console.log(filepath + ' removed');
 }
 
@@ -70,7 +73,7 @@ function check_allres_update(res_info_collection, res_hash_collection) {
 }
 
 
-function watch_allres(res_info_collection, monitors) {
+function watch_allres(res_info_collection) {
 
     if (!fs.existsSync(RES_INFO_PATH)) {
         console.log("no res exists, stop watching res");
@@ -81,7 +84,7 @@ function watch_allres(res_info_collection, monitors) {
         if (err)
             console.log(err.message);
         docs.forEach(function(doc){
-            utils.createMonitor(doc, monitors);
+            utils.createMonitor(doc, global.monitors);
         });
     });
 }
