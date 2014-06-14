@@ -3,11 +3,10 @@
 <head lang="en">
   <meta charset="UTF-8">
   <title>node-webkit test</title>
-</head>
-<body id="body">
-<input style="" id="fileDialog" type="file" multiple />
 
+<script type="text/javascript" src="jquery-1.11.0.min.js"></script>
 <script>
+  $(document).ready(function(){
     var main = require('../js/main'),
         res_api = require('../js/res_api.js'),
         Datastore = require('nedb'),
@@ -20,21 +19,50 @@
 
     main.init(res_info_collection, res_hash_collection);
 
+    // handle res add
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.addEventListener("change", function (evt) {
-            var files = document.getElementById("fileDialog").files;
+            var files = $("#fileDialog")[0].files;
             for (var i = 0; i < files.length; ++i) {
                 res_api.add_res(files[i].path,
                     res_info_collection, res_hash_collection);
+                $("#res").prepend("<input type=\"checkbox\" name=\"resources\" value=\""+
+                 files[i].path + "\">" + files[i].path + "<br />");
             }
-
         }, false);
     }
     chooseFile('#fileDialog');
+
+    // handle res remove
+    $("#res").submit(function() {
+      var res_to_remove = "";
+      with(document.form1) {
+        for(var i = 0; i < resources.length; i++){
+          if(resources[i].checked) {
+            res_to_remove += resources[i].value + "\n";
+          }
+        }
+      }
+      if(res_to_remove == "") {
+        alert("select resource to remove");
+      } else {
+        alert (res_to_remove);
+      }
+      return false;
+    });
+
+  });
+
 </script>
 
+</head>
 
-
+<body id="body">
+<input style="" id="fileDialog" type="file" multiple />
+<br />
+<form id="res" name="form1">
+  <input type="submit" value="Submit">
+</form>
 </body>
 </html>

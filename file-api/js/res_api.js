@@ -11,7 +11,7 @@ function add_res(filepath, res_info_collection, res_hash_collection) {
         //DRBUG
         console.log("existing monitors:");
         for (var file in global.monitors) {
-            console.log(monitors[file]);
+            console.log(global.monitors[file]);
         }
 
         utils.store_res_info(filepath, global.monitors, res_info_collection);
