@@ -241,7 +241,7 @@ function createMonitor(newDoc, monitors) {
     watch.createMonitor(watch_root, {'filter': function(f){
         return (path.basename(res_path) == path.basename(f))
     }}, function(monitor){
-        monitors.push(monitor);
+        monitors[res_path] = monitor;
         createEventListener(monitor, res_path);
     });
 }
@@ -252,22 +252,20 @@ function createMonitor(newDoc, monitors) {
 function update_monitors(events, monitors) {
     switch (Object.keys(events)[0]) {
         case 'clear':
-            monitors.forEach(function(monitor){
-                monitor.stop();
-            });
+            for (var file in monitors)
+                monitors[file].stop();
             break;
         case 'remove':
             var path = events['remove'].path;
-            monitors.forEach(function(monitor){
-                if (path in Object.keys(monitor.files)) {
-                    monitor.stop();
-                }
-            });
+            for (var file in monitors)
+                if (path in Object.keys(monitors[file].files))
+                    monitors[file].stop();
             break;
         case 'store':
             var newDoc = events['store'];  // newDoc is res_info
             // 一个monitor和一个文件对应, 不能监视目录, 除非资源就是一个目录!
-            createMonitor(newDoc, monitors);
+            if (!monitors.hasOwnProperty(newDoc.path))  // monitor不存在才添加
+                createMonitor(newDoc, monitors);
     }
 }
 

@@ -10,9 +10,9 @@ function add_res(filepath, res_info_collection, res_hash_collection) {
     try {
         //DRBUG
         console.log("existing monitors:");
-        global.monitors.forEach(function(monitor){
-            console.log(monitor);
-        });
+        for (var file in global.monitors) {
+            console.log(monitors[file]);
+        }
 
         utils.store_res_info(filepath, global.monitors, res_info_collection);
         utils.store_res_hash(filepath, seed, res_hash_collection);
