@@ -289,7 +289,7 @@ function check_res_update(res_info, res_hash, res_info_collection, res_hash_coll
     var path = res_info.path;
     try {
         fs.stat(path, function(err, stats){
-            if (res_info.mtime != stats['mtime']) {
+            if (res_info.mtime != stats['mtime'].getTime()) {
                 // 一旦mtime不同, 再检查hash, 如果相同, 那么只需要更新res_info的mtime
                 // 否则得调用store_res_info, store_res_hash进行更新
                 var hasher = new xxhash(res_hash.seed);
