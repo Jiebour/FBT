@@ -15,10 +15,12 @@ var utils = require('../js/utils'),
     fs = require('fs'),
     watch = require('watch'),
     path = require('path'),
-    fileapi = require('../js/res_api');
+    fileapi = require('../js/res_api'),
+    settings = require('../js/settings');
 
 var file1 = 'resources/file1.txt',
-    file2 = 'resources/file2.py';
+    file2 = 'resources/file2.py',
+    RES_HASH_PATH = settings.RES_HASH_PATH;
 
 var monitors = [];
 
@@ -29,7 +31,8 @@ var monitors = [];
     }
 
     //test add_res
-    utils.mock_store_res_hash(file1); //mock because xxhash can only be used in node-webkit
+    var res_hash_collection = new Datastore({ filename: RES_HASH_PATH, autoload: true });
+    utils.mock_store_res_hash(file1, res_hash_collection); //mock because xxhash can only be used in node-webkit
 
     (function(){
         utils.store_res_info(file1, monitors, function(newDoc){

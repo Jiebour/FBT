@@ -4,23 +4,32 @@
   <meta charset="UTF-8">
   <title>node-webkit test</title>
 </head>
-<body id="body" onload="process.mainModule.exports.init()">
+<body id="body">
 <input style="" id="fileDialog" type="file" multiple />
 
 <script>
-    var res_api = require('../js/res_api.js');
+    var main = require('../js/main'),
+        res_api = require('../js/res_api.js'),
+        Datastore = require('nedb'),
+        settings = require('../js/settings');
+
+    var RES_INFO_PATH = settings.RES_INFO_PATH,
+        RES_HASH_PATH = settings.RES_HASH_PATH,
+        res_info_collection = new Datastore({filename: RES_INFO_PATH, autoload: true}),
+        res_hash_collection = new Datastore({filename: RES_HASH_PATH, autoload: true});
+
+    main.init(res_info_collection, res_hash_collection);
+
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.addEventListener("change", function (evt) {
             var files = document.getElementById("fileDialog").files;
             for (var i = 0; i < files.length; ++i) {
-                console.log(window.document.monitors);
-                res_api.add_res(files[i].path, window.document.monitors);
+                res_api.add_res(files[i].path,
+                    res_info_collection, res_hash_collection);
             }
 
         }, false);
-
-        //chooser.click();
     }
     chooseFile('#fileDialog');
 </script>

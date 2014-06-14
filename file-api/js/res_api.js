@@ -3,15 +3,16 @@ var Datastore = require('nedb'),
     fs = require('fs'),
     settings = require('./settings');
 
-var RES_INFO_PATH = settings.RES_INFO_PATH,
-    RES_HASH_PATH = settings.RES_HASH_PATH;
+var RES_INFO_PATH = settings.RES_INFO_PATH;
 
-function add_res(filepath, monitors) {
+function add_res(filepath, res_info_collection, res_hash_collection) {
     var seed = 0xAAAA;
     try {
         console.log(filepath);
-        utils.store_res_info(filepath, monitors);
-        utils.store_res_hash(filepath, seed);
+        //DRBUG
+        console.log(global.monitors);
+        utils.store_res_info(filepath, global.monitors, res_info_collection);
+        utils.store_res_hash(filepath, seed, res_hash_collection);
     }
     catch(err) {
         console.log(err.message);
@@ -19,16 +20,14 @@ function add_res(filepath, monitors) {
 }
 
 
-function get_res_info(filename) {
-    var res_info_collection = new Datastore({filename: RES_INFO_PATH, autoload: true});
+function get_res_info(filename, res_info_collection) {
     return res_info_collection.find({'name': filename}, function(err, docs) {
         utils.update_page_content(docs, 'get_res_file_info:\n');
     });
 }
 
 
-function get_allres_info() {
-    var res_info_collection = new Datastore({filename: RES_INFO_PATH, autoload: true});
+function get_allres_info(res_info_collection) {
     return res_info_collection.find({}, function(err, docs) {
         if (err)
             console.log(err.message);
@@ -37,8 +36,7 @@ function get_allres_info() {
 }
 
 
-function get_allres_hash() {
-    var res_hash_collection = new Datastore({filename: RES_HASH_PATH, autoload: true});
+function get_allres_hash(res_hash_collection) {
     return res_hash_collection.find({}, function(err, docs) {
         if (err)
             console.log(err.message);
@@ -47,10 +45,9 @@ function get_allres_hash() {
 }
 
 
-function remove_res(filepath) {
-    utils.remove_res_infohash(filepath, function(){
-        console.log(filepath + ' removed');
-    });
+function remove_res(filepath, monitors, res_info_collection, res_hash_collection) {
+    utils.remove_res_infohash(filepath, monitors, res_info_collection, res_hash_collection);
+    console.log(filepath + ' removed');
 }
 
 

@@ -29,11 +29,8 @@ res_info 存储格式
 var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb')
-  , watch = require('watch')
-  , settings = require('./settings');
+  , watch = require('watch');
 
-var RES_INFO_PATH = settings.RES_INFO_PATH,
-    RES_HASH_PATH = settings.RES_HASH_PATH;
 
 var mode = "run";
 
@@ -43,9 +40,8 @@ else
     var xxhash = require('xxhash_nw');  // rebuild xxhash for nw
 
 
-function mock_store_res_hash(file) {
-    var db = new Datastore({ filename: RES_HASH_PATH, autoload: true });
-    db.update(
+function mock_store_res_hash(file, res_hash_collection) {
+    res_hash_collection.update(
         { 'path': path.normalize(file) },
         { 'path': file, 'hashlist': [], 'hash': 111},
         { 'multi': true, 'upsert': true }
@@ -152,10 +148,7 @@ function store_res_info(filepath, monitors, res_info_collection, todo) {
 }
 
 
-function remove_res_infohash(filepath, monitors, todo) {
-    var res_info_collection = new Datastore({filename: RES_INFO_PATH, autoload: true}),
-        res_hash_collection = new Datastore({filename: RES_HASH_PATH, autoload: true});
-
+function remove_res_infohash(filepath, monitors, res_info_collection, res_hash_collection, todo) {
     var query = {'path': path.normalize(filepath)};
     res_info_collection.count(query, function(err, count) {
         if (count != 1) {
@@ -180,19 +173,16 @@ function remove_res_infohash(filepath, monitors, todo) {
 }
 
 
-function clear_db(monitors) {
-    var db_hash = new Datastore({ filename: RES_HASH_PATH, autoload: true }),
-        db_info = new Datastore({ filename: RES_INFO_PATH, autoload: true });
-
-    db_hash.find({}, function (err, docs) {
+function clear_db(monitors, res_info_collection, res_hash_collection) {
+    res_hash_collection.find({}, function (err, docs) {
         console.log("\nold hash record:\n", JSON.stringify(docs));
-        db_hash.remove({}, {multi: true}, function (err, numRemoved) {
+        res_hash_collection.remove({}, {multi: true}, function (err, numRemoved) {
             console.log("\nremoved %d hash record", numRemoved);
         });
     });
-    db_info.find({}, function (err, docs) {
+    res_info_collection.find({}, function (err, docs) {
         console.log("\nold info record:\n", JSON.stringify(docs));
-        db_info.remove({}, {multi: true}, function (err, numRemoved) {
+        res_info_collection.remove({}, {multi: true}, function (err, numRemoved) {
             console.log("\nremoved %d info record", numRemoved);
         });
     });
