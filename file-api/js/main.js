@@ -1,4 +1,11 @@
-//require('nw.gui').Window.get().showDevTools();
+try {
+    require('nw.gui').Window.get().showDevTools();
+}
+catch(e){
+
+}
+
+
 var res_api = require('./res_api'),
     Datastore = require('nedb'),
     utils = require('./utils');

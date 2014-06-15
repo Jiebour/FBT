@@ -15,7 +15,6 @@ var utils = require('../js/utils'),
     fs = require('fs'),
     watch = require('watch'),
     path = require('path'),
-    fileapi = require('../js/res_api'),
     settings = require('../js/settings');
 
 var file1 = 'resources/file1.txt',
