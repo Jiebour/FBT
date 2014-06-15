@@ -1,0 +1,19 @@
+{
+  "name": "fbt",
+  "description": "fbt client",
+  "version": "0.1.0",
+  "main": "./html/main.html",
+  "window": {
+    "toolbar": false,
+    "position": "center",
+    "width": 500,
+    "height": 300,
+    "min_width": 220,
+    "min_height": 220
+  },
+  "dependencies": {
+      "nedb": "0.10.5",
+      "xxhash": "0.2.0",
+      "watch": "git+https://git@github.com/mikeal/watch.git"
+  }
+}

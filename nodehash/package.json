@@ -1,0 +1,13 @@
+{
+    "name": "nodehash",
+    "version": "0.1.0",
+    "description": "An example module to illustrate the usage of a package.json",
+    "author": "laike9m <laike9m@gmail.com>",
+    "dependencies": {
+        "xxhash": "0.2.0",
+        "nedb": "0.10.5"
+    },
+    "scripts": {
+        "start": "call_block_hash.js"
+    }
+}

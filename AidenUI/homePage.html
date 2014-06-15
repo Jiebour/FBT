@@ -3,36 +3,97 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <!--<link rel="shortcut icon" href="../../assets/ico/favicon.ico">-->
+    <title>FBT主页</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0">
 
-    <title>FBT Homepage</title>
+    <link href="Flat-UI-master/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/docs.css" rel="stylesheet">
+    <link href="css/navbarFixedTop.css" rel="stylesheet">
+    <link rel="shortcut icon" href="Flat UI_files/fbtLogo.png">
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css">
-    <!-- Loading Flat UI -->
-    <!--<link href="http://www.bootcss.com/p/flat-ui/css/flat-ui.css" rel="stylesheet">-->
-
-    <!-- Custom styles for this template -->
-    <link href="css/navbar-fixed-top.css" rel="stylesheet">
-
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
     <![endif]-->
-  </head>
 
-  <body>
+
+
+
+<style>
+  .item{
+    border-bottom: solid 1px #d8d8d8;
+    padding-top: 18px;
+    padding-bottom: 18px; 
+  }
+
+  .navbar-default .navbar-brand {color: #1abc9c;}
+  h2{font-size: 30px; margin-top: 4px;}
+  h5{font-size: 22px; line-height: 30px;}
+  a:hover, a:focus {text-decoration: underline;}
+
+  .downloadingDiv{padding-right: 0px; height: 40px;}
+  .downloadingRow{padding-top: 10px;}
+  .downloadingCancelDiv{color: red; height: 40px;}
+  .downloadingCancelA{color: red;}
+  .downloadingRow12{}
+  .doneWithComment{text-align: right;}
+
+  .myTextArea{width: 100%; border: solid 2px #1abc9c;}
+  textarea:focus{outline: #1abc9c auto 4px;}
+  .tfh{padding-top: 6px;}
+
+  .score{float: left; width: 50%; padding-bottom: 6px; color: red;}
+  .pzx{display: inline-block; width: 50%; text-align: center; padding-bottom: 6px;}
+
+
+.fileInput{border: none; font-size: 18px; width: 100%;}
+input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {
+outline: none;
+}        
+
+.button::-webkit-file-upload-button {
+  visibility: hidden;
+}
+.button:before {
+  content: '选择文件';
+  display: inline-block;
+  background: #1abc9c;
+  border-radius: 3px;
+  padding: 5px 8px;
+  outline: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  cursor: pointer;
+  width: 100%;
+  height: 40px;
+  text-align: center;
+  font-size: 15px;
+  color: white;
+}
+.button:hover:before {
+  border-color: black;
+}
+.button:active:before {
+  background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+}
+
+        /*这两行CSS模拟了flatUI典型的input样式*/
+        input{border: 2px solid #dce4ec; color: #34495e; border-radius: 6px;
+              transition: border linear .2s,box-shadow linear .2s;}
+        input:focus{border-color: #1abc9c; -webkit-box-shadow: none;
+                    -moz-box-shadow: none; box-shadow: none; outline: none;}
+        input{display: block; margin-bottom: 6px; width: 100%; height: 42px;}
+
+</style>  
+
+
+  </head>
+  <body class="containerBody">
 
     <!-- Fixed navbar -->
-    <div class="navbar navbar-default navbar-fixed-top myNav" role="navigation">
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -45,10 +106,11 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <!--<li class="active"><a href="#">Home</a></li>-->
-            
+            <li class="active"><a href="#"></a></li>
+
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">资源库<b class="caret"></b></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-hdd"></span>&nbsp;资源库<b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="#">电影</a></li>
                 <li><a href="#">动漫</a></li>
@@ -59,35 +121,52 @@
                 <li><a href="#">学习</a></li>
               </ul>
             </li>
-            <li><a href="#private">私有圈</a></li>
+
+            <li  class="myActive"><a href="myInformation.html">
+              <span class="glyphicon glyphicon-folder-close"></span>&nbsp;我的资源</a>
+            </li>
+
+            <li  class="myActive"><a href="javascript:void(0)" data-toggle="modal" data-target="#uploadModal">
+              <span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;上传资源</a>
+            </li>            
           </ul>
+
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#"><span class="glyphicon glyphicon-user"></span>个人中心</a></li>
+            <!--
+            <li><a href="javascript:void(0)" onclick="showDownloads()">
+                  <span class="glyphicon glyphicon-cloud-download"></span>我的下载
+                </a>
+            </li>
+            -->
           </ul>
+
         </div><!--/.nav-collapse -->
       </div>
     </div>
 
+
     <div class="container">
 
-      <div class="row item">
+      <div class="row item"><!--一个电影row的开始-->
         <div class="col-xs-3">
           <img src="img/movie.jpg" class="img-responsive center-block img-rounded"> 
         </div>
-        <div class="col-xs-9">
+        <div class="col-xs-8">
 
           <a href="#"><h2>宠物/卑鄙的我2番外篇:宠物/Despicable Me 2</h2></a>
-          <p>2013-10-22(美国)/皮埃尔/...........</p>
+          <p>神偷奶爸（卑鄙的我）是由克里斯·雷诺德Chris Renaud和 皮埃尔·科芬Pierre Coffin 导演的，申科·保罗Cinco Paul和 肯·达里奥Ken Daurio 编剧的，史蒂夫·卡瑞尔Steve Carell 杰森·赛格尔Jason Segel 拉塞尔·布兰德Russell Brand 威尔·阿奈特Will Arnett 朱莉·安德鲁斯Julie Andrews 等人主演的喜剧动画，2010年7月在美国上映。 
+          </p>
 
-              <div class="score" style="float: left; width: 50%; padding-bottom: 6px;">
-                9.1 
+              <div class="score">
+                评分：9.1 
                 <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment">(查看8888人评论)</a>
               </div>
 
-            <div class="score" style="display: inline-block; width: 50%; text-align: center; padding-bottom: 6px;">
-            <a data-toggle="collapse" data-toggle="collapse" href="#collapseMyComment">评论| </a>
+            <div class="pzx">
+            <a data-toggle="collapse" href="#collapseMyComment">评论| </a>
             <a href="#">转发| </a>
-            <a href="#">下载</a>
+            <a data-toggle="collapse" href="#collapseMyDownload">下载</a>
             </div>
 
         
@@ -104,59 +183,94 @@
 
         <div id="collapseMyComment" class="collapse myCollapse">
           <div class="row">
-            <div class="col-xs-12">
-              <input type="text" class="form-control" id="myComment" placeholder="发表观后感吧(1000字最多)...">
+            <div class="col-xs-10">
+              <textarea rows="4" class="myTextArea" placeholder="发表观后感吧(1000字最多)..."></textarea>
             </div>
           </div>
 
           <div class="row">
-            <div class="col-xs-6" style="padding-top: 8px;">
+            <div class="col-xs-6 tfh">
               <span class="glyphicon glyphicon-picture">图片</span>
               <span class="glyphicon glyphicon-paperclip">附件</span>
               <span >@好友</span>
             </div>
 
             <div class="col-xs-2 checkbox">
+            <!--
               <label>
                 <input type="checkbox">转发给粉丝
               </label>
+              -->
             </div>
 
-            <div class="col-xs-4" style="padding-top: 8px;">
-              <button type="button" class="btn btn-sm btn-success">完成评论</button>
+            <div class="col-xs-2 doneWithComment">
+              <button type="button" class="btn btn-sm btn-success doneWithCommentBtn">完成评论</button>
             </div>
           </div><!--评论第二行-->
 
         </div><!--collapseMyComment-->
+
+<div id="collapseMyDownload" class="collapse">
+<br>
+          <div class="row downloadingRow12">
+            <div class="col-xs-3 downloadingDiv downloadCol">40M/100M&emsp;&emsp;40%</div>
+            <div class="col-xs-6 downloadingRow">
+
+<div class="progress progress-striped">
+  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+    <span class="sr-only">40% Complete (success)</span>
+  </div>
+</div>
+            </div>
+
+            <div class="col-xs-2 downloadingCancelDiv downloadCol">
+            <a class="downloadingCancelA" href="javascript:void(0)" onclick="pauseDownload()">
+              <span class="glyphicon glyphicon-pause"></span>
+              &emsp;
+            </a>
+
+            <a class="downloadingCancelA" href="javascript:void(0)" onclick="cancelDownload()">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>            
+            </div>
+
+          </div>        
+
         </div><!--col-9-->
-      </div><!--一个电影row的结束-->
+      </div>
+</div><!--一个电影row的结束-->
 
 
 
 
+<!--
+ ================一个电影信息========================
+-->
 
-      <div class="row item">
+
+      <div class="row item"><!--一个电影row的开始-->
         <div class="col-xs-3">
           <img src="img/movie.jpg" class="img-responsive center-block img-rounded"> 
         </div>
-        <div class="col-xs-9">
+        <div class="col-xs-8">
 
           <a href="#"><h2>宠物/卑鄙的我2番外篇:宠物/Despicable Me 2</h2></a>
-          <p>2013-10-22(美国)/皮埃尔/...........</p>
+          <p>神偷奶爸（卑鄙的我）是由克里斯·雷诺德Chris Renaud和 皮埃尔·科芬Pierre Coffin 导演的，申科·保罗Cinco Paul和 肯·达里奥Ken Daurio 编剧的，史蒂夫·卡瑞尔Steve Carell 杰森·赛格尔Jason Segel 拉塞尔·布兰德Russell Brand 威尔·阿奈特Will Arnett 朱莉·安德鲁斯Julie Andrews 等人主演的喜剧动画，2010年7月在美国上映。 
+          </p>
 
-              <div class="score" style="float: left; width: 50%; padding-bottom: 6px;">
-                9.1 
-                <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment1">(查看8888人评论)</a>
+              <div class="score">
+                评分：9.1 
+                <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment">(查看8888人评论)</a>
               </div>
 
-            <div class="score" style="display: inline-block; width: 50%; text-align: center; padding-bottom: 6px;">
-            <a data-toggle="collapse" data-toggle="collapse" href="#collapseMyComment1">评论| </a>
+            <div class="pzx">
+            <a data-toggle="collapse" href="#collapseMyComment">评论| </a>
             <a href="#">转发| </a>
-            <a href="#">下载</a>
+            <a data-toggle="collapse" href="#collapseMyDownload">下载</a>
             </div>
 
         
-        <div id="collapseAllComment1" class="collapse">
+        <div id="collapseAllComment" class="collapse">
           <div class="row">
             <div class="col-xs-12">
               评论全部放在这里<br>
@@ -167,57 +281,168 @@
           </div>
         </div>
 
-        <div id="collapseMyComment1" class="collapse myCollapse">
+        <div id="collapseMyComment" class="collapse myCollapse">
           <div class="row">
-            <div class="col-xs-12">
-              <input type="text" class="form-control" id="myComment1" placeholder="发表观后感吧(1000字最多)...">
+            <div class="col-xs-10">
+              <textarea rows="4" class="myTextArea" placeholder="发表观后感吧(1000字最多)..."></textarea>
             </div>
           </div>
 
           <div class="row">
-            <div class="col-xs-6" style="padding-top: 8px;">
+            <div class="col-xs-6 tfh">
               <span class="glyphicon glyphicon-picture">图片</span>
               <span class="glyphicon glyphicon-paperclip">附件</span>
               <span >@好友</span>
             </div>
 
             <div class="col-xs-2 checkbox">
+            <!--
               <label>
                 <input type="checkbox">转发给粉丝
               </label>
+              -->
             </div>
 
-            <div class="col-xs-4" style="padding-top: 8px;">
-              <button type="button" class="btn btn-sm btn-success">完成评论</button>
+            <div class="col-xs-2 doneWithComment">
+              <button type="button" class="btn btn-sm btn-success doneWithCommentBtn">完成评论</button>
             </div>
           </div><!--评论第二行-->
 
         </div><!--collapseMyComment-->
+
+<div id="collapseMyDownload" class="collapse">
+<br>
+          <div class="row downloadingRow12">
+            <div class="col-xs-3 downloadingDiv downloadCol">40M/100M&emsp;&emsp;40%</div>
+            <div class="col-xs-6 downloadingRow">
+
+<div class="progress progress-striped">
+  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+    <span class="sr-only">40% Complete (success)</span>
+  </div>
+</div>
+            </div>
+
+            <div class="col-xs-2 downloadingCancelDiv downloadCol">
+            <a class="downloadingCancelA" href="javascript:void(0)" onclick="pauseDownload()">
+              <span class="glyphicon glyphicon-pause"></span>
+              &emsp;
+            </a>
+
+            <a class="downloadingCancelA" href="javascript:void(0)" onclick="cancelDownload()">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>            
+            </div>
+
+          </div>        
+
         </div><!--col-9-->
-      </div><!--一个电影row的结束-->
+      </div>
+</div><!--一个电影row的结束-->
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+<!--
+ ================一个电影信息========================
+-->
 
 
     </div> <!-- /container -->
+ 
 
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <div class="row">
+          <div class="col-xs-2"><img src="./Flat UI_files/fbtLogo60.png" class="img-responsive"></div>
+          <div class="col-xs-9"><h5>FBT: 快乐源于 <span style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span></h5></div>
+        </div>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+        <!--
+          <div class="col-xs-4">
+            <img src="img/mgdz.png" class="img-responsive img-rounded" alt="Responsive image">
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star-empty"></span>
+              <span class="glyphicon glyphicon-star-empty"></span>
+          </div>
+          -->
+          <div class="col-xs-12">
+            <div class="row" style="padding-bottom: 6px;">
+              <div class="col-xs-4">
+                <input type="file" class="button fileInput" id="exampleInputFile" title="do">
+              </div>
+
+              <div class="col-xs-4">
+                <select class="form-control">
+                  <option>频道1</option>
+                  <option>频道2</option>
+                  <option>频道3</option>
+                </select>
+              </div>
+
+              <div class="col-xs-4">
+                <select class="form-control">
+                  <option>标清(默认)</option>
+                  <option>高清</option>
+                  <option>超高清</option>
+                </select>
+              </div>
+            </div>
+            <input id="resourceName" type="text" value="" placeholder="请填写名称"/>
+            <input id="resourceLabel" type="text" value="" placeholder="请填写资源标签,如科幻、漫画改编"/>
+
+            <!--
+            <input type="text" class="tags" value="Amsterdam,Washington,Sydney,Beijing,Cairo" placeholder="Add tags" />-->
+            <textarea rows="4" class="myTextArea" placeholder="一句话点评下？140字:-)"></textarea>
+            <!--<button class="btn btn-large btn-primary btn-block" style="width: 90%;">发布</button>-->
+          </div>
+        </div>
+
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-large btn-primary">发 布</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!--
+<div style="width:100%; background-color: #ecf0f1; height: 66px;"></div>
+-->
+
+    <!-- Load JS here for greater good =============================-->
+    <script src="Flat-UI-master/js/jquery-1.8.3.min.js"></script>
+    <script src="Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+    <script src="Flat-UI-master/js/bootstrap.min.js"></script>
+    <script src="Flat-UI-master/js/bootstrap-select.js"></script>
+    <script src="Flat-UI-master/js/bootstrap-switch.js"></script>
+    <script src="Flat-UI-master/js/flatui-checkbox.js"></script>
+    <script src="Flat-UI-master/js/flatui-radio.js"></script>
+    <script src="Flat-UI-master/js/jquery.tagsinput.js"></script>
+    <script src="Flat-UI-master/js/jquery.placeholder.js"></script>
+    <script src="Flat-UI-master/js/jquery.stacktable.js"></script>
+    <script src="Flat-UI-master/js/video.js"></script>
+    <script src="Flat-UI-master/js/application.js"></script>
+
+<script>
+$('.doneWithCommentBtn').click(function(){
+  alert("完成评论！:)");
+  $("#collapseMyComment").collapse('hide');
+});
+</script>
+
   </body>
 </html>

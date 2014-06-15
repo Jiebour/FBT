@@ -1,1 +1,4 @@
 .idea/
+nedb_data/
+nodehash/node_modules/
+file-api/node_modules/

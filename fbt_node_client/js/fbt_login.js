@@ -45,10 +45,10 @@ function validate(){
     return true;
 }
 function login() {
-    var message = {}
+    var message = {};
     message["user"] = $("#user").val();
     message["pwd"] = $("#pwd").val();
-    message["next"] = "/"
+    message["next"] = "/";
     var disabled = $("#login");
     disabled.disable();
     $.postJSON("http://www.friendbt.com/login", message, function(response) {

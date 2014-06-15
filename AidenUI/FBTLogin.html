@@ -1,21 +1,18 @@
 <!DOCTYPE html>
-<!-- saved from url=(0034)http://www.bootcss.com/p/flat-ui/# -->
 <html lang="en" class="dk_fouc has-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
-    <title>FBT UI</title>
+    <title>FBT登录</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Loading Bootstrap -->
-    <link href="http://cdnjs.bootcss.com/ajax/libs/twitter-bootstrap/2.2.2/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Loading Flat UI -->
-    <link href="http://www.bootcss.com/p/flat-ui/css/flat-ui.css" rel="stylesheet">
-    <link rel="shortcut icon" href="http://www.bootcss.com/p/flat-ui/images/favicon.ico">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
       <script src="//cdnjs.bootcss.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
     <![endif]-->
+
+    <link href="Flat-UI-master/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+    <link rel="shortcut icon" href="Flat UI_files/fbtLogo.png">
+
 <style>
 .btn:focus {
     outline: 5px auto #FFF;
@@ -23,63 +20,92 @@
 body{
   background-image:url(img/bg.png); background-repeat: repeat; background-attachment:fixed;
 }
+
+        /*这两行CSS模拟了flatUI典型的input样式*/
+input{border-radius: 6px;
+border: 2px solid #dce4ec;
+color: #34495e;
+font-family: "Lato", sans-serif;
+font-size: 14px;
+padding: 8px 0 9px 10px;
+text-indent: 1px;
+-webkit-border-radius: 6px;
+-moz-border-radius: 6px;
+border-radius: 6px;
+-webkit-box-shadow: none;
+-moz-box-shadow: none;
+box-shadow: none;
+transition: border linear .2s,box-shadow linear .2s;}
+input:focus{
+  border-color: #1abc9c; -webkit-box-shadow: none;-moz-box-shadow: none; box-shadow: none; outline: none;}
+input{display: block; margin-bottom: 6px; width: 100%; height: 42px;}
+
+  h2{font-size: 30px; margin-top: 4px; color: #1abc9c;}
+  h5{font-size: 22px; line-height: 30px;}
+
+  .remeberPW{line-height: 60px;}
+  .login-link{color: #aaaaaa;}
+
+
 </style>    
   </head>
-  <body youdao="bind">
+
+
+<body>
 <br>
-<br>
-<div class="container" style="border-bottom: dashed 1px #cccccc; padding-bottom: 10px;">
+<div class="container" style="border-bottom: dashed 1px #cccccc;">
   <div class="row">
-  <div class="span2"><h3 class="span2">FBT</h3></div>
-  <div class="span8"><input type="text" value="" placeholder="Click here to search" class="span8"></div>
-  <div class="span2"><button class="btn btn-large btn-primary span2">Search</button></div>
+  <div class="col-xs-1"></div>
+  <div class="col-xs-1"><h2>FBT</h2></div>
+  <div class="col-xs-8"><input type="text" value="" placeholder="点此搜索资源..."></div>
+  <div class="col-xs-2"><button class="btn btn-large btn-primary">Search</button></div>
 </div>
 </div>
 
-<br>
-<br>
-<br>
-<br>
-<br>
 <br>
 <br>
 <br>
 <br>
     <div class="container">
       <div class="row">
-        <div class="span5" style="text-align: center; padding-top: 15px;">
+        <div class="col-xs-5" style="text-align: center; padding-top: 10px;">
             <img src="./Flat UI_files/fbtLogo.png" class="img-responsive center-block">
-            <h4>FBT: 快乐源于 <span style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span></h4>
+            <h5>FBT: 快乐源于 <span style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span></h5>
         </div>
-        <div class="span7">
+        <div class="col-xs-7">
 
-          <div class="span7">
-            <input id="userName" type="text" value="" placeholder="Username" class="span5">
-            
+          <div class="col-xs-7">
+            <input id="userName" type="text" value="" placeholder="用户名">
           </div>  
-          <div class="span7">
-            <input id="password" type="text" value="" placeholder="Password" class="span5">
 
+          <div class="col-xs-7">
+            <input id="password" type="text" value="" placeholder="密码">
           </div>
-          <div class="span7">
+
+          <div class="col-xs-7">
+
           <div class="row">
-            <div class="span2"></div>
-          <div class="toggle toggle-off span2">
-            <label class="toggle-radio" for="toggleOption4">记住密码? √</label>
-            <input type="radio" name="toggleOptions2" id="toggleOption3" value="option3">
-            <label class="toggle-radio" for="toggleOption3">记住密码? ×</label>
-            <input type="radio" name="toggleOptions2" id="toggleOption4" value="option4" checked="checked">
-          </div>
-          <div class="span2"></div>
+          <div class="col-xs-1"></div>
+          <div class="col-xs-4">记住密码：</div>
+          <div class="col-xs-6">
+            <div class="switch"
+               data-on-label="<i class='fui-check'></i>" data-off-label="<i class='fui-cross'></i>">
+            <input type="checkbox" />
           </div>
           </div>
+        
+          </div>
+          </div><!-- /checkboxes col-xs-7 -->
 
-            <button class="btn btn-large btn-primary span5" onclick="logIn()">Log in</button>
+          <div class="col-xs-7">
+            <button class="btn btn-large btn-primary btn-block" onclick="logIn()">登录</button>
+          </div><!-- /checkboxes col-xs-7 -->
+            
 
-        <div class="span7" style="text-align: center;">
-          <a data-toggle="collapse"  href="register.html">Register?</a>
+        <div class="col-xs-7" style="text-align: center;">
+          <a data-toggle="collapse"  href="register.html">尚未注册?</a>
           &emsp;&emsp;&emsp;&emsp;
-          <a class="login-link" href="" style="display: inline-block;">Lost your password?</a>
+          <a class="login-link" href="" style="display: inline-block;">忘记密码?</a>
           &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
         </div>
 
@@ -89,7 +115,7 @@ body{
 
     
 
-    <!-- Load JS here for greater good =============================-->
+    <!-- Load JS here for greater good =============================
     <script src="./Flat UI_files/jquery.min.js"></script>
     <script src="./Flat UI_files/jquery-ui-1.10.0.custom.min.js"></script>
     <script src="./Flat UI_files/jquery.dropkick-1.0.0.js"></script>
@@ -98,7 +124,24 @@ body{
     <script src="./Flat UI_files/bootstrap-tooltip.js"></script>
     <script src="./Flat UI_files/jquery.tagsinput.js"></script>
     <script src="./Flat UI_files/jquery.placeholder.min.js"></script>
-    <script src="./Flat UI_files/video.js"></script>
+    <script src="./Flat UI_files/video.js"></script>-->
+
+    <!-- Load JS here for greater good =============================-->
+    <script src="js/jquery-1.11.min.js"></script>
+    <!--<script src="Flat-UI-master/js/jquery-1.8.3.min.js"></script>-->
+    <script src="Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+    <script src="Flat-UI-master/js/bootstrap.min.js"></script>
+    <script src="Flat-UI-master/js/bootstrap-select.js"></script>
+    <script src="Flat-UI-master/js/bootstrap-switch.js"></script>
+    <script src="Flat-UI-master/js/flatui-checkbox.js"></script>
+    <script src="Flat-UI-master/js/flatui-radio.js"></script>
+    <script src="Flat-UI-master/js/jquery.tagsinput.js"></script>
+    <script src="Flat-UI-master/js/jquery.placeholder.js"></script>
+    <script src="Flat-UI-master/js/jquery.stacktable.js"></script>
+    <script src="Flat-UI-master/http://vjs.zencdn.net/4.3/video.js"></script>
+    <script src="Flat-UI-master/js/application.js"></script>
+
 
     <!--[if lt IE 8]>
       <script src="js/icon-font-ie7.js"></script>
