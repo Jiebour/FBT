@@ -1,6 +1,7 @@
 //require('nw.gui').Window.get().showDevTools();
-var res_api = require('../js/res_api'),
-    Datastore = require('nedb');
+var res_api = require('./res_api'),
+    Datastore = require('nedb'),
+    utils = require('./utils');
 
 
 function init(res_info_collection, res_hash_collection, window) {
@@ -9,5 +10,11 @@ function init(res_info_collection, res_hash_collection, window) {
     res_api.watch_allres(res_info_collection, window);
 }
 
-exports.init = init;
 
+function clear(res_info_collection, res_hash_collection) {
+    utils.clear_db(global.monitors, res_info_collection, res_hash_collection);
+    console.log("all cleared");
+}
+
+exports.init = init;
+exports.clear = clear;

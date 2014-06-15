@@ -72,8 +72,7 @@ function store_res_hash(filepath, seed, res_hash_collection, todo) {
             if (flag) {  // 只要是readable的状态就会进入function, 所以必须限制使得读取完成之后回调函数不再起作用
                 flag = 0;
                 oneMdata = readable.read();
-                console.log('block count:' + ++count);
-                console.log("last block size: " + oneMdata.length);
+                console.log('block count:' + ++count + ", last block size: " + oneMdata.length);
                 hash = xxhash.hash(oneMdata, seed);
                 hashlist.push(hash);
                 hashstring += hash;
