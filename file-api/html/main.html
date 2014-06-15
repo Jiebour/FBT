@@ -30,11 +30,19 @@
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.addEventListener("change", function (evt) {
+            var res = [];  // 存储已添加的res
+            $("input:checkbox[name='resources']").each(function(){
+                res.push(this.value);
+            });
+            console.log(res);
             var files = $("#fileDialog")[0].files;
             for (var i = 0; i < files.length; ++i) {
+                if (res.indexOf(files[i].path) != -1)
+                    continue;  // 防止重复添加资源
                 res_api.add_res(files[i].path,
                     res_info_collection, res_hash_collection);
                 update_page(files[i].path);
+                res.push(files[i].path);
             }
         }, false);
     }
@@ -76,7 +84,7 @@
 <input style="" id="fileDialog" type="file" multiple />
 <br />
 <form id="res" name="form1">
-  <input type="delete" value="Submit">
+  <input type="submit" value="Delete">
   <input type="reset" value="Reset">
   <input id="clear" type="button" value="Clear">
 </form>

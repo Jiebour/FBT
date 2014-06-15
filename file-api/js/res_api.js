@@ -7,7 +7,6 @@ var Datastore = require('nedb'),
 var RES_INFO_PATH = settings.RES_INFO_PATH;
 
 function add_res(filepath, res_info_collection, res_hash_collection) {
-    var seed = 0xAAAA;
     try {
         //DRBUG
         console.log("monitors before adding: ");
@@ -16,7 +15,7 @@ function add_res(filepath, res_info_collection, res_hash_collection) {
         }
 
         utils.store_res_info(filepath, global.monitors, res_info_collection);
-        utils.store_res_hash(filepath, seed, res_hash_collection);
+        utils.store_res_hash(filepath, settings.seed, res_hash_collection);
     }
     catch(err) {
         console.log(err.message);

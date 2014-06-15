@@ -29,7 +29,8 @@ res_info 存储格式
 var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb')
-  , watch = require('watch');
+  , watch = require('watch')
+  , settings = require('./settings');
 
 
 var mode = "run";
@@ -251,12 +252,19 @@ function createMonitor(newDoc, monitors) {
 function update_monitors(events, monitors) {
     switch (Object.keys(events)[0]) {
         case 'clear':
-            for (var file in monitors)
-                monitors[file].stop();
+            for (var file in monitors) {
+                monitors[file].stop();  // stop需要时间, 如果马上delete会stop失败
+                setTimeout(function(){
+                    delete monitors[file];
+                }, 2000);
+            }
             break;
         case 'remove':
             var path = events['remove'].path;
-            delete monitors[path];
+            monitors[path].stop();
+            setTimeout(function(){
+                delete monitors[path];
+            }, 2000);
             console.log("monitors after removing:");
             for (var f in monitors)
                 console.log(monitors[f]);
@@ -300,7 +308,7 @@ function check_res_update(res_info, res_hash, res_info_collection, res_hash_coll
                             console.log(path, "modified and changed");
                             store_res_info(path, [], res_info_collection, update_page_content);
                             // don't touch monitors
-                            store_res_hash(path, seed, res_hash_collection);
+                            store_res_hash(path, settings.seed, res_hash_collection);
                         }
                     });
             }
