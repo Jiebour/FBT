@@ -152,12 +152,12 @@ function remove_res_infohash(filepath, monitors, res_info_collection, res_hash_c
     var query = {'path': path.normalize(filepath)};
     res_info_collection.count(query, function(err, count) {
         if (count != 1) {
-            console.log("found duplicate info docs when removing");
+            console.log("Found duplicate/no info doc when removing");
             return;
         }
         res_hash_collection.count(query, function(err, count) {
             if (count != 1) {
-                console.log("found duplicate info docs when removing");
+                console.log("found duplicate/no hash doc when removing");
                 return;
             }
 
@@ -257,9 +257,10 @@ function update_monitors(events, monitors) {
             break;
         case 'remove':
             var path = events['remove'].path;
-            for (var file in monitors)
-                if (path in Object.keys(monitors[file].files))
-                    monitors[file].stop();
+            delete monitors[path];
+            console.log("monitors after removing:");
+            for (var f in monitors)
+                console.log(monitors[f]);
             break;
         case 'store':
             var newDoc = events['store'];  // newDoc is res_info

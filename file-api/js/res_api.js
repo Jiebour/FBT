@@ -1,7 +1,8 @@
 var Datastore = require('nedb'),
     utils = require('./utils'),
     fs = require('fs'),
-    settings = require('./settings');
+    settings = require('./settings')
+    $ = require('jquery');
 
 var RES_INFO_PATH = settings.RES_INFO_PATH;
 
@@ -9,7 +10,7 @@ function add_res(filepath, res_info_collection, res_hash_collection) {
     var seed = 0xAAAA;
     try {
         //DRBUG
-        console.log("existing monitors:");
+        console.log("monitors before adding: ");
         for (var file in global.monitors) {
             console.log(global.monitors[file]);
         }
@@ -73,7 +74,7 @@ function check_allres_update(res_info_collection, res_hash_collection) {
 }
 
 
-function watch_allres(res_info_collection) {
+function watch_allres(res_info_collection, window) {
 
     if (!fs.existsSync(RES_INFO_PATH)) {
         console.log("no res exists, stop watching res");
@@ -85,6 +86,9 @@ function watch_allres(res_info_collection) {
             console.log(err.message);
         docs.forEach(function(doc){
             utils.createMonitor(doc, global.monitors);
+            // use jquery in nodejs
+            $(window.document).find("#res").prepend("<input type=\"checkbox\" name=\"resources\" value=\""+
+                doc.path + "\">" + doc.path + "<br />");
         });
     });
 }
