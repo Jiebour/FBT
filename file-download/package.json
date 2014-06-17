@@ -1,8 +1,5 @@
 {
-  "name": "p2p-file-share",
-  "version": "0.0.1",
-  "repository": "git://github.com/????",
-  "license": "LGPL",
+  "name": "friendbt",
   "description": "node p2p file share",
   "keywords": [
     "file",
@@ -11,7 +8,8 @@
   ],
   "author": "bonelee <lizhihua2000@gmail.com>",
   "dependencies": {
-    "buffalo": "0.1.3"
+    "buffalo": "0.1.3",
+    "random-access-file": "0.3.1"
   }
 }
 
