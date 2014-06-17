@@ -29,7 +29,8 @@ res_info 存储格式
 var fs = require('fs')
   , path = require('path')
   , Datastore = require('nedb')
-  , watch = require('watch');
+  , watch = require('watch')
+  , settings = require('./settings');
 
 
 var mode = "run";
@@ -72,8 +73,7 @@ function store_res_hash(filepath, seed, res_hash_collection, todo) {
             if (flag) {  // 只要是readable的状态就会进入function, 所以必须限制使得读取完成之后回调函数不再起作用
                 flag = 0;
                 oneMdata = readable.read();
-                console.log('block count:' + ++count);
-                console.log("last block size: " + oneMdata.length);
+                console.log('block count:' + ++count + ", last block size: " + oneMdata.length);
                 hash = xxhash.hash(oneMdata, seed);
                 hashlist.push(hash);
                 hashstring += hash;
@@ -152,12 +152,12 @@ function remove_res_infohash(filepath, monitors, res_info_collection, res_hash_c
     var query = {'path': path.normalize(filepath)};
     res_info_collection.count(query, function(err, count) {
         if (count != 1) {
-            console.log("found duplicate info docs when removing");
+            console.log("Found duplicate/no info doc when removing");
             return;
         }
         res_hash_collection.count(query, function(err, count) {
             if (count != 1) {
-                console.log("found duplicate info docs when removing");
+                console.log("found duplicate/no hash doc when removing");
                 return;
             }
 
@@ -252,14 +252,22 @@ function createMonitor(newDoc, monitors) {
 function update_monitors(events, monitors) {
     switch (Object.keys(events)[0]) {
         case 'clear':
-            for (var file in monitors)
-                monitors[file].stop();
+            for (var file in monitors) {
+                monitors[file].stop();  // stop需要时间, 如果马上delete会stop失败
+                setTimeout(function(){
+                    delete monitors[file];
+                }, 2000);
+            }
             break;
         case 'remove':
             var path = events['remove'].path;
-            for (var file in monitors)
-                if (path in Object.keys(monitors[file].files))
-                    monitors[file].stop();
+            monitors[path].stop();
+            setTimeout(function(){
+                delete monitors[path];
+            }, 2000);
+            console.log("monitors after removing:");
+            for (var f in monitors)
+                console.log(monitors[f]);
             break;
         case 'store':
             var newDoc = events['store'];  // newDoc is res_info
@@ -300,7 +308,7 @@ function check_res_update(res_info, res_hash, res_info_collection, res_hash_coll
                             console.log(path, "modified and changed");
                             store_res_info(path, [], res_info_collection, update_page_content);
                             // don't touch monitors
-                            store_res_hash(path, seed, res_hash_collection);
+                            store_res_hash(path, settings.seed, res_hash_collection);
                         }
                     });
             }

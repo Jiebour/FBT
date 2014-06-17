@@ -4,31 +4,45 @@
   <meta charset="UTF-8">
   <title>node-webkit test</title>
 
-<script type="text/javascript" src="jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="../js/jquery-1.11.0.min.js"></script>
 <script>
   $(document).ready(function(){
     var main = require('../js/main'),
         res_api = require('../js/res_api.js'),
         Datastore = require('nedb'),
-        settings = require('../js/settings');
+        settings = require('../js/settings'),
+        util = require('util');
 
     var RES_INFO_PATH = settings.RES_INFO_PATH,
         RES_HASH_PATH = settings.RES_HASH_PATH,
         res_info_collection = new Datastore({filename: RES_INFO_PATH, autoload: true}),
         res_hash_collection = new Datastore({filename: RES_HASH_PATH, autoload: true});
 
-    main.init(res_info_collection, res_hash_collection);
+    main.init(res_info_collection, res_hash_collection, window);
 
     // handle res add
+    function update_page(path) {
+      var element = util.format("<input type=\"checkbox\" name=\"resources\"" +
+          " value=\"%s\">%s<br />", path, path);
+      $("#res").prepend(element);
+    }
+
     function chooseFile(name) {
         var chooser = document.querySelector(name);
         chooser.addEventListener("change", function (evt) {
+            var res = [];  // 存储已添加的res
+            $("input:checkbox[name='resources']").each(function(){
+                res.push(this.value);
+            });
+            console.log(res);
             var files = $("#fileDialog")[0].files;
             for (var i = 0; i < files.length; ++i) {
+                if (res.indexOf(files[i].path) != -1)
+                    continue;  // 防止重复添加资源
                 res_api.add_res(files[i].path,
                     res_info_collection, res_hash_collection);
-                $("#res").prepend("<input type=\"checkbox\" name=\"resources\" value=\""+
-                 files[i].path + "\">" + files[i].path + "<br />");
+                update_page(files[i].path);
+                res.push(files[i].path);
             }
         }, false);
     }
@@ -37,19 +51,27 @@
     // handle res remove
     $("#res").submit(function() {
       var res_to_remove = "";
-      with(document.form1) {
-        for(var i = 0; i < resources.length; i++){
-          if(resources[i].checked) {
-            res_to_remove += resources[i].value + "\n";
-          }
-        }
-      }
+      $("input:checkbox[name='resources']:checked").each(function(){
+            res_to_remove += this.value + "\n";
+            res_api.remove_res(this.value, res_info_collection, res_hash_collection);
+            $(this).after("removed ");
+            $(this).remove();
+      });
       if(res_to_remove == "") {
         alert("select resource to remove");
       } else {
         alert (res_to_remove);
       }
       return false;
+    });
+
+    // reset
+    $("#clear").click(function(){
+      main.clear(res_info_collection, res_hash_collection);
+      $("input:checkbox[name='resources']").each(function(){
+        $(this).after("removed ");
+        $(this).remove();
+      });
     });
 
   });
@@ -62,7 +84,9 @@
 <input style="" id="fileDialog" type="file" multiple />
 <br />
 <form id="res" name="form1">
-  <input type="submit" value="Submit">
+  <input type="submit" value="Delete">
+  <input type="reset" value="Reset">
+  <input id="clear" type="button" value="Clear">
 </form>
 </body>
 </html>
