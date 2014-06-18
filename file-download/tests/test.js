@@ -1,31 +1,20 @@
-var bft = require('buffertools');
+var child_process = require("child_process"),
+    xxhash = require('xxhash'),
+    fs = require('fs'),
+    settings = require('../settings');
 
 
-function indexOfSplitter(buffer){
-    var i = 0;
-    while(i < (buffer.length - 4)){
-        if(buffer[i]==0x40 && buffer[i+1]==0x40 && buffer[i+2]==0x40 && buffer[i+3]==0x40  && buffer[i+4]==0x40){
-            return i;
-        }
-        i += 1;
-    }
-    return -1;
-}
+child_process.spawn('node', ["p2p-server.js"]).stdout.on('data', function(data){
+   console.log(data.toString());
+});
+child_process.spawn('node', ["p2p-server2.js"]).stdout.on('data', function(data){
+    console.log(data.toString());
+});
+child_process.spawn('node', ["p2p-server3.js"]).stdout.on('data', function(data){
+    console.log(data.toString());
+});
 
-var SPLITTER='@@@@@';
-
-function newIndex(buffer) {
-    for(var i=0; i < (buffer.length - 4); i++)
-        if(bft.compare(buffer.slice(i, i+5), SPLITTER) == 0)
-            return i;
-    return -1;
-}
-
-function test() {
-    var s = Buffer("dasdad@@@@@dsdsd");
-    console.log(indexOfSplitter(s));
-    console.log(newIndex(s));
-}
-
-test();
-
+setTimeout(function(){
+    console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
+    console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+}, 3000);

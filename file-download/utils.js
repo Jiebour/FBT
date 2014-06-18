@@ -1,5 +1,6 @@
 buffertools = require("buffertools");
 
+var SPLITTER = '@@@@@';
 function indexOfSplitter(buffer){
     for(var i=0; i < (buffer.length - 4); i++)
         if(buffertools.compare(buffer.slice(i, i+5), SPLITTER) == 0)
