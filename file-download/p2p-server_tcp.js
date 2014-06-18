@@ -1,4 +1,4 @@
-var dgram = require("dgram"),
+var socket = require("net"),
     fileSystem = require("fs"),
     bson = require('buffalo'),
     utils = require('./utils'),
@@ -13,16 +13,15 @@ var connectionCnt = 0;
 var dataToProcess = new Buffer(0);
 
 
-
-function addEventListener(socket) {
+function handle_conn(connection) {
     connectionCnt++;
-    socket.on('message', function (data){
-        console.log("data received:" + data.toString());
-        dataToProcess = Buffer.concat([dataToProcess, data]);
+    connection.on('data', function (data){
+        console.log("data received:" + data);
+        dataToProcess = Buffer.concat([dataToProcess,data]);
         var index = utils.indexOfSplitter(dataToProcess);
         while(index > -1) {
             //bson is here
-            console.log("receiving size:" + dataToProcess.slice(0, index).length);
+            console.log("receiving size:"+dataToProcess.slice(0, index).length);
             //Process bson
 
             var jsonData = bson.parse(dataToProcess.slice(0, index));
@@ -67,19 +66,16 @@ function addEventListener(socket) {
     });
 }
 
-var server1 = dgram.createSocket('udp4');
-var server2 = dgram.createSocket('udp4');
-var server3 = dgram.createSocket('udp4');
+var server1 = socket.createServer(handle_conn);
+var server2 = socket.createServer(handle_conn);
+var server3 = socket.createServer(handle_conn);
 
-server1.bind(8801, function () {
-    addEventListener(server1);
+server1.listen(8801, function () {
     console.log('\033[96m   server listening on *:8801\033[39m');
 });
-server2.bind(8802, function (){
-    addEventListener(server2);
+server2.listen(8802, function (){
     console.log('\033[96m   server listening on *:8802\033[39m');
 });
-server3.bind(8803, function (){
-    addEventListener(server3);
+server3.listen(8803, function (){
     console.log('\033[96m   server listening on *:8803\033[39m');
 });

@@ -1,5 +1,4 @@
 var net = require('net'),
-    dgram = require('dgram'),
     fs = require('fs'),
     randomAccessFile = require('random-access-file'),
     BSON = require('buffalo'),
