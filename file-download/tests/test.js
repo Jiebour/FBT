@@ -1,3 +1,6 @@
+var bft = require('buffertools');
+
+
 function indexOfSplitter(buffer){
     var i = 0;
     while(i < (buffer.length - 4)){
@@ -12,15 +15,9 @@ function indexOfSplitter(buffer){
 var SPLITTER='@@@@@';
 
 function newIndex(buffer) {
-    var i = 0;
-    while(i < (buffer.length - 4)){
-        console.log(typeof(buffer.slice(i, i+5)));
-        console.log(typeof(Buffer("@@@@@")));
-        if(buffer.slice(i, i+5).toString() == SPLITTER) {
+    for(var i=0; i < (buffer.length - 4); i++)
+        if(bft.compare(buffer.slice(i, i+5), SPLITTER) == 0)
             return i;
-        }
-        i += 1;
-    }
     return -1;
 }
 

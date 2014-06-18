@@ -1,25 +1,11 @@
-var socket = require("net");
-var fileSystem = require("fs");
-var bson = require('buffalo');
+var socket = require("net"),
+    fileSystem = require("fs"),
+    bson = require('buffalo'),
+    utils = require('./utils');
 
 
-function indexOfSplitter(buffer){
-    var i = 0, NOT_FOUND =- 1;
-    while(i < (buffer.length - 4)){
-        if(buffer[i]==0x40 && buffer[i+1]==0x40 && buffer[i+2]==0x40 && buffer[i+3]==0x40  && buffer[i+4]==0x40){
-            return i;
-        }
-        i += 1;
-    }
-    return NOT_FOUND;
-}
-    
-function hasFileIndex(jsonData){
-    return "index" in jsonData;
-}
-    
 var SPLITTER = '@@@@@';
-var connectionCnt = 0, users = {};
+var connectionCnt = 0;
 var dataToProcess = new Buffer(0);
 
 var server = socket.createServer(function (connection){
@@ -27,7 +13,7 @@ var server = socket.createServer(function (connection){
     connection.on('data', function (data){
         console.log("data received:" + data);
         dataToProcess = Buffer.concat([dataToProcess,data]);
-        var index = indexOfSplitter(dataToProcess);
+        var index = utils.indexOfSplitter(dataToProcess);
         while(index > -1) {
             //bson is here
             console.log("receiving size:"+dataToProcess.slice(0, index).length);
@@ -35,7 +21,7 @@ var server = socket.createServer(function (connection){
             
             var jsonData = bson.parse(dataToProcess.slice(0, index));
             //has file content
-            if(hasFileIndex(jsonData)){
+            if(utils.hasFileIndex(jsonData)){
                 var startHere = jsonData["index"];
                 console.log("file index:" + startHere);
                 var BLOCK_SIZE = 1024;
@@ -64,7 +50,7 @@ var server = socket.createServer(function (connection){
 
             // Cuts off the processed chunk
             dataToProcess = dataToProcess.slice(index + SPLITTER.length,dataToProcess.length);
-            index = indexOfSplitter(dataToProcess);
+            index = utils.indexOfSplitter(dataToProcess);
         }        
     });
     connection.on('close', function(){
