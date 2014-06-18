@@ -2,18 +2,21 @@ var net = require('net'),
     fs = require('fs'),
     randomAccessFile = require('random-access-file'),
     BSON = require('buffalo'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    settings = require('./settings');
 
 
-var SPLITTER='@@@@@';
-var BLOCK_SIZE=1024;
-//download file by block 1KB
-var fileSize = 439355;
-var filepath = 'fav-local.mp3';
-for(var i=0; i<(fileSize+1023)/1024; ++i){
-	downloadFile('127.0.0.1', 8800+utils.rand3(), 'fav.mp3', filepath, i);
+var BLOCK_SIZE = settings.BLOCK_SIZE,
+    SPLITTER = settings.SPLITTER,
+    SPLITTERLENGTH = settings.SPLITTERLENGTH,
+    source_file = settings.source_file,
+    download_file = settings.download_file,
+    filesize = settings.filesize;
+
+
+for(var i=0; i<(filesize+BLOCK_SIZE-1)/BLOCK_SIZE; ++i){
+	downloadFile('127.0.0.1', 8800+utils.rand3(), source_file, download_file, i);
 }
-
 
 
 function downloadFile(IP, PORT, remoteFile, localFile, blockID){
@@ -23,8 +26,9 @@ function downloadFile(IP, PORT, remoteFile, localFile, blockID){
     //connect to the server
     client.connect(PORT, IP, function() {
         console.log('Client Connected to server');
-        client.write(BSON.serialize({file: "fav.mp3", index: blockID})); //TODO the real file to transfer
-        client.write(SPLITTER);//END mark
+        client.write(BSON.serialize({file: source_file, index: blockID}));
+        //TODO the real file to transfer
+        client.write(SPLITTER); //END mark
     });
 
     var dataToProcess = new Buffer(0);
@@ -51,7 +55,7 @@ function downloadFile(IP, PORT, remoteFile, localFile, blockID){
                 console.log("Waning: bson is not a file content...");
             }
             // Cuts off the processed chunk
-            dataToProcess = dataToProcess.slice(index+SPLITTER.length, dataToProcess.length);
+            dataToProcess = dataToProcess.slice(index+SPLITTERLENGTH, dataToProcess.length);
             index = utils.indexOfSplitter(dataToProcess);
         } 
     });

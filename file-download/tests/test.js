@@ -7,10 +7,7 @@ var child_process = require("child_process"),
 child_process.spawn('node', ["p2p-server.js"]).stdout.on('data', function(data){
    console.log(data.toString());
 });
-child_process.spawn('node', ["p2p-server2.js"]).stdout.on('data', function(data){
-    console.log(data.toString());
-});
-child_process.spawn('node', ["p2p-server3.js"]).stdout.on('data', function(data){
+child_process.spawn('node', ["p2p-client.js"]).stdout.on('data', function(data){
     console.log(data.toString());
 });
 
