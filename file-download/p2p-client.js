@@ -16,10 +16,13 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
 
 
 var socket = dgram.createSocket('udp4');
-socket.bind(9999);  // 这个值目前双方都知道, 实际应该是通过STUN获知
+socket.bind(9999);
+// 这个值目前双方都知道, 实际应该是通过STUN获知
+
 addEventListener(socket, source_file, download_file);
 var dataToProcess = new Buffer(0);
-for(var i=0; i<(parseInt(filesize/BLOCK_SIZE))+1; ++i){
+var totalblocks = parseInt(filesize/BLOCK_SIZE) + 1;
+for(var i=0; i<totalblocks; ++i){
     downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
 }
 
@@ -33,7 +36,7 @@ function downloadFile(socket, IP, PORT, blockID) {
 
 function addEventListener(socket, remoteFile, localFile) {
     socket.on('message', function(data, rinfo) {
-        console.log("receiving data from ", rinfo.ip, ':', rinfo.port);
+//        console.log("receiving data from ", rinfo.ip, ':', rinfo.port);
         dataToProcess = Buffer.concat([dataToProcess, data]);
         console.log('dataToProcesslength: ', dataToProcess.length);
         var index = utils.indexOfSplitter(dataToProcess);
@@ -41,10 +44,9 @@ function addEventListener(socket, remoteFile, localFile) {
 //            console.log("receiving size:" + dataToProcess.slice(0, index).length);
             var jsonData = BSON.parse(dataToProcess.slice(0, index));
             //has file content
-            blockID = jsonData["index"];
-            console.log("block ID: ", blockID);
             if(utils.hasFileContent(jsonData)){
-                var chunksData = jsonData["content"];
+                var chunksData = jsonData["content"],
+                    blockID = jsonData["index"];
                 var file = randomAccessFile(localFile);
                 // write 是异步的!在callback触犯的时候blockID已经不是之前的了, 就是最后那个, 所以输出的blockID都一样
                 file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
