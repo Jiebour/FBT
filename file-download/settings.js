@@ -5,7 +5,7 @@ var filepath1 = 'fav.mp3',
     filesize = fs.statSync(filepath1)['size'],
     SPLITTER = '@@@@@',
     SPLITTERLENGTH = SPLITTER.length,
-    BLOCK_SIZE = 1024;
+    BLOCK_SIZE = 10240;
 
 exports.source_file = filepath1;
 exports.download_file = filepath2;

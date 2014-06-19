@@ -13,8 +13,8 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
 var connectionCnt = 0;
 var dataToProcess = new Buffer(0);
 
+
 function addEventListener(socket) {
-    var toSend = new Buffer(0);
     connectionCnt++;
     socket.on('message', function (data, rinfo){
         console.log("data received:" + data.toString());
@@ -29,26 +29,21 @@ function addEventListener(socket) {
             //has file content
             if (utils.hasFileIndex(jsonData)) {
                 var blockID = jsonData["index"];
+                console.log("file index:" + blockID);
                 var readStream = fs.createReadStream(
                     source_file, {
                         start: blockID * BLOCK_SIZE,
                         end: blockID * BLOCK_SIZE + BLOCK_SIZE - 1
                     }
                 );
-                readStream.on('data', function(data) {
-                    console.log('transfer data....', blockID);
-                    var temp = bson.serialize({header: "media", index: blockID, content: data});
-//                    console.log("data size:" + data.length + " bson size:" + toSend.length);
-                    toSend = Buffer.concat([toSend, temp, BF_SPLITTER]);
-                    // 目前看来, 问题就是client没办法接受得那么快, 目前的解决方法就是堆在一起发。
-                    // 让client最后向每个server发一个结束信息, server收到结束信息之后把自己剩下的包发出去
-                    // client那一边最后应当记录收到的block, 最后检查有哪些没收到, 然后请求这些剩余的块
-                    if (toSend.length > BLOCK_SIZE * 5) {
-                        socket.send(toSend, 0, toSend.length, 9999, rinfo.ip);
-                        toSend = new Buffer(0);
-                    }
+                readStream.on('data', function (data) {
+                    console.log('transfer data....');
+                    var toSend = bson.serialize({header: "media", index: blockID, content: data});
+                    console.log("data size:" + data.length + " bson size:" + toSend.length);
+                    toSend = Buffer.concat([toSend, BF_SPLITTER]);
+                    socket.send(toSend, 0, toSend.length, 9999, rinfo.ip);
                 });
-
+//
                 readStream.on('end', function () {
                     console.log('transfer data end....');
                 });
@@ -104,16 +99,15 @@ var server1 = dgram.createSocket('udp4');
 var server2 = dgram.createSocket('udp4');
 var server3 = dgram.createSocket('udp4');
 
-server1.bind(8801, function () {
-    addEventListener(server1);
-    console.log('\033[96m   server listening on *:8801\033[39m');
-});
+//server1.bind(8801, function () {
+//    addEventListener(server1);
+//    console.log('\033[96m   server listening on *:8801\033[39m');
+//});
 server2.bind(8802, function (){
     addEventListener(server2);
     console.log('\033[96m   server listening on *:8802\033[39m');
 });
-server3.bind(8803, function (){
-    addEventListener(server3);
-    console.log('\033[96m   server listening on *:8803\033[39m');
-});
-//
+//server3.bind(8803, function (){
+//    addEventListener(server3);
+//    console.log('\033[96m   server listening on *:8803\033[39m');
+//});
