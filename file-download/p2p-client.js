@@ -39,19 +39,22 @@ setTimeout(function(){
             for (var i = 0; i< totalblocks; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
-                    console.log("re download block: ", i);
+                    console.log("redownload block: ", i);
                     downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
                 }
             }
             if (redownloadcount == 0){
-                console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
-                console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
-                console.log("download complete! exsting...");
-                utils.show_diff_block();
-                clearInterval(interval_obj);
-//                setTimeout(function(){
-//                    process.exit(0);
-//                }, 3000);
+                console.log("redownload complete, checking hash...");
+                utils.show_diff_block(download_record, last_download_record);
+                setTimeout(function(){
+                    if (utils.allOne(download_record)) {
+                        clearInterval(interval_obj);
+                        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
+                        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+                        console.log("download complete! exiting...");
+                        process.exit(0);
+                    }
+                }, 3000);
             }
         }
         else{
