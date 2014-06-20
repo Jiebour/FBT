@@ -50,13 +50,15 @@ setTimeout(function(){
                 utils.show_diff_block(tobe_check, download_record, last_download_record);
                 setTimeout(function(){
                     if (utils.allOne(download_record)) {
-                        clearInterval(interval_obj);
                         console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
                         console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
                         console.log("download complete! exiting...");
-                        process.exit(0);
+                        clearInterval(interval_obj);
+                        setTimeout(function(){
+                            process.exit(0);
+                        }, 2000);
                     }
-                }, 3000);
+                }, 4000);
             }
         }
         else{
