@@ -17,12 +17,12 @@ function addEventListener(socket) {
     var toSend = new Buffer(0);
     connectionCnt++;
     socket.on('message', function (data, rinfo){
-        console.log("data received:" + data.toString());
+//        console.log("data received:" + data.toString());
         dataToProcess = Buffer.concat([dataToProcess, data]);
         var index = utils.indexOfSplitter(dataToProcess);
         while(index > -1) {
             //bson is here
-            console.log("receiving size:" + dataToProcess.slice(0, index).length);
+//            console.log("receiving size:" + dataToProcess.slice(0, index).length);
             //Process bson
 
             var jsonData = bson.parse(dataToProcess.slice(0, index));
@@ -39,14 +39,14 @@ function addEventListener(socket) {
                     console.log('transfer data....', blockID);
                     toSend = bson.serialize({header: "media", index: blockID, content: data});
                     toSend = Buffer.concat([toSend, BF_SPLITTER]);
-                    console.log("data size:" + data.length + " bson size:" + toSend.length);
+//                    console.log("data size:" + data.length + " bson size:" + toSend.length);
                     // 让client最后向每个server发一个结束信息, server收到结束信息之后把自己剩下的包发出去
                     // client那一边最后应当记录收到的block, 最后检查有哪些没收到, 然后请求这些剩余的块
                     socket.send(toSend, 0, toSend.length, 9999, rinfo.address);
                 });
 
                 readStream.on('end', function () {
-                    console.log('transfer data end....');
+//                    console.log('transfer data end....');
                 });
             }
             else{

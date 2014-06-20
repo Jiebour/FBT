@@ -13,7 +13,8 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
     SPLITTERLENGTH = settings.SPLITTERLENGTH,
     source_file = settings.source_file,
     download_file = settings.download_file,
-    filesize = settings.filesize;
+    filesize = settings.filesize
+    unit_delay_time = settings.unit_delay_time;
 
 
 var socket = dgram.createSocket('udp4');
@@ -28,6 +29,7 @@ var download_record = new Array(totalblocks),
     last_download_record = new Array(totalblocks),
     tobe_check = new Array(totalblocks);
 
+console.time("downloading");
 for(var i=0; i<totalblocks; ++i){
     tobe_check[i] = i;
     downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
@@ -41,7 +43,7 @@ setTimeout(function(){
             for (var i = 0; i< totalblocks; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
-                    console.log("redownload block: ", i);
+//                    console.log("redownload block: ", i);
                     downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
                 }
             }
@@ -50,15 +52,16 @@ setTimeout(function(){
                 utils.show_diff_block(tobe_check, download_record, last_download_record);
                 setTimeout(function(){
                     if (utils.allOne(download_record)) {
+                        console.timeEnd("downloading");
                         console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
                         console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
                         console.log("download complete! exiting...");
                         clearInterval(interval_obj);
                         setTimeout(function(){
                             process.exit(0);
-                        }, 2000);
+                        }, unit_delay_time);
                     }
-                }, 4000);
+                }, 4*unit_delay_time);
             }
         }
         else{
@@ -95,7 +98,7 @@ function addEventListener(socket, remoteFile, localFile) {
                     if(err)
                         console.log("blockID download err:" + blockID);
                     else{
-//                        console.log("blockID download OK:" + blockID);
+                        console.log("blockID download OK:" + blockID);
                     }
                 });
             }else{
