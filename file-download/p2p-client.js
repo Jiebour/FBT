@@ -32,7 +32,7 @@ for(var i=0; i<totalblocks; ++i){
 }
 
 setTimeout(function(){
-    setInterval(function(){
+    var interval_obj = setInterval(function(){
         if (utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
             var redownloadcount = 0;
@@ -46,10 +46,12 @@ setTimeout(function(){
             if (redownloadcount == 0){
                 console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
                 console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
-                console.log("download complete! existing...");
-                setTimeout(function(){
-                    process.exit(0);
-                }, 1000);
+                console.log("download complete! exsting...");
+                utils.show_diff_block();
+                clearInterval(interval_obj);
+//                setTimeout(function(){
+//                    process.exit(0);
+//                }, 3000);
             }
         }
         else{

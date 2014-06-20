@@ -1,4 +1,6 @@
-buffertools = require("buffertools");
+var buffertools = require("buffertools");
+var fs = require('fs');
+var settings = require('./settings');
 
 var SPLITTER = '@@@@@';
 function indexOfSplitter(buffer){
@@ -33,8 +35,40 @@ function arrayEqual(a, b){
   return true;
 }
 
+
+function show_diff_block() {
+    var blocksize=settings.BLOCK_SIZE, source=settings.source_file, download=settings.download_file;
+    var totalblocks = parseInt(settings.filesize/blocksize);
+    var temp = Buffer(blocksize);
+    var temp2 = Buffer(blocksize);
+
+
+    function compare_block(i, fd1, fd2) {
+        fs.read(fd1, temp, 0, blocksize, i * blocksize, function (err, bytesRead, bf1) {
+            fs.read(fd2, temp2, 0, blocksize, i * blocksize, function (err, bytesRead, bf2) {
+                if (buffertools.compare(bf1, bf2) != 0)
+                    console.log("block ", i, " not equal!");
+                else
+                    console.log("block ", i, " equal!");
+                if (i < totalblocks){
+                    compare_block(i+1, fd1, fd2);
+                }
+            });
+        });
+    }
+
+    fs.open(source, "r", function (err, fd1) {
+       fs.open(download, "r", function(err, fd2) {
+           compare_block(0, fd1, fd2);
+       });
+    });
+}
+
 exports.indexOfSplitter = indexOfSplitter;
 exports.hasFileContent = hasFileContent;
 exports.hasFileIndex = hasFileIndex;
 exports.rand3 = rand3;
 exports.arrayEqual = arrayEqual;
+exports.show_diff_block = show_diff_block;
+
+//show_diff_block();

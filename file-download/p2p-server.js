@@ -50,8 +50,8 @@ function addEventListener(socket) {
                 });
             }
             else{
-                    console.log("Waning: bson is not a file content...");
-                }
+                console.log("Waning: bson is not a file content...");
+            }
             // Cuts off the processed chunk
             dataToProcess = dataToProcess.slice(index + SPLITTERLENGTH, dataToProcess.length);
             index = utils.indexOfSplitter(dataToProcess);
