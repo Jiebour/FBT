@@ -25,7 +25,16 @@ function rand3(){
 }
 
 
+function arrayEqual(a, b){
+    // assume a.length == b.length
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 exports.indexOfSplitter = indexOfSplitter;
 exports.hasFileContent = hasFileContent;
 exports.hasFileIndex = hasFileIndex;
 exports.rand3 = rand3;
+exports.arrayEqual = arrayEqual;

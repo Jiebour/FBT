@@ -40,7 +40,6 @@ function addEventListener(socket) {
                     toSend = bson.serialize({header: "media", index: blockID, content: data});
                     toSend = Buffer.concat([toSend, BF_SPLITTER]);
                     console.log("data size:" + data.length + " bson size:" + toSend.length);
-                    // 目前看来, 问题就是client没办法接受得那么快, 目前的解决方法就是堆在一起发。
                     // 让client最后向每个server发一个结束信息, server收到结束信息之后把自己剩下的包发出去
                     // client那一边最后应当记录收到的block, 最后检查有哪些没收到, 然后请求这些剩余的块
                     socket.send(toSend, 0, toSend.length, 9999, rinfo.address);

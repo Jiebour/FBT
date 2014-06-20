@@ -3,7 +3,8 @@ var dgram = require('dgram'),
     randomAccessFile = require('random-access-file'),
     BSON = require('buffalo'),
     utils = require('./utils'),
-    settings = require('./settings');
+    settings = require('./settings'),
+    xxhash = require('xxhash');
 
 
 var BLOCK_SIZE = settings.BLOCK_SIZE,
@@ -22,9 +23,40 @@ socket.bind(9999);
 addEventListener(socket, source_file, download_file);
 var dataToProcess = new Buffer(0);
 var totalblocks = parseInt(filesize/BLOCK_SIZE) + 1;
+
+var download_record = new Array(totalblocks);
+var last_download_record = new Array(totalblocks);
+
 for(var i=0; i<totalblocks; ++i){
     downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
 }
+
+setTimeout(function(){
+    setInterval(function(){
+        if (utils.arrayEqual(download_record, last_download_record)){
+            // 这一次接收已经结束
+            var redownloadcount = 0;
+            for (var i = 0; i< totalblocks; i++) {
+                if (!download_record[i]) {
+                    redownloadcount++;
+                    console.log("re download block: ", i);
+                    downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
+                }
+            }
+            if (redownloadcount == 0){
+                console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
+                console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+                console.log("download complete! existing...");
+                setTimeout(function(){
+                    process.exit(0);
+                }, 1000);
+            }
+        }
+        else{
+            last_download_record = download_record;
+        }
+    }, 1000);
+}, 2000);
 
 
 function downloadFile(socket, IP, PORT, blockID) {
@@ -47,6 +79,7 @@ function addEventListener(socket, remoteFile, localFile) {
             if(utils.hasFileContent(jsonData)){
                 var chunksData = jsonData["content"],
                     blockID = jsonData["index"];
+                download_record[blockID] = 1;
                 var file = randomAccessFile(localFile);
                 // write 是异步的!在callback触犯的时候blockID已经不是之前的了, 就是最后那个, 所以输出的blockID都一样
                 file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
@@ -62,7 +95,6 @@ function addEventListener(socket, remoteFile, localFile) {
             // Cuts off the processed chunk
             dataToProcess = dataToProcess.slice(index+SPLITTERLENGTH, dataToProcess.length);
             index = utils.indexOfSplitter(dataToProcess);
-            console.log(index);
         }
     });
 
