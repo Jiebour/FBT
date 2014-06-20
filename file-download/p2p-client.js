@@ -24,10 +24,12 @@ addEventListener(socket, source_file, download_file);
 var dataToProcess = new Buffer(0);
 var totalblocks = parseInt(filesize/BLOCK_SIZE) + 1;
 
-var download_record = new Array(totalblocks);
-var last_download_record = new Array(totalblocks);
+var download_record = new Array(totalblocks),
+    last_download_record = new Array(totalblocks),
+    tobe_check = new Array(totalblocks);
 
 for(var i=0; i<totalblocks; ++i){
+    tobe_check[i] = i;
     downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
 }
 
@@ -45,7 +47,7 @@ setTimeout(function(){
             }
             if (redownloadcount == 0){
                 console.log("redownload complete, checking hash...");
-                utils.show_diff_block(download_record, last_download_record);
+                utils.show_diff_block(tobe_check, download_record, last_download_record);
                 setTimeout(function(){
                     if (utils.allOne(download_record)) {
                         clearInterval(interval_obj);
@@ -73,9 +75,9 @@ function downloadFile(socket, IP, PORT, blockID) {
 
 function addEventListener(socket, remoteFile, localFile) {
     socket.on('message', function(data, rinfo) {
-//        console.log("receiving data from ", rinfo.ip, ':', rinfo.port);
+//        console.log("receiving data from ", rinfo.address, ':', rinfo.port);
         dataToProcess = Buffer.concat([dataToProcess, data]);
-        console.log('dataToProcesslength: ', dataToProcess.length);
+//        console.log('dataToProcesslength: ', dataToProcess.length);
         var index = utils.indexOfSplitter(dataToProcess);
         while(index>-1) {
 //            console.log("receiving size:" + dataToProcess.slice(0, index).length);
@@ -86,13 +88,13 @@ function addEventListener(socket, remoteFile, localFile) {
                     blockID = jsonData["index"];
                 download_record[blockID] = 1;
                 var file = randomAccessFile(localFile);
-                // write 是异步的!在callback触犯的时候blockID已经不是之前的了, 就是最后那个, 所以输出的blockID都一样
                 file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
                     file.close();//TODO
                     if(err)
                         console.log("blockID download err:" + blockID);
-                    else
-                        console.log("blockID download OK:" + blockID);
+                    else{
+//                        console.log("blockID download OK:" + blockID);
+                    }
                 });
             }else{
                 console.log("Waning: bson is not a file content...");
