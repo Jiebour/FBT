@@ -1,21 +1,22 @@
-body {
-  background: white;
-  margin: 10px;
+.wrap_all{
+	text-align: center;
 }
-
-body,
-input {
-  font-family: sans-serif;
-  font-size: 10pt;
-  color: black;
+.modal,.container{
+	text-align: left;
 }
-
-table {
-  border-collapse: collapse;
-  border: 0;
+.hide{
+  visibility: hidden;
 }
-
-td {
-  border: 0;
-  padding: 0;
+.show{
+  visibility: visible;
+}
+#hint{
+  color: red;
+}
+.alert{
+	margin-right: auto;
+	margin-left: auto;
+}
+b{
+	cursor: pointer;
 }
