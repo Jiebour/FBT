@@ -8,7 +8,7 @@ var filepath1 = '6.75M.mp3',
     BLOCK_SIZE = 1000;
 
 // delay time
-var unit_delay_time = 2000;
+var unit_delay_time = 2000; // 该值最好和文件大小关联上
 
 exports.source_file = filepath1;
 exports.download_file = filepath2;

@@ -27,7 +27,7 @@ var totalblocks = parseInt(filesize/BLOCK_SIZE) + 1;
 
 var download_record = new Array(totalblocks),
     last_download_record = new Array(totalblocks),
-    tobe_check = new Array(totalblocks);
+    tobe_check = new Array(totalblocks);  // 记录未校验过的块
 
 console.time("downloading");
 for(var i=0; i<totalblocks; ++i){
@@ -39,7 +39,7 @@ setTimeout(function(){
     var interval_obj = setInterval(function(){
         if (utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
-            var redownloadcount = 0;
+            var redownloadcount = 0; // 记录这一次重新下载的块的数量
             for (var i = 0; i< totalblocks; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
@@ -49,6 +49,7 @@ setTimeout(function(){
             }
             if (redownloadcount == 0){
                 console.log("redownload complete, checking hash...");
+                // show_diff_block函数会更新tobe_check, 校验通过则删除对应的项
                 utils.show_diff_block(tobe_check, download_record, last_download_record);
                 setTimeout(function(){
                     if (utils.allOne(download_record)) {
@@ -59,16 +60,16 @@ setTimeout(function(){
                         clearInterval(interval_obj);
                         setTimeout(function(){
                             process.exit(0);
-                        }, unit_delay_time);
+                        }, unit_delay_time);  // delay 1
                     }
-                }, 4*unit_delay_time);
+                }, 4*unit_delay_time);  // delay 2
             }
         }
         else{
             last_download_record = download_record;
         }
-    }, 1000);
-}, 2000);
+    }, 1000); // delay 3
+}, 2000);  // delay 4 这四个延时都是我随便写的, 肯定不是最优。靠延时似乎并不好, 暂时没想到别的方法
 
 
 function downloadFile(socket, IP, PORT, blockID) {

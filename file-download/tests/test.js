@@ -1,3 +1,7 @@
+/*
+暂时不要用test.js进行测试, 还是先运行p2p-server.js再运行p2p-client.js
+ */
+
 var child_process = require("child_process"),
     xxhash = require('xxhash'),
     fs = require('fs'),
