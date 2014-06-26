@@ -5,7 +5,7 @@ var filepath1 = '6.75M.mp3',
     filesize = fs.statSync(filepath1)['size'],
     SPLITTER = '@@@@@',
     SPLITTERLENGTH = SPLITTER.length,
-    BLOCK_SIZE = 1000;
+    BLOCK_SIZE = 1000;  // bytes
 
 // delay time
 var unit_delay_time = 2000; // 该值最好和文件大小关联上

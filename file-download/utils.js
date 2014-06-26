@@ -57,12 +57,15 @@ function show_diff_block(tobe_check, download_record, last_download_record) {
             var block_index = tobe_check[i];
             fs.read(fd1, bf1, 0, readsize, block_index * blocksize, function (err, bytesRead, bf1) {
                 fs.read(fd2, bf2, 0, readsize, block_index * blocksize, function (err, bytesRead, bf2) {
+                    var result;
                     if (tobe_check[i] == totalblocks)
-                        var result = buffertools.compare(bf1.slice(0, bytesRead), bf2.slice(0, bytesRead));
+                        result = buffertools.compare(bf1.slice(0, bytesRead), bf2.slice(0, bytesRead));
                     else
-                        var result = buffertools.compare(bf1, bf2);
+                        result = buffertools.compare(bf1, bf2);
+
                     if (result != 0) {
                         console.log("block ", block_index, " not equal!");
+                        // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
                         last_download_record[block_index] = download_record[block_index] = 0;
                     }
                     else {
@@ -70,6 +73,7 @@ function show_diff_block(tobe_check, download_record, last_download_record) {
                         console.log("block ", block_index, " equal!");
                     }
                     if (i > 0) {
+                        // 考虑到splice对index的影响, 采用逆序递归
                         compare_block(blocksize, i - 1, fd1, fd2);
                     }
                 });

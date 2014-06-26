@@ -13,7 +13,7 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
     SPLITTERLENGTH = settings.SPLITTERLENGTH,
     source_file = settings.source_file,
     download_file = settings.download_file,
-    filesize = settings.filesize
+    filesize = settings.filesize,
     unit_delay_time = settings.unit_delay_time;
 
 
@@ -25,9 +25,9 @@ addEventListener(socket, source_file, download_file);
 var dataToProcess = new Buffer(0);
 var totalblocks = parseInt(filesize/BLOCK_SIZE) + 1;
 
-var download_record = new Array(totalblocks),
-    last_download_record = new Array(totalblocks),
-    tobe_check = new Array(totalblocks);  // 记录未校验过的块
+var download_record = [],// 记录下载过的块, download_record[blockID]=1
+    last_download_record = [],
+    tobe_check = [];  // 记录未校验过的块, 校验通过则删除这个blockID
 
 console.time("downloading");
 for(var i=0; i<totalblocks; ++i){
@@ -85,11 +85,11 @@ function addEventListener(socket, remoteFile, localFile) {
         dataToProcess = Buffer.concat([dataToProcess, data]);
 //        console.log('dataToProcesslength: ', dataToProcess.length);
         var index = utils.indexOfSplitter(dataToProcess);
-        while(index>-1) {
+        while(index > -1) {
 //            console.log("receiving size:" + dataToProcess.slice(0, index).length);
             var jsonData = BSON.parse(dataToProcess.slice(0, index));
             //has file content
-            if(utils.hasFileContent(jsonData)){
+            if (utils.hasFileContent(jsonData)){
                 var chunksData = jsonData["content"],
                     blockID = jsonData["index"];
                 download_record[blockID] = 1;
@@ -102,7 +102,7 @@ function addEventListener(socket, remoteFile, localFile) {
                         console.log("blockID download OK:" + blockID);
                     }
                 });
-            }else{
+            } else{
                 console.log("Waning: bson is not a file content...");
             }
             // Cuts off the processed chunk
