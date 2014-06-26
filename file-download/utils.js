@@ -45,10 +45,10 @@ function allOne(a) {
     return true;
 }
 
-function show_diff_block(tobe_check, download_record, last_download_record) {
+function diff_block(tobe_check, download_record, last_download_record) {
     if (tobe_check.length == 0) return;  // [], all elements removed
     var blocksize=settings.BLOCK_SIZE, source=settings.source_file, download=settings.download_file;
-    var totalblocks = parseInt(settings.filesize/blocksize);
+    var totalblocks = parseInt((settings.filesize-1)/settings.BLOCK_SIZE);
     var bf1 = Buffer(blocksize);
     var bf2 = Buffer(blocksize);
 
@@ -100,7 +100,7 @@ exports.hasFileIndex = hasFileIndex;
 exports.rand3 = rand3;
 exports.arrayEqual = arrayEqual;
 exports.allOne = allOne;
-exports.show_diff_block = show_diff_block;
+exports.diff_block = diff_block;
 
 
 //var totalblocks = parseInt(settings.filesize/settings.BLOCK_SIZE);

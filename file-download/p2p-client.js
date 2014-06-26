@@ -14,7 +14,8 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
     source_file = settings.source_file,
     download_file = settings.download_file,
     filesize = settings.filesize,
-    unit_delay_time = settings.unit_delay_time;
+    unit_delay_time = settings.unit_delay_time,
+    BLOCK_IN_PART = settings.BLOCK_IN_PART;
 
 
 var socket = dgram.createSocket('udp4');
@@ -23,24 +24,51 @@ socket.bind(9999);
 
 addEventListener(socket, source_file, download_file);
 var dataToProcess = new Buffer(0);
-var totalblocks = parseInt(filesize/BLOCK_SIZE) + 1;
+var totalblocks = parseInt((filesize+BLOCK_SIZE-1)/BLOCK_SIZE);
+var partsize = BLOCK_IN_PART * BLOCK_SIZE;
+var totalparts = parseInt((filesize+partsize-1)/partsize);
 
 var download_record = [],// 记录下载过的块, download_record[blockID]=1
     last_download_record = [],
     tobe_check = [];  // 记录未校验过的块, 校验通过则删除这个blockID
 
 console.time("downloading");
-for(var i=0; i<totalblocks; ++i){
+
+for (var i=0; i<totalblocks; i++) {
     tobe_check[i] = i;
-    downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
 }
 
-setTimeout(function(){
+verify_part(0);
+
+function download_part(partID) { // 一次只下载一个part, 校验完成之后下载下一个
+    var i;
+    if (BLOCK_IN_PART*(partID + 1) > totalblocks) {
+        for(i=BLOCK_IN_PART*partID; i<totalblocks; ++i){
+            downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
+        }
+    }
+    else {
+        for(i=BLOCK_IN_PART*partID; i<BLOCK_IN_PART*(partID+1); ++i){
+            downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
+        }
+    }
+}
+
+function verify_part(partID) {
+    if (partID > totalparts) return 1; // 处理完所有part, 返回1
+
+    var part_first_block = BLOCK_IN_PART * partID,
+        part_last_block = (BLOCK_IN_PART*(partID+1)>totalblocks) ?
+                            totalblocks : BLOCK_IN_PART*(partID+1); // lastblock实际上是last+1
+    var part_tobe_check = tobe_check.slice(part_first_block, part_last_block);
+
+    download_part(partID);
+
     var interval_obj = setInterval(function(){
         if (utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
-            for (var i = 0; i< totalblocks; i++) {
+            for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
 //                    console.log("redownload block: ", i);
@@ -49,27 +77,31 @@ setTimeout(function(){
             }
             if (redownloadcount == 0){
                 console.log("redownload complete, checking hash...");
-                // show_diff_block函数会更新tobe_check, 校验通过则删除对应的项
-                utils.show_diff_block(tobe_check, download_record, last_download_record);
+                // diff_block函数会更新part_tobe_check, 校验通过则删除对应的项, 不会影响tobe_check
+                // 自己加callback函数?
+                utils.diff_block(part_tobe_check, download_record, last_download_record);
                 setTimeout(function(){
-                    if (utils.allOne(download_record)) {
-                        console.timeEnd("downloading");
-                        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
-                        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
-                        console.log("download complete! exiting...");
+                    if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                         clearInterval(interval_obj);
-                        setTimeout(function(){
-                            process.exit(0);
-                        }, unit_delay_time);  // delay 1
+                        var return_value = verify_part(partID + 1); // 一般是undefined, 结束时是1
+                        if (return_value) {
+                            console.timeEnd("downloading");
+                            console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
+                            console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+                            console.log("download complete! exiting...");
+                            setTimeout(function(){
+                                process.exit(0);
+                            }, unit_delay_time);  // delay 1
+                        }
                     }
-                }, 4*unit_delay_time);  // delay 2
+                }, 300);
             }
         }
         else{
             last_download_record = download_record;
         }
-    }, 1000); // delay 3
-}, 2000);  // delay 4 这四个延时都是我随便写的, 肯定不是最优。靠延时似乎并不好, 暂时没想到别的方法
+    }, 300); // delay 2
+}
 
 
 function downloadFile(socket, IP, PORT, blockID) {
