@@ -45,8 +45,11 @@ function allOne(a) {
     return true;
 }
 
-function diff_block(tobe_check, download_record, last_download_record) {
-    if (tobe_check.length == 0) return;  // [], all elements removed
+function diff_block(tobe_check, download_record, last_download_record, callback) {
+    if (tobe_check.length == 0) {
+        callback();
+        return;
+    }  // [], all elements removed
     var blocksize=settings.BLOCK_SIZE, source=settings.source_file, download=settings.download_file;
     var totalblocks = parseInt((settings.filesize-1)/settings.BLOCK_SIZE);
     var bf1 = Buffer(blocksize);
@@ -75,6 +78,9 @@ function diff_block(tobe_check, download_record, last_download_record) {
                     if (i > 0) {
                         // 考虑到splice对index的影响, 采用逆序递归
                         compare_block(blocksize, i - 1, fd1, fd2);
+                    }
+                    else {
+                        callback();
                     }
                 });
             });

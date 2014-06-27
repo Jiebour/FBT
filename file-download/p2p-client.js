@@ -79,8 +79,7 @@ function verify_part(partID) {
                 console.log("redownload complete, checking hash...");
                 // diff_block函数会更新part_tobe_check, 校验通过则删除对应的项, 不会影响tobe_check
                 // 自己加callback函数?
-                utils.diff_block(part_tobe_check, download_record, last_download_record);
-                setTimeout(function(){
+                utils.diff_block(part_tobe_check, download_record, last_download_record, function(){
                     if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                         clearInterval(interval_obj);
                         var return_value = verify_part(partID + 1); // 一般是undefined, 结束时是1
@@ -94,7 +93,7 @@ function verify_part(partID) {
                             }, unit_delay_time);  // delay 1
                         }
                     }
-                }, 300);
+                });
             }
         }
         else{
