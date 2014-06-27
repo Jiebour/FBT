@@ -69,10 +69,6 @@ function diff_block(tobe_check, download_record, last_download_record, callback)
 
     function compare_block(readsize, i, fd1, fd2) {
         // 有时候fd会莫名其妙地消失, 这时候只能重新调用diff_block生成fd1, fd2
-        if (typeof fd1 === "undefined" || typeof fd2 === "undefined"){
-            console.log("wierd things happen, fds disappear");
-            fd1 = global.fd1; fd2 = global.fd2;
-        }
         try {
             var block_index = tobe_check[i];
             fs.read(fd1, bf1, 0, readsize, block_index * blocksize, function (err, bytesRead, bf1) {
@@ -107,10 +103,10 @@ function diff_block(tobe_check, download_record, last_download_record, callback)
         }
     }
 
-           if (tobe_check[tobe_check.length-1] == totalblocks)
-               compare_block(settings.filesize % blocksize, tobe_check.length-1, global.fd1, global.fd2);
-           else
-               compare_block(blocksize, tobe_check.length-1, global.fd1, global.fd2);
+   if (tobe_check[tobe_check.length-1] == totalblocks)
+       compare_block(settings.filesize % blocksize, tobe_check.length-1, global.fd1, global.fd2);
+   else
+       compare_block(blocksize, tobe_check.length-1, global.fd1, global.fd2);
 }
 
 exports.indexOfSplitter = indexOfSplitter;

@@ -80,7 +80,7 @@ function verify_part(partID) {
             for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
-                    console.log("redownload block: ", i);
+//                    console.log("redownload block: ", i);
                     downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
                 }
             }
