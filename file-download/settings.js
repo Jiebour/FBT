@@ -1,12 +1,12 @@
 var fs = require('fs');
 
-var filepath1 = '6.75M.mp3',
-    filepath2 = '6.75M-local.mp3',
+var filepath1 = 'test.mp4',
+    filepath2 = 'test-local.mp4',
     filesize = fs.statSync(filepath1)['size'],
     SPLITTER = '@@@@@',
     SPLITTERLENGTH = SPLITTER.length,
     BLOCK_SIZE = 1000,  // bytes
-    BLOCK_IN_PART = 100;
+    BLOCK_IN_PART = 25;
 
 // delay time
 var unit_delay_time = 2000; // 该值最好和文件大小关联上

@@ -40,6 +40,13 @@ for (var i=0; i<totalblocks; i++) {
 
 verify_part(0);
 
+fs.open(settings.source_file, "r", function (err, fd1) {
+    fs.open(settings.download_file, "w+", function(err, fd2) {
+        global.fd1 = fd1;  // 以防之后fd消失
+        global.fd2 = fd2;  // fd2用w+可在文件不存在时创建, 否则无法获取fd
+    });
+});
+
 function download_part(partID) { // 一次只下载一个part, 校验完成之后下载下一个
     var i;
     if (BLOCK_IN_PART*(partID + 1) > totalblocks) {
@@ -63,15 +70,17 @@ function verify_part(partID) {
     var part_tobe_check = tobe_check.slice(part_first_block, part_last_block);
 
     download_part(partID);
-
+    var times = 0;
     var interval_obj = setInterval(function(){
+        times ++;
         if (utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
+            console.log("times: ", times);
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
             for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
-//                    console.log("redownload block: ", i);
+                    console.log("redownload block: ", i);
                     downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
                 }
             }
@@ -99,7 +108,7 @@ function verify_part(partID) {
         else{
             last_download_record = download_record;
         }
-    }, 300); // delay 2
+    }, 100); // delay 2
 }
 
 
@@ -130,7 +139,7 @@ function addEventListener(socket, remoteFile, localFile) {
                     if(err)
                         console.log("blockID download err:" + blockID);
                     else{
-                        console.log("blockID download OK:" + blockID);
+//                        console.log("blockID download OK:" + blockID);
                     }
                 });
             } else{

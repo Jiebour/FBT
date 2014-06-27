@@ -39,23 +39,40 @@ function arrayEqual(a, b){
 
 function allOne(a) {
     for (var i=0; i< a.length; i++) {
-        if (a[i] != 1)
+        if (a[i] !== 1)
             return false;
     }
     return true;
 }
 
+
+function countOne(a) {
+    var count = 0;
+    for (var i=0; i< a.length; i++) {
+        if (a[i] === 1)
+            count ++;
+    }
+    return count;
+}
+
+
 function diff_block(tobe_check, download_record, last_download_record, callback) {
     if (tobe_check.length == 0) {
+        // 这种情况在interval未到但是已经校验完该part的block时出现
         callback();
         return;
-    }  // [], all elements removed
+    }
     var blocksize=settings.BLOCK_SIZE, source=settings.source_file, download=settings.download_file;
     var totalblocks = parseInt((settings.filesize-1)/settings.BLOCK_SIZE);
     var bf1 = Buffer(blocksize);
     var bf2 = Buffer(blocksize);
 
     function compare_block(readsize, i, fd1, fd2) {
+        // 有时候fd会莫名其妙地消失, 这时候只能重新调用diff_block生成fd1, fd2
+        if (typeof fd1 === "undefined" || typeof fd2 === "undefined"){
+            console.log("wierd things happen, fds disappear");
+            fd1 = global.fd1; fd2 = global.fd2;
+        }
         try {
             var block_index = tobe_check[i];
             fs.read(fd1, bf1, 0, readsize, block_index * blocksize, function (err, bytesRead, bf1) {
@@ -73,7 +90,7 @@ function diff_block(tobe_check, download_record, last_download_record, callback)
                     }
                     else {
                         tobe_check.splice(i, 1);
-                        console.log("block ", block_index, " equal!");
+//                        console.log("block ", block_index, " equal!");
                     }
                     if (i > 0) {
                         // 考虑到splice对index的影响, 采用逆序递归
@@ -90,14 +107,10 @@ function diff_block(tobe_check, download_record, last_download_record, callback)
         }
     }
 
-    fs.open(source, "r", function (err, fd1) {
-       fs.open(download, "r", function(err, fd2) {
            if (tobe_check[tobe_check.length-1] == totalblocks)
-               compare_block(settings.filesize % blocksize, tobe_check.length-1, fd1, fd2);
+               compare_block(settings.filesize % blocksize, tobe_check.length-1, global.fd1, global.fd2);
            else
-               compare_block(blocksize, tobe_check.length-1, fd1, fd2);
-       });
-    });
+               compare_block(blocksize, tobe_check.length-1, global.fd1, global.fd2);
 }
 
 exports.indexOfSplitter = indexOfSplitter;
