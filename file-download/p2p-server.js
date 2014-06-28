@@ -32,7 +32,8 @@ function addEventListener(socket) {
                 var readStream = fs.createReadStream(
                     source_file, {
                         start: blockID * BLOCK_SIZE,
-                        end: blockID * BLOCK_SIZE + BLOCK_SIZE - 1
+                        end: blockID * BLOCK_SIZE + BLOCK_SIZE - 1,
+                        autoClose: true
                     }
                 );
                 readStream.on('data', function(data) {
@@ -67,35 +68,6 @@ function addEventListener(socket) {
     });
 }
 
-/*
-setInterval(function(){
-    var index = utils.indexOfSplitter(dataToProcess);
-    while (index > -1) {
-        var jsonData = bson.parse(dataToProcess.slice(0, index));
-        if(utils.hasFileIndex(jsonData)) {
-            var blockID = jsonData["index"];
-            console.log("file index: " + blockID);
-            fs.openSync(source_file, "r", function (err, fd) {
-                fs.readSync(fd, null, 0, BLOCK_SIZE, blockID * BLOCK_SIZE, function (err, bytesRead, buffer) {
-                    console.log('transfer data....');
-                    var toSend = bson.serialize({header: "media", index: blockID, content: buffer});
-                    console.log("data size:" + data.length + " bson size:" + toSend.length);
-                    toSend = Buffer.concat([toSend, BF_SPLITTER]);
-                    socket.send(toSend, 0, toSend.length, 9999, rinfo.ip);
-                    console.log('transfer data end....');
-                });
-            });
-        }
-        else{
-                console.log("Waning: bson is not a file content...");
-        }
-        // Cuts off the processed chunk
-        dataToProcess = dataToProcess.slice(index + SPLITTERLENGTH, dataToProcess.length);
-        index = utils.indexOfSplitter(dataToProcess);
-    }
-}, 10);
-
-*/
 var server1 = dgram.createSocket('udp4');
 var server2 = dgram.createSocket('udp4');
 var server3 = dgram.createSocket('udp4');
@@ -112,4 +84,3 @@ server3.bind(8803, function (){
     addEventListener(server3);
     console.log('\033[96m   server listening on *:8803\033[39m');
 });
-//

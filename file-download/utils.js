@@ -56,7 +56,7 @@ function countOne(a) {
 }
 
 
-function diff_block(tobe_check, download_record, last_download_record, callback) {
+function diff_block(tobe_check, block_not_equal, download_record, last_download_record, callback) {
     if (tobe_check.length == 0) {
         // 这种情况在interval未到但是已经校验完该part的block时出现
         callback();
@@ -83,6 +83,7 @@ function diff_block(tobe_check, download_record, last_download_record, callback)
                         console.log("block ", block_index, " not equal!");
                         // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
                         last_download_record[block_index] = download_record[block_index] = 0;
+                        block_not_equal.unshift(block_index);
                     }
                     else {
                         tobe_check.splice(i, 1);

@@ -41,9 +41,9 @@ for (var i=0; i<totalblocks; i++) {
 verify_part(0);
 
 fs.open(settings.source_file, "r", function (err, fd1) {
-    fs.open(settings.download_file, "w+", function(err, fd2) {
+    fs.open(settings.download_file, "a+", function(err, fd2) {
         global.fd1 = fd1;  // 以防之后fd消失
-        global.fd2 = fd2;  // fd2用w+可在文件不存在时创建, 否则无法获取fd
+        global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
     });
 });
 
@@ -62,33 +62,38 @@ function download_part(partID) { // 一次只下载一个part, 校验完成之�
 }
 
 function verify_part(partID) {
-    if (partID > totalparts) return 1; // 处理完所有part, 返回1
+    if (partID >= totalparts) return 1; // 处理完所有part, 返回1
 
     var part_first_block = BLOCK_IN_PART * partID,
         part_last_block = (BLOCK_IN_PART*(partID+1)>totalblocks) ?
                             totalblocks : BLOCK_IN_PART*(partID+1); // lastblock实际上是last+1
     var part_tobe_check = tobe_check.slice(part_first_block, part_last_block);
 
+    global.congestion = global.last_congestion = BLOCK_IN_PART;
     download_part(partID);
-    var times = 0;
     var interval_obj = setInterval(function(){
-        times ++;
-        if (utils.arrayEqual(download_record, last_download_record)){
+        // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
+        if (global.congestion <= global.last_congestion && utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
-            console.log("times: ", times);
+//            console.log(global.last_congestion);
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
             for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
+                    global.congestion++;
 //                    console.log("redownload block: ", i);
                     downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
                 }
             }
+            global.last_congestion = global.congestion; // 原来的congestion+redownloadcount
             if (redownloadcount == 0){
                 console.log("redownload complete, checking hash...");
                 // diff_block函数会更新part_tobe_check, 校验通过则删除对应的项, 不会影响tobe_check
                 // 自己加callback函数?
-                utils.diff_block(part_tobe_check, download_record, last_download_record, function(){
+                var copy_part_tobe_check = part_tobe_check.slice();  // make a copy
+                part_tobe_check = [];  // 因为会重复校验, 所以先清空, 在diff中添加需重新校验的块序号
+                utils.diff_block(copy_part_tobe_check, part_tobe_check, download_record,
+                    last_download_record, function(){
                     if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                         clearInterval(interval_obj);
                         var return_value = verify_part(partID + 1); // 一般是undefined, 结束时是1
@@ -108,7 +113,7 @@ function verify_part(partID) {
         else{
             last_download_record = download_record;
         }
-    }, 100); // delay 2
+    }, 75); // delay 2
 }
 
 
@@ -139,6 +144,7 @@ function addEventListener(socket, remoteFile, localFile) {
                     if(err)
                         console.log("blockID download err:" + blockID);
                     else{
+                        global.congestion--;
 //                        console.log("blockID download OK:" + blockID);
                     }
                 });
