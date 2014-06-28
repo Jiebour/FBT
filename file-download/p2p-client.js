@@ -89,7 +89,6 @@ function verify_part(partID) {
             if (redownloadcount == 0){
                 console.log("redownload complete, checking hash...");
                 // diff_block函数会更新part_tobe_check, 校验通过则删除对应的项, 不会影响tobe_check
-                // 自己加callback函数?
                 var copy_part_tobe_check = part_tobe_check.slice();  // make a copy
                 part_tobe_check = [];  // 因为会重复校验, 所以先清空, 在diff中添加需重新校验的块序号
                 utils.diff_block(copy_part_tobe_check, part_tobe_check, download_record,
@@ -113,7 +112,7 @@ function verify_part(partID) {
         else{
             last_download_record = download_record;
         }
-    }, 75); // delay 2
+    }, 500); // delay 2
 }
 
 
