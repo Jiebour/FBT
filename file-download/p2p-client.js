@@ -75,7 +75,7 @@ function verify_part(partID) {
         // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
         if (global.congestion <= global.last_congestion && utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
-//            console.log(global.last_congestion);
+            console.log(global.last_congestion);
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
             for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
@@ -125,6 +125,7 @@ function downloadFile(socket, IP, PORT, blockID) {
 }
 
 function addEventListener(socket, remoteFile, localFile) {
+    var file = randomAccessFile(localFile);
     socket.on('message', function(data, rinfo) {
 //        console.log("receiving data from ", rinfo.address, ':', rinfo.port);
         dataToProcess = Buffer.concat([dataToProcess, data]);
@@ -138,9 +139,7 @@ function addEventListener(socket, remoteFile, localFile) {
                 var chunksData = jsonData["content"],
                     blockID = jsonData["index"];
                 download_record[blockID] = 1;
-                var file = randomAccessFile(localFile);
                 file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
-                    file.close();//TODO
                     if(err)
                         console.log("blockID download err:" + blockID);
                     else{

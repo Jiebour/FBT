@@ -2,6 +2,7 @@ var buffertools = require("buffertools");
 var fs = require('fs');
 var settings = require('./settings');
 var xxhash = require('xxhash');
+var crc = require('crc');
 
 var SPLITTER = '@@@@@';
 function indexOfSplitter(buffer){
@@ -77,9 +78,10 @@ function diff_block(tobe_check, block_not_equal, download_record, last_download_
                     if (tobe_check[i] == totalblocks)
                         result = buffertools.compare(bf1.slice(0, bytesRead), bf2.slice(0, bytesRead));
                     else
-                        result = buffertools.compare(bf1, bf2);
+//                        result = buffertools.compare(bf1, bf2);
+                        result = (crc.crc32(bf1) === crc.crc32(bf2)) ? 0 : 1;
 
-                    if (result != 0) {
+                    if (result !== 0) {
                         console.log("block ", block_index, " not equal!");
                         // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
                         last_download_record[block_index] = download_record[block_index] = 0;
@@ -117,14 +119,3 @@ exports.rand3 = rand3;
 exports.arrayEqual = arrayEqual;
 exports.allOne = allOne;
 exports.diff_block = diff_block;
-
-
-//var totalblocks = parseInt(settings.filesize/settings.BLOCK_SIZE);
-//var download_record = new Array(totalblocks),
-//    last_download_record = new Array(totalblocks),
-//    tobe_check = new Array(totalblocks);
-//for(var i=0; i<totalblocks+1; ++i) {
-//    tobe_check[i] = i;
-//}
-//show_diff_block(tobe_check, download_record, last_download_record);
-//
