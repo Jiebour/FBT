@@ -47,12 +47,12 @@ function download_part(partID) { // 一次只下载一个part, 校验完成之�
     var i;
     if (BLOCK_IN_PART*(partID + 1) > totalblocks) {
         for(i=BLOCK_IN_PART*partID; i<totalblocks; ++i){
-            downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
+            downloadFile(socket, settings.server_ip, 8800+utils.rand3(), i);
         }
     }
     else {
         for(i=BLOCK_IN_PART*partID; i<BLOCK_IN_PART*(partID+1); ++i){
-            downloadFile(socket, '127.0.0.1', 8800+utils.rand3(), i);
+            downloadFile(socket, settings.server_ip, 8800+utils.rand3(), i);
         }
     }
 }
@@ -77,7 +77,7 @@ function verify_part(partID) {
                     redownloadcount++;
                     global.congestion++;
 //                    console.log("redownload block: ", i);
-                    downloadFile(socket, '127.0.0.1', 8800 + utils.rand3(), i);
+                    downloadFile(socket, settings.server_ip, 8800 + utils.rand3(), i);
                 }
             }
             global.last_congestion = global.congestion; // 原来的congestion+redownloadcount

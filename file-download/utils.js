@@ -102,7 +102,6 @@ function diff_block(tobe_check, block_not_equal, download_record, last_download_
        compare_block(blocksize, tobe_check.length-1, global.fd1, global.fd2);
 }
 
-exports.indexOfSplitter = indexOfSplitter;
 exports.hasFileContent = hasFileContent;
 exports.hasFileIndex = hasFileIndex;
 exports.rand3 = rand3;

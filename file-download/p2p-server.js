@@ -36,7 +36,7 @@ function addEventListener(socket) {
 //                    console.log("data size:" + data.length + " bson size:" + toSend.length);
                 // 让client最后向每个server发一个结束信息, server收到结束信息之后把自己剩下的包发出去
                 // client那一边最后应当记录收到的block, 最后检查有哪些没收到, 然后请求这些剩余的块
-                socket.send(toSend, 0, toSend.length, 9999, rinfo.address);
+                socket.send(toSend, 0, toSend.length, rinfo.port, rinfo.address);
             });
 
             readStream.on('end', function () {
