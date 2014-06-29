@@ -8,9 +8,6 @@ var dgram = require('dgram'),
 
 
 var BLOCK_SIZE = settings.BLOCK_SIZE,
-    SPLITTER = settings.SPLITTER,
-    BF_SPLITTER = new Buffer(SPLITTER),
-    SPLITTERLENGTH = settings.SPLITTERLENGTH,
     source_file = settings.source_file,
     download_file = settings.download_file,
     filesize = settings.filesize,
@@ -23,7 +20,6 @@ socket.bind(9999);
 // 这个值目前双方都知道, 实际应该是通过STUN获知
 
 addEventListener(socket, source_file, download_file);
-var dataToProcess = new Buffer(0);
 var totalblocks = parseInt((filesize+BLOCK_SIZE-1)/BLOCK_SIZE);
 var partsize = BLOCK_IN_PART * BLOCK_SIZE;
 var totalparts = parseInt((filesize+partsize-1)/partsize);
@@ -75,7 +71,6 @@ function verify_part(partID) {
         // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
         if (global.congestion <= global.last_congestion && utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
-            console.log(global.last_congestion);
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
             for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
@@ -118,7 +113,6 @@ function verify_part(partID) {
 
 function downloadFile(socket, IP, PORT, blockID) {
     var toSend = BSON.serialize({file: source_file, index: blockID});
-    toSend = Buffer.concat([toSend, BF_SPLITTER]);
     socket.send(toSend, 0, toSend.length, PORT, IP);
     //TODO the real file to transfer
 }
@@ -127,31 +121,24 @@ function addEventListener(socket, remoteFile, localFile) {
     var file = randomAccessFile(localFile);
     socket.on('message', function(data, rinfo) {
 //        console.log("receiving data from ", rinfo.address, ':', rinfo.port);
-        dataToProcess = Buffer.concat([dataToProcess, data]);
 //        console.log('dataToProcesslength: ', dataToProcess.length);
-        var index = utils.indexOfSplitter(dataToProcess);
-        while(index > -1) {
 //            console.log("receiving size:" + dataToProcess.slice(0, index).length);
-            var jsonData = BSON.parse(dataToProcess.slice(0, index));
-            //has file content
-            if (utils.hasFileContent(jsonData)){
-                var chunksData = jsonData["content"],
-                    blockID = jsonData["index"];
-                download_record[blockID] = 1;
-                file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
-                    if(err)
-                        console.log("blockID download err:" + blockID);
-                    else{
-                        global.congestion--;
+        var jsonData = BSON.parse(data);
+        //has file content
+        if (utils.hasFileContent(jsonData)){
+            var chunksData = jsonData["content"],
+                blockID = jsonData["index"];
+            download_record[blockID] = 1;
+            file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
+                if(err)
+                    console.log("blockID download err:" + blockID);
+                else{
+                    global.congestion--;
 //                        console.log("blockID download OK:" + blockID);
-                    }
-                });
-            } else{
-                console.log("Waning: bson is not a file content...");
-            }
-            // Cuts off the processed chunk
-            dataToProcess = dataToProcess.slice(index+SPLITTERLENGTH, dataToProcess.length);
-            index = utils.indexOfSplitter(dataToProcess);
+                }
+            });
+        } else{
+            console.log("Waning: bson is not a file content...");
         }
     });
 

@@ -1,16 +1,7 @@
-var buffertools = require("buffertools");
 var fs = require('fs');
 var settings = require('./settings');
 var xxhash = require('xxhash');
 var crc = require('crc');
-
-var SPLITTER = '@@@@@';
-function indexOfSplitter(buffer){
-    for(var i=0; i < (buffer.length - 4); i++)
-        if(buffertools.compare(buffer.slice(i, i+5), SPLITTER) == 0)
-            return i;
-    return -1;
-}
 
 
 function hasFileContent(jsonData){
@@ -76,11 +67,10 @@ function diff_block(tobe_check, block_not_equal, download_record, last_download_
                 fs.read(fd2, bf2, 0, readsize, block_index * blocksize, function (err, bytesRead, bf2) {
                     var result;
                     if (tobe_check[i] == totalblocks)
-                        result = buffertools.compare(bf1.slice(0, bytesRead), bf2.slice(0, bytesRead));
+                        result = (crc.crc32(bf1.slice(0, bytesRead)) === crc.crc32(bf2.slice(0, bytesRead)))
+                            ? 0 : 1;
                     else
-//                        result = buffertools.compare(bf1, bf2);
                         result = (crc.crc32(bf1) === crc.crc32(bf2)) ? 0 : 1;
-
                     if (result !== 0) {
                         console.log("block ", block_index, " not equal!");
                         // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
