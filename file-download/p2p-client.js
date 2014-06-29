@@ -4,7 +4,8 @@ var dgram = require('dgram'),
     BSON = require('buffalo'),
     utils = require('./utils'),
     settings = require('./settings'),
-    xxhash = require('xxhash');
+    xxhash = require('xxhash'),
+    EventEmitter = require('events').EventEmitter;
 
 
 var BLOCK_SIZE = settings.BLOCK_SIZE,
@@ -26,9 +27,7 @@ var download_record = [],// 记录下载过的块, download_record[blockID]=1
 function addEventListener(socket, remoteFile, localFile) {
     var file = randomAccessFile(localFile);
     socket.on('message', function(data, rinfo) {
-//        console.log("receiving data from ", rinfo.address, ':', rinfo.port);
         var jsonData = BSON.parse(data);
-        //has file content
         if (utils.hasFileContent(jsonData)){
             var chunksData = jsonData["content"],
                 blockID = jsonData["index"];
@@ -107,12 +106,27 @@ function verify_part(socket, partID) {
                     var return_value = verify_part(socket, partID + 1); // 一般是undefined, 结束时是1
                     if (return_value) {
                         console.timeEnd("downloading");
-                        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
-                        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
-                        console.log("download complete! exiting...");
-                        setTimeout(function(){
-                            process.exit(0);
-                        }, unit_delay_time);  // delay 1
+                        console.log("download complete! start checking...");
+                        // 移除handler中不需要的部分
+                        socket.removeAllListeners("message");
+                        var file = randomAccessFile(download_file);
+                        socket.on('message', function(data, rinfo) {
+                            var jsonData = BSON.parse(data);
+                            if (utils.hasFileContent(jsonData)){
+                                var chunksData = jsonData["content"],
+                                    blockID = jsonData["index"];
+                                file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
+                                    if(err)
+                                        console.log("blockID download err:" + blockID);
+                                    else
+                                        console.log("redownload diff block: " + blockID);
+                                });
+                            } else{
+                                console.log("Waning: bson is not a file content...");
+                            }
+                        });
+                        console.time("checking");
+                        check(socket);
                     }
                 }
             }
@@ -123,6 +137,27 @@ function verify_part(socket, partID) {
     }, 200);
 }
 
+
+function check(socket) {
+    /* 下载完之后对所有block进行校验 */
+    if (tobe_check.length === 0) { // 所有block都通过校验
+        console.log("checking complete");
+        console.timeEnd("checking");
+        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
+        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+        setTimeout(function(){
+            process.exit(0);
+        }, unit_delay_time);
+    }
+    else {
+        utils.diff_block(tobe_check, function(){
+            tobe_check.forEach(function(blockID){
+                downloadFile(socket, settings.server_ip, 8800+utils.rand3(), blockID);
+            });
+            setTimeout(check(socket), 300);
+        });
+    }
+}
 
 (function main(){
     var socket = dgram.createSocket('udp4');
@@ -137,7 +172,7 @@ function verify_part(socket, partID) {
 
     fs.open(settings.source_file, "r", function (err, fd1) {
         fs.open(settings.download_file, "a+", function(err, fd2) {
-            global.fd1 = fd1;  // 以防之后fd消失
+            global.fd1 = fd1;  // 以防之后fd消失, 实际代码中是没有fd1的, 单机测试时需要
             global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
         });
     });
