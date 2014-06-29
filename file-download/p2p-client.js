@@ -63,7 +63,6 @@ function verify_part(partID) {
     var part_first_block = BLOCK_IN_PART * partID,
         part_last_block = (BLOCK_IN_PART*(partID+1)>totalblocks) ?
                             totalblocks : BLOCK_IN_PART*(partID+1); // lastblock实际上是last+1
-    var part_tobe_check = tobe_check.slice(part_first_block, part_last_block);
 
     global.congestion = global.last_congestion = BLOCK_IN_PART;
     download_part(partID);
@@ -82,32 +81,26 @@ function verify_part(partID) {
             }
             global.last_congestion = global.congestion; // 原来的congestion+redownloadcount
             if (redownloadcount == 0){
-                console.log("redownload complete, checking hash...");
-                // diff_block函数会更新part_tobe_check, 校验通过则删除对应的项, 不会影响tobe_check
-                var copy_part_tobe_check = part_tobe_check.slice();  // make a copy
-                part_tobe_check = [];  // 因为会重复校验, 所以先清空, 在diff中添加需重新校验的块序号
-                utils.diff_block(copy_part_tobe_check, part_tobe_check, download_record,
-                    last_download_record, function(){
-                    if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
-                        clearInterval(interval_obj);
-                        var return_value = verify_part(partID + 1); // 一般是undefined, 结束时是1
-                        if (return_value) {
-                            console.timeEnd("downloading");
-                            console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
-                            console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
-                            console.log("download complete! exiting...");
-                            setTimeout(function(){
-                                process.exit(0);
-                            }, unit_delay_time);  // delay 1
-                        }
+                console.log("redownload complete");
+                if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
+                    clearInterval(interval_obj);
+                    var return_value = verify_part(partID + 1); // 一般是undefined, 结束时是1
+                    if (return_value) {
+                        console.timeEnd("downloading");
+                        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
+                        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+                        console.log("download complete! exiting...");
+                        setTimeout(function(){
+                            process.exit(0);
+                        }, unit_delay_time);  // delay 1
                     }
-                });
+                }
             }
         }
         else{
             last_download_record = download_record;
         }
-    }, 500); // delay 2
+    }, 200);
 }
 
 

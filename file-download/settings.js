@@ -5,7 +5,7 @@ var filepath1 = 'test.mp4',
     filesize = fs.statSync(filepath1)['size'],
     BLOCK_SIZE = 4096,  // bytes
     BLOCK_IN_PART = 1024,
-    server_ip = "192.168.1.111";
+    server_ip = "127.0.0.1";
 
 // delay time
 var unit_delay_time = 2000; // 该值最好和文件大小关联上
