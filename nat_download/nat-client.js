@@ -2,58 +2,24 @@ var dgram = require("dgram");
 var utils = require("./utils.js");
 var settings = require("./settings");
 
-var FullCone = "Full Cone";  // 0
-var RestrictNAT = "Restrict NAT";  // 1
-var RestrictPortNAT = "Restrict Port NAT";  // 2
-var SymmetricNAT = "Symmetric NAT";  // 3
+var FullCone = settings.FullCone,  // 0
+    RestrictNAT = settings.RestrictNAT,  // 1
+    RestrictPortNAT = settings.RestrictNAT,  // 2
+    SymmetricNAT = settings.SymmetricNAT;  // 3
 var NATTYPE = [FullCone, RestrictNAT, RestrictPortNAT, SymmetricNAT];
-var argv = process.argv.slice(1);// 去掉'node'就和py相同了
-
-function check_input() {
-	if (argv.length != 5 && argv.length != 4) {
-		console.log("usage: node client.js <host> <port> <pool>");
-		process.exit(1);
-	} else if (argv.length == 5) {
-		var test_nat_type = parseInt(argv[4]);  // test_nat_type is int
-        if ([0, 1, 2, 3].indexOf(test_nat_type) == -1) {
-            console.log("test nat type should be [0,1,2,3]")
-        }
-	} else {
-		var test_nat_type = null;
-	}
-	return test_nat_type;
-}
 
 
-function Client() {
-	var master_ip = argv[1] == 'localhost' ? '127.0.0.1' : argv[1];
-	var master = {ip: master_ip, port: parseInt(argv[2])};
-	var pool = argv[3];
+
+function Client(nat_type, pool) {
+	var master_ip = settings.nat_server_ip;
+	var master = {ip: master_ip, port: settings.nat_server_port};
+	var pool = pool;
 	var sockfd = null, target = null;
 	var peer_nat_type = null;
-    var nat_type = null;
+    var nat_type = nat_type;
 	
-	this.main = function(test_nat_type) { // main是唯一public的函数,由它调用各种private
-        test_nat_type = typeof test_nat_type != 'undefined' ? test_nat_type : null;
-        if (test_nat_type === null) {
-            var python = require('child_process').spawn(
-                settings.stun_exe
-            );
-            python.stdout.on('data', function(data) {
-                nat_type = data.toString().split(':')[1].trim();
-                var nat_type_id = NATTYPE.indexOf(nat_type);
-                console.log(nat_type);
-                if (nat_type_id != -1)
-                    request_for_connection(nat_type_id, chat);
-            });
-        }
-        else { // 假装正在测试某种类型的NAT, 在check_input中已被限定为0-3
-            request_for_connection(test_nat_type, chat);
-            nat_type = NATTYPE[test_nat_type];
-        }
-	};
 
-	var request_for_connection = function (nat_type_id, chat) {
+	this.request_for_connection = function (nat_type_id) {
 		sockfd = dgram.createSocket("udp4");
 		var msg = new Buffer(pool + ' ' + nat_type_id);  // msg是Buffer
         sockfd.send(msg, 0, msg.length, master.port, master.ip);
@@ -74,10 +40,7 @@ function Client() {
                 console.log("connected to %s:%s, its NAT type is %s",
                             result[0], result[1], peer_nat_type);
                 sockfd.removeListener('message', messageforconnect);
-                if(typeof chat == 'function')
-                    chat(nat_type);
-                else
-                    console.log("callback is not function!");
+                chat(nat_type);
             } else {
                 console.log("Got invalid response: " + msg);
                 process.exit(2);
@@ -155,12 +118,6 @@ function Client() {
 }
 
 
-var test_nat_type = check_input();
-process.stdin.setEncoding('utf8');
-process.stdin.resume();
-var c = new Client();
-if (test_nat_type != undefined)
-    c.main(test_nat_type);
-else
-    c.main();
+
+exports.Client = Client;
 

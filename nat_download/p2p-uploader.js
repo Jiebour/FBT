@@ -47,6 +47,8 @@ function main(socket){
     // 直接使用之前punch时的socket, 废除之前punching用的处理, 添加新处理
     socket.removeAllListeners("message");
     addEventListener(server1);
+    console.log("uploader listening on " + socket.address().port);
+    console.log("prepare to upload");
 }
 
 

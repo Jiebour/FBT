@@ -157,11 +157,11 @@ function check(socket) {
     }
 }
 
-(function main(){
-    var socket = dgram.createSocket('udp4');
-    socket.bind(9999);
-// 这个值目前双方都知道, 实际应该是通过STUN获知
+(function main(socket){
+    socket.removeAllListeners("message");
     addEventListener(socket, source_file, download_file);
+    console.log("downloader listening on " + socket.address().port);
+    console.log("prepare to download");
     console.time("downloading");
 
     for (var i=0; i<totalblocks; i++) {
