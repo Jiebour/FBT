@@ -4,8 +4,7 @@ var dgram = require('dgram'),
     BSON = require('buffalo'),
     utils = require('./utils'),
     settings = require('./settings'),
-    xxhash = require('xxhash'),
-    EventEmitter = require('events').EventEmitter;
+    xxhash = require('xxhash');
 
 
 var BLOCK_SIZE = settings.BLOCK_SIZE,
@@ -94,7 +93,6 @@ function verify_part(socket, partID) {
                 if (!download_record[i]) {
                     redownloadcount++;
                     global.congestion++;
-//                    console.log("redownload block: ", i);
                     downloadFile(socket, settings.server_ip, 8800 + utils.rand3(), i);
                 }
             }
@@ -126,7 +124,7 @@ function verify_part(socket, partID) {
                             }
                         });
                         console.time("checking");
-                        check(socket);
+                        check(socket);  // 开始校验
                     }
                 }
             }

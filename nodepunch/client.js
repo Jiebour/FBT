@@ -43,7 +43,7 @@ function Client() {
             python.stdout.on('data', function(data) {
                 nat_type = data.toString().split(':')[1].trim();
                 var nat_type_id = NATTYPE.indexOf(nat_type);
-                print(nat_type)
+                print(nat_type);
                 if (nat_type_id != -1)
                     request_for_connection(nat_type_id, chat);
             });
