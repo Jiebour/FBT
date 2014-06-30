@@ -1,0 +1,17 @@
+{
+  "name": "friendbt",
+  "description": "node p2p file share",
+  "keywords": [
+    "file",
+    "share",
+    "p2p"
+  ],
+  "author": "bonelee <lizhihua2000@gmail.com>",
+  "dependencies": {
+      "buffalo": "0.1.3",
+      "random-access-file": "0.3.1",
+      "xxhash": "*",
+      "crc": "*"
+  }
+}
+

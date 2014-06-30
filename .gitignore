@@ -6,3 +6,4 @@ file-download/node_modules/
 file-download/*local*
 nodehash/files/484M
 file-download/test.mp4
+nat_download/node_modules/*
