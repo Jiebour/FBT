@@ -7,11 +7,9 @@ var dgram = require("dgram"),
 var BLOCK_SIZE = settings.BLOCK_SIZE,
     source_file = settings.source_file;
 
-var connectionCnt = 0;
 
 function addEventListener(socket) {
     var toSend = new Buffer(0);
-    connectionCnt++;
     socket.on('message', function (data, rinfo){
 //        console.log("data received:" + data.toString());
 
@@ -48,7 +46,6 @@ function addEventListener(socket) {
         }
     });
     socket.on('close', function(){
-        connectionCnt--;
         console.log('close....');
     });
     socket.on('error', function(){

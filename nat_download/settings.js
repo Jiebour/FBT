@@ -36,6 +36,11 @@ switch (process.platform) {
     }
 };
 
+/*
+目前仅测试一对一的传输, 实际中得用uid_list中的每个值连一遍
+实际中, uid_list应该是在之前就已经得到的, 这里假定已知
+ */
+var uid_list = [1];
 
 exports.source_file = filepath1;
 exports.download_file = filepath2;
