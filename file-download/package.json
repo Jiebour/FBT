@@ -6,7 +6,7 @@
     "share",
     "p2p"
   ],
-  "author": "bonelee <lizhihua2000@gmail.com>",
+  "author": "laike9m <laike9m@gmail.com>",
   "dependencies": {
       "buffalo": "0.1.3",
       "random-access-file": "0.3.1",
