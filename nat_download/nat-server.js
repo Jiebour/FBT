@@ -1,6 +1,5 @@
 var dgram = require("dgram");
 var utils = require("./utils.js");
-var print = utils.print;
 
 var FullCone = "Full Cone";  // 0
 var RestrictNAT = "Restrict NAT";  // 1
@@ -11,7 +10,7 @@ var argv = process.argv.slice(1);// 去掉'node'就和py相同了
 
 function check_input() {
     if (argv.length != 2) {
-        print("usage: ndoe server.js port");
+        console.log("usage: ndoe server.js port");
         exit(1);
     }
     else {
@@ -20,7 +19,7 @@ function check_input() {
             return String(n) === str && n > 0;
         }
         if (!isNormalInteger(argv[1]))
-            print("port should be a positive integer!");
+            console.log("port should be a positive integer!");
         else
             main(parseInt(argv[1]));
     }
@@ -48,7 +47,7 @@ function addrIndexOf(arr, o) {
 function main(port) {
     var sock = dgram.createSocket('udp4');
     sock.bind(("", port));
-    print("listening on *:%d (udp)", port);
+    console.log("listening on *:%d (udp)", port);
     var poolqueue = {};
     var received_addr = new Array();
     var pool;
@@ -63,28 +62,28 @@ function main(port) {
          */
         if (addrIndexOf(received_addr, client_addr) == -1) { //第一次接收
             received_addr.push(client_addr);  // 把這個addr加入已知addr列表
-            print("connection from %s:%d", rinfo.address, rinfo.port);
+            console.log("connection from %s:%d", rinfo.address, rinfo.port);
             pool = message.trim().split(' ')[0];
             nat_type_id = message.trim().split(' ')[1];
             respond = new Buffer("ok " + pool);
             sock.send(respond, 0, respond.length, rinfo.port, rinfo.address);
-            print("pool=%s, nat_type=%s, ok sent to client", pool, NATTYPE[parseInt(nat_type_id)]);
+            console.log("pool=%s, nat_type=%s, ok sent to client", pool, NATTYPE[parseInt(nat_type_id)]);
         } else if (message == "ok") {
             //接收到客戶端的"ok",必須是經過了第一次的,即client_addr in received_addr
-            print("request received for pool:" + pool);
+            console.log("request received for pool:" + pool);
             if (pool in poolqueue) {
                 var a = poolqueue[pool].addr;
                 var b = client_addr;
                 var nat_type_id_a = poolqueue[pool].nat_type_id;
                 var nat_type_id_b = nat_type_id;
                 respond = utils.addr2bytes(a, nat_type_id_a);
-                print(respond.length);
-                print(b);
+                console.log(respond.length);
+                console.log(b);
                 sock.send(respond, 0, respond.length, b.port, b.ip);
                 respond = utils.addr2bytes(b, nat_type_id_b);
-                print(a);
+                console.log(a);
                 sock.send(respond, 0, respond.length, a.port, a.ip);
-                print("linked" + pool);
+                console.log("linked" + pool);
                 delete poolqueue[pool];
             }
             else {

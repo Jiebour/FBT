@@ -130,7 +130,6 @@ function bytes2addr(bytes) {
 
 exports.bytes2addr = bytes2addr;
 exports.addr2bytes = addr2bytes;
-exports.print = console.log;
 exports.hasFileContent = hasFileContent;
 exports.hasFileIndex = hasFileIndex;
 exports.rand3 = rand3;

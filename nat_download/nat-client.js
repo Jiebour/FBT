@@ -1,6 +1,6 @@
 var dgram = require("dgram");
 var utils = require("./utils.js");
-var print = utils.print;
+var settings = require("./settings");
 
 var FullCone = "Full Cone";  // 0
 var RestrictNAT = "Restrict NAT";  // 1
@@ -11,12 +11,12 @@ var argv = process.argv.slice(1);// 去掉'node'就和py相同了
 
 function check_input() {
 	if (argv.length != 5 && argv.length != 4) {
-		print("usage: node client.js <host> <port> <pool>");
+		console.log("usage: node client.js <host> <port> <pool>");
 		process.exit(1);
 	} else if (argv.length == 5) {
 		var test_nat_type = parseInt(argv[4]);  // test_nat_type is int
         if ([0, 1, 2, 3].indexOf(test_nat_type) == -1) {
-            print("test nat type should be [0,1,2,3]")
+            console.log("test nat type should be [0,1,2,3]")
         }
 	} else {
 		var test_nat_type = null;
@@ -37,13 +37,12 @@ function Client() {
         test_nat_type = typeof test_nat_type != 'undefined' ? test_nat_type : null;
         if (test_nat_type === null) {
             var python = require('child_process').spawn(
-                'python27',
-                ["stun.py"]
+                settings.stun_exe
             );
             python.stdout.on('data', function(data) {
                 nat_type = data.toString().split(':')[1].trim();
                 var nat_type_id = NATTYPE.indexOf(nat_type);
-                print(nat_type);
+                console.log(nat_type);
                 if (nat_type_id != -1)
                     request_for_connection(nat_type_id, chat);
             });
@@ -64,23 +63,23 @@ function Client() {
         var messageforconnect = function(msg, rinfo) {
             /*本来是用switch, 但是不知道为什么就是有bug,只能转用多个条件判断*/
             message = msg.toString();
-            print(message);
+            console.log(message);
             if (message == "ok " + pool) {
                 sockfd.send(sendmsg, 0, 2, master.port, master.ip);
-                print("request sent, waiting for partner in pool %s...", pool);
+                console.log("request sent, waiting for partner in pool %s...", pool);
             } else if (msg.length == 7) {
                 var result = utils.bytes2addr(msg);
                 target = {ip: result[0], port: result[1]};
                 peer_nat_type = NATTYPE[result[2]];
-                print("connected to %s:%s, its NAT type is %s",
+                console.log("connected to %s:%s, its NAT type is %s",
                             result[0], result[1], peer_nat_type);
                 sockfd.removeListener('message', messageforconnect);
                 if(typeof chat == 'function')
                     chat(nat_type);
                 else
-                    print("callback is not function!");
+                    console.log("callback is not function!");
             } else {
-                print("Got invalid response: " + msg);
+                console.log("Got invalid response: " + msg);
                 process.exit(2);
             }
         };
@@ -89,18 +88,18 @@ function Client() {
 
     var chat = function(nat_type){
         if (nat_type == SymmetricNAT || peer_nat_type == SymmetricNAT) {
-            print("Symmetric chat mode");
+            console.log("Symmetric chat mode");
             chat_symmetric();
         }
         else if (nat_type == FullCone) {
-            print("FullCone chat mode");
+            console.log("FullCone chat mode");
             chat_fullcone();
         }
         else if (nat_type == RestrictNAT || nat_type == RestrictPortNAT) {
-            print("Restrict chat mode");
+            console.log("Restrict chat mode");
             chat_restrict();
         } else {
-            print("NAT type wrong!");
+            console.log("NAT type wrong!");
         }
     };
 
@@ -125,7 +124,7 @@ function Client() {
         function send(count) {
             var text = new Buffer("punching...\n");
             sockfd.send(text, 0, text.length, target.port, target.ip);
-            print("UDP punching package %d sent", count);
+            console.log("UDP punching package %d sent", count);
             setTimeout(function(){
                 if (periodic_running)
                     send(count+1);
@@ -134,7 +133,7 @@ function Client() {
         send(0);
         sockfd.on('message', function(msg, rinfo) {
             if (periodic_running) {
-                print("periodic_send is alive");
+                console.log("periodic_send is alive");
                 periodic_running = false;
                 process.stdin.on('data', function(text) {
                     var text = new Buffer(text);
