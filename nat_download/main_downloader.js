@@ -11,7 +11,6 @@ function get_uid_list() {
    return [1];
 }
 
-uid_list = get_uid_list();
 
 
 function check_input() {
@@ -30,16 +29,20 @@ function check_input() {
     return test_nat_type;
 }
 
+
+uid_list = get_uid_list();
 var test_nat_type = check_input();
 for (var i=0; i<uid_list.length; i++)
     main(test_nat_type, uid_list[i]);
 
-
 function main(test_nat_type, pool) {
+
+    var socket_amount = uid_list.length;
+    global.traverse_complete_count = 0
+
+    // NAT type detection
     if (test_nat_type === null) {
-        var python = require('child_process').spawn(
-            settings.stun_exe
-        );
+        var python = require('child_process').spawn(settings.stun_exe);
         python.stdout.on('data', function(data) {
             var nat_type = data.toString().split(':')[1].trim();
             var nat_type_id = NATTYPE.indexOf(nat_type);
@@ -51,11 +54,31 @@ function main(test_nat_type, pool) {
             else {
                 // 如果不是这四种NAT类型, 如何处理?
             }
-
         });
     }
-    else { // 假装正在测试某种类型的NAT, 在check_input中已被限定为0-3
+    else { // test mode
         var client = new nat_client.Client(NATTYPE[test_nat_type], pool);
         client.request_for_connection(test_nat_type);
     }
+    var times = 0
+    var last_traverse_complete_count = 0;
+    var interval_obj = setInterval(function(){
+        if (times >= 3 || global.traverse_complete_count === socket_amount) {
+            clearInterval(interval_obj);
+            // 连续三次穿透的socket未增加或者已经全部穿透, 开始数据传输
+            fs.open(settings.download_file, "a+", function(err, fd2) {
+                global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
+            });
+
+        }
+        else if (global.traverse_complete_count > last_traverse_complete_count) {
+            last_traverse_complete_count = global.traverse_complete_count;
+            times = 0;
+        }
+        else {
+            times++;
+        }
+    }, 500);
 };
+
+

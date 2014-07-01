@@ -58,7 +58,6 @@ function addEventListener(socket, remoteFile, localFile) {
 function downloadFile(socket, IP, PORT, blockID) {
     var toSend = BSON.serialize({file: source_file, index: blockID});
     socket.send(toSend, 0, toSend.length, PORT, IP);
-    //TODO the real file to transfer
 }
 
 function download_part(socket, partID) { // 一次只下载一个part, 校验完成之后下载下一个
@@ -157,7 +156,7 @@ function check(socket) {
     }
 }
 
-(function main(socket){
+function socket_download(socket){
     socket.removeAllListeners("message");
     addEventListener(socket, source_file, download_file);
     console.log("downloader listening on " + socket.address().port);
@@ -168,13 +167,8 @@ function check(socket) {
         tobe_check[i] = i;
     }
 
-    fs.open(settings.source_file, "r", function (err, fd1) {
-        fs.open(settings.download_file, "a+", function(err, fd2) {
-            global.fd1 = fd1;  // 以防之后fd消失, 实际代码中是没有fd1的, 单机测试时需要
-            global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
-        });
-    });
 
     verify_part(socket, 0);
-})();
+}
 
+exports.socket_download = socket_download;
