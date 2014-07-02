@@ -5,7 +5,6 @@ var filepath1 = 'test.mp4',
     filesize = 126401476,// filepath1, 2, filesize获取的位置都得改
     BLOCK_SIZE = 4096,  // bytes
     BLOCK_IN_PART = 1024,
-    server_ip = "127.0.0.1",
     nat_server_ip = "205.147.105.205",
     nat_server_port = 1111;
 

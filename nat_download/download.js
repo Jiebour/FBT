@@ -55,34 +55,34 @@ function addEventListener(socket, remoteFile, localFile) {
 }
 
 
-function downloadFile(socket, IP, PORT, blockID) {
+function download_block(socket, blockID, ip, port) {
     var toSend = BSON.serialize({file: source_file, index: blockID});
-    socket.send(toSend, 0, toSend.length, PORT, IP);
+    socket.send(toSend, 0, toSend.length, port, ip);
 }
 
-function download_part(socket, partID) { // 一次只下载一个part, 校验完成之后下载下一个
+function download_part(socket, partID, ip, port) { // 一次只下载一个part, 校验完成之后下载下一个
     var i;
     if (BLOCK_IN_PART*(partID + 1) > totalblocks) {
         for(i=BLOCK_IN_PART*partID; i<totalblocks; ++i){
-            downloadFile(socket, settings.server_ip, 8800+utils.rand3(), i);
+            download_block(socket, i ,ip, port);
         }
     }
     else {
         for(i=BLOCK_IN_PART*partID; i<BLOCK_IN_PART*(partID+1); ++i){
-            downloadFile(socket, settings.server_ip, 8800+utils.rand3(), i);
+            download_block(socket, i ,ip, port);
         }
     }
 }
 
-function verify_part(socket, partID) {
-    if (partID >= totalparts) return 1; // 处理完所有part, 返回1
+function verify_part(socket, index, part_queue, ip, port) {
+    if (index >= part_queue.length) return 1; // 处理完所有part, 返回1
 
-    var part_first_block = BLOCK_IN_PART * partID,
-        part_last_block = (BLOCK_IN_PART*(partID+1)>totalblocks) ?
-                            totalblocks : BLOCK_IN_PART*(partID+1); // lastblock实际上是last+1
+    var part_first_block = BLOCK_IN_PART * part_queue[index],
+        part_last_block = (BLOCK_IN_PART*(part_queue[index]+1)>totalblocks) ?
+                            totalblocks : BLOCK_IN_PART*(part_queue[index]+1); // lastblock实际上是last+1
 
     global.congestion = global.last_congestion = BLOCK_IN_PART;
-    download_part(socket, partID);
+    download_part(socket, part_queue[index], ip, port);
     var interval_obj = setInterval(function(){
         // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
         if (global.congestion <= global.last_congestion && utils.arrayEqual(download_record, last_download_record)){
@@ -92,7 +92,7 @@ function verify_part(socket, partID) {
                 if (!download_record[i]) {
                     redownloadcount++;
                     global.congestion++;
-                    downloadFile(socket, settings.server_ip, 8800 + utils.rand3(), i);
+                    download_block(socket, i ,ip, port);
                 }
             }
             global.last_congestion = global.congestion; // 原来的congestion+redownloadcount
@@ -100,11 +100,12 @@ function verify_part(socket, partID) {
                 console.log("redownload complete");
                 if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                     clearInterval(interval_obj);
-                    var return_value = verify_part(socket, partID + 1); // 一般是undefined, 结束时是1
+                    // return_value一般是undefined, 结束时是1
+                    var return_value = verify_part(socket, index + 1, part_queue, ip, port);
                     if (return_value) {
                         console.timeEnd("downloading");
                         console.log("download complete! start checking...");
-                        // 移除handler中不需要的部分
+                        // 移除handler中不需要的部分, 为后面校验+重传做准备
                         socket.removeAllListeners("message");
                         var file = randomAccessFile(download_file);
                         socket.on('message', function(data, rinfo) {
@@ -135,7 +136,7 @@ function verify_part(socket, partID) {
 }
 
 
-function check(socket) {
+function check(socket, ip, port) {
     /* 下载完之后对所有block进行校验 */
     if (tobe_check.length === 0) { // 所有block都通过校验
         console.log("checking complete");
@@ -149,14 +150,14 @@ function check(socket) {
     else {
         utils.diff_block(tobe_check, function(){
             tobe_check.forEach(function(blockID){
-                downloadFile(socket, settings.server_ip, 8800+utils.rand3(), blockID);
+                download_block(socket, blockID, ip, port);
             });
-            setTimeout(check(socket), 300);
+            setTimeout(check(socket, ip, port), 300);
         });
     }
 }
 
-function socket_download(socket){
+function socket_download(socket, ip, port){
     socket.removeAllListeners("message");
     addEventListener(socket, source_file, download_file);
     console.log("downloader listening on " + socket.address().port);
@@ -168,7 +169,7 @@ function socket_download(socket){
     }
 
 
-    verify_part(socket, 0);
+    verify_part(socket, 0, socket.part_queue, ip, port);
 }
 
 exports.socket_download = socket_download;

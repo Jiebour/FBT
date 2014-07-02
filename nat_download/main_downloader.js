@@ -1,5 +1,7 @@
 var nat_client = require("./nat-client.js"),
-    settings = require("./settings.js");
+    settings = require("./settings.js"),
+    download = require("./download.js"),
+    nat_client = require("./nat-client.js");
 var NATTYPE = settings.NATTYPE;
 
 
@@ -112,6 +114,12 @@ function check_input() {
         for (var j=0; j<parts_less; j++)
             available_clients[i].part_queue.push(clients_download_more_amount+i*parts_less+j);
     }
+
+    //****************************** Download START **********************************
+    available_clients.forEach(function(client) {
+        download.socket_download(client.socket, client.target.ip, client.target.port);
+    })
+
 })();
 
 function create_download_client(test_nat_type, pool) {

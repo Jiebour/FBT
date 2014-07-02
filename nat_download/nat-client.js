@@ -67,7 +67,7 @@ function Client(nat_type, pool) {
         else if (nat_type == FullCone) {
             if (peer_nat_type == FullCone) { // 两边都是fullcone, socket直接可用
                 is_available = true;
-                global.traverse_complete_count++; // socket穿透完成
+                global.traverse_complete_count++; // socket穿透完成, 如果是uploader, 那这个值达到1就OK了
                 console.log("FullCone mode");
             }
             else { // 对面client是受限或者sym, 这时要接收punching包
@@ -81,19 +81,17 @@ function Client(nat_type, pool) {
     };
 
     var punch_receive = function() {
-        process.stdin.on('data', function(text) {
-            var text = new Buffer(text);  //奇怪的是单独测试时不需要转成buffer?
-            socket.send(text, 0, text.length, target.port, target.ip);
-        });
         socket.on('message', function(msg, rinfo) {
             var msg = msg.toString('utf8');
             process.stdout.write("peer: " + msg);
-            if (msg == 'punching...\n') {
+            if (msg === 'punching...\n') {
                 var text = new Buffer("end punching\n");
                 // 收到punching包, 得回给rinfo.port, 因为若对方是sym, 那rinfo.port!=target.port
                 socket.send(text, 0, text.length, rinfo.port, target.ip);
                 target.port = rinfo.port;
-                global.traverse_complete_count++; // socket穿透完成
+            }
+            if (msg === "done\n") {
+                global.traverse_complete_count++; // 三次握手, socket穿透完成
                 is_available = true;
             }
         });
@@ -102,7 +100,7 @@ function Client(nat_type, pool) {
     var punch_send = function() {
         var periodic_running = true;
         function send(count) {
-            var text = new Buffer("punching...\n");
+            var text = Buffer("punching...\n");
             socket.send(text, 0, text.length, target.port, target.ip);
             console.log("UDP punching package %d sent", count);
             setTimeout(function(){
@@ -113,19 +111,19 @@ function Client(nat_type, pool) {
         send(0);
         socket.on('message', function(msg, rinfo) {
             if (periodic_running) {
-                console.log("periodic_send is alive");
+                // 这里收到的应该是"end punching\n"
+                // 发出了的包有回应, 说明穿透成功
+                console.log("punching succeed");
                 periodic_running = false;
-                global.traverse_complete_count++; // socket穿透完成
+                var text = Buffer("done\n");
+                socket.send(text, 0, text.length, rinfo.port, target.ip);
+                global.traverse_complete_count++;
                 is_available = true;
-                process.stdin.on('data', function(text) {
-                    var text = new Buffer(text);
-                    socket.send(text, 0, text.length, target.port, target.ip);
-                });
             }
             var msg = msg.toString('utf8');
             process.stdout.write("peer: " + msg);
             if (msg == 'punching...\n') {
-                var text = new Buffer("end punching\n");
+                var text = Buffer("end punching\n");
                 socket.send(text, 0, text.length, rinfo.port, target.ip);
                 target.port = rinfo.port;
             }
