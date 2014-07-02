@@ -116,6 +116,12 @@ function check_input() {
     }
 
     //****************************** Download START **********************************
+    global.download_record = [];// 记录下载过的块, download_record[blockID]=1
+    global.last_download_record = [];
+    global.tobe_check = [];// 记录未校验过的块, 校验通过则删除这个blockID
+    for (var i=0; i<totalblocks; i++) {
+        global.tobe_check[i] = i;
+    }
     available_clients.forEach(function(client) {
         download.socket_download(client.socket, client.target.ip, client.target.port);
     })

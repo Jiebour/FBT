@@ -18,12 +18,12 @@ var totalblocks = parseInt((filesize+BLOCK_SIZE-1)/BLOCK_SIZE);
 var partsize = BLOCK_IN_PART * BLOCK_SIZE;
 var totalparts = parseInt((filesize+partsize-1)/partsize);
 
-var download_record = [],// 记录下载过的块, download_record[blockID]=1
-    last_download_record = [],
-    tobe_check = [];  // 记录未校验过的块, 校验通过则删除这个blockID
+var download_record = global.download_record,
+    last_download_record = global.last_download_record,
+    tobe_check = global.tobe_check;
 
 
-function addEventListener(socket, remoteFile, localFile) {
+function addEventListener(socket, remoteFile, localFile, congestion) {
     var file = randomAccessFile(localFile);
     socket.on('message', function(data, rinfo) {
         var jsonData = BSON.parse(data);
@@ -35,7 +35,7 @@ function addEventListener(socket, remoteFile, localFile) {
                 if(err)
                     console.log("blockID download err:" + blockID);
                 else{
-                    global.congestion--;
+                    congestion.value--;
 //                        console.log("blockID download OK:" + blockID);
                 }
             });
@@ -74,34 +74,35 @@ function download_part(socket, partID, ip, port) { // 一次只下载一个part,
     }
 }
 
-function verify_part(socket, index, part_queue, ip, port) {
+function verify_part(socket, index, part_queue, ip, port, congestion, last_congestion) {
     if (index >= part_queue.length) return 1; // 处理完所有part, 返回1
 
     var part_first_block = BLOCK_IN_PART * part_queue[index],
         part_last_block = (BLOCK_IN_PART*(part_queue[index]+1)>totalblocks) ?
                             totalblocks : BLOCK_IN_PART*(part_queue[index]+1); // lastblock实际上是last+1
 
-    global.congestion = global.last_congestion = BLOCK_IN_PART;
     download_part(socket, part_queue[index], ip, port);
     var interval_obj = setInterval(function(){
-        // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
-        if (global.congestion <= global.last_congestion && utils.arrayEqual(download_record, last_download_record)){
+        // congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
+        if (congestion.value <= last_congestion.value &&
+        utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
             for (var i = part_first_block; i< part_last_block; i++) {
                 if (!download_record[i]) {
                     redownloadcount++;
-                    global.congestion++;
+                    congestion.value++;
                     download_block(socket, i ,ip, port);
                 }
             }
-            global.last_congestion = global.congestion; // 原来的congestion+redownloadcount
+            last_congestion.value = congestion.value; // 原来的congestion+redownloadcount
             if (redownloadcount == 0){
                 console.log("redownload complete");
                 if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                     clearInterval(interval_obj);
                     // return_value一般是undefined, 结束时是1
-                    var return_value = verify_part(socket, index + 1, part_queue, ip, port);
+                    var return_value = verify_part(socket, index + 1, part_queue,
+                                        ip, port, congestion, last_congestion);
                     if (return_value) {
                         console.timeEnd("downloading");
                         console.log("download complete! start checking...");
@@ -124,7 +125,7 @@ function verify_part(socket, index, part_queue, ip, port) {
                             }
                         });
                         console.time("checking");
-                        check(socket);  // 开始校验
+                        check(socket, ip, port);  // 开始校验
                     }
                 }
             }
@@ -159,17 +160,14 @@ function check(socket, ip, port) {
 
 function socket_download(socket, ip, port){
     socket.removeAllListeners("message");
-    addEventListener(socket, source_file, download_file);
     console.log("downloader listening on " + socket.address().port);
     console.log("prepare to download");
     console.time("downloading");
 
-    for (var i=0; i<totalblocks; i++) {
-        tobe_check[i] = i;
-    }
-
-
-    verify_part(socket, 0, socket.part_queue, ip, port);
+    var congestion = {value: BLOCK_IN_PART};
+    var last_congestion = {value: BLOCK_IN_PART};
+    addEventListener(socket, source_file, download_file, congestion);
+    verify_part(socket, 0, socket.part_queue, ip, port, congestion, last_congestion);
 }
 
 exports.socket_download = socket_download;
