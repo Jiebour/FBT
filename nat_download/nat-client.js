@@ -17,7 +17,7 @@ function Client(nat_type, pool) {
     var target = null; // 对面client
 	var peer_nat_type = null;
     var nat_type = nat_type;
-    var is_available; // 这个socket是否可用
+    var is_available = false; // 这个socket是否可用
 
 	this.request_for_connection = function (nat_type_id) {
 		socket = dgram.createSocket("udp4");
@@ -40,7 +40,7 @@ function Client(nat_type, pool) {
                 console.log("connected to %s:%s, its NAT type is %s",
                             result[0], result[1], peer_nat_type);
                 socket.removeListener('message', messageforconnect);
-                chat(nat_type);
+                punch(nat_type);
             } else {
                 console.log("pool %d Got invalid response: ", pool, msg);
                 socket.close(); // 这个socket废了
@@ -49,7 +49,7 @@ function Client(nat_type, pool) {
 		socket.on('message', messageforconnect);
 	};
 
-    var chat = function(nat_type){
+    var punch = function(nat_type){
         if ((nat_type == SymmetricNAT || peer_nat_type == SymmetricNAT) ||
             (nat_type == SymmetricNAT || peer_nat_type == RestrictPortNAT) ||
             (nat_type == RestrictPortNAT || peer_nat_type == SymmetricNAT))
@@ -58,27 +58,29 @@ function Client(nat_type, pool) {
             无法处理的情况: 1. 都是sym; 2. 一边是sym,一边是端口受限
             这种情况就不下载了
              */
-            is_available = false;
             console.log("Can't download from socket " + pool);
         }
         else if (nat_type == SymmetricNAT || nat_type == RestrictNAT || nat_type == RestrictPortNAT) {
-            // 得由symmtric这边发punching包
-            is_available = true;
-            console.log("Punching mode");
-            chat_restrict();
+            console.log("Punching mode"); // 由这边发punching包
+            punch_send();
         }
         else if (nat_type == FullCone) {
-            is_available = true;
-            console.log("FullCone mode");
-            chat_fullcone();
+            if (peer_nat_type == FullCone) { // 两边都是fullcone, socket直接可用
+                is_available = true;
+                global.traverse_complete_count++; // socket穿透完成
+                console.log("FullCone mode");
+            }
+            else { // 对面client是受限或者sym, 这时要接收punching包
+                console.log("Receive Punching mode");
+                punch_receive();
+            }
         }
         else {
-            is_available = false;
             console.log("NAT type wrong!");
         }
     };
 
-    var chat_fullcone = function() {
+    var punch_receive = function() {
         process.stdin.on('data', function(text) {
             var text = new Buffer(text);  //奇怪的是单独测试时不需要转成buffer?
             socket.send(text, 0, text.length, target.port, target.ip);
@@ -91,12 +93,13 @@ function Client(nat_type, pool) {
                 // 收到punching包, 得回给rinfo.port, 因为若对方是sym, 那rinfo.port!=target.port
                 socket.send(text, 0, text.length, rinfo.port, target.ip);
                 target.port = rinfo.port;
-                global.traverse_complete_count++; // 这个socket穿透完成
+                global.traverse_complete_count++; // socket穿透完成
+                is_available = true;
             }
         });
     };
 
-    var chat_restrict = function() {
+    var punch_send = function() {
         var periodic_running = true;
         function send(count) {
             var text = new Buffer("punching...\n");
@@ -112,7 +115,8 @@ function Client(nat_type, pool) {
             if (periodic_running) {
                 console.log("periodic_send is alive");
                 periodic_running = false;
-                global.traverse_complete_count++; // 这个socket穿透完成
+                global.traverse_complete_count++; // socket穿透完成
+                is_available = true;
                 process.stdin.on('data', function(text) {
                     var text = new Buffer(text);
                     socket.send(text, 0, text.length, target.port, target.ip);

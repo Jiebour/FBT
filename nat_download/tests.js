@@ -28,3 +28,13 @@ for (var i=clients_download_more_amount; i < available_clients.length; i++) {
 }
 
 console.log(available_clients);
+function test() {
+    var k = 1;
+    sub2();
+}
+
+function sub2() {
+    console.log(k);
+}
+
+test(); // 输出k is not defined

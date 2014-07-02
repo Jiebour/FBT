@@ -26,6 +26,7 @@ var download_record = [],// 记录下载过的块, download_record[blockID]=1
  */
 function get_uid_list() {
    return [1];
+    // TODO: 真正的get_uid_list
 }
 
 
@@ -51,44 +52,69 @@ function check_input() {
     fs.open(settings.download_file, "a+", function(err, fd2) {
         global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
     });
-    var available_clients = [];
+
+    //****************************** NAT traverse START ********************************
+    var socket_amount = uid_list.length;
+    global.available_clients = [];
+    global.traverse_complete_count = 0 // 完成穿透的socket计数, 和is_available同时更新
     for (var i = 0; i < uid_list.length; i++) {
-        var client = create_download_client(test_nat_type, uid_list[i]);
-        if (client.is_available) {
-            client.part_queue = [];
-            available_clients.push(client);
+        create_download_client(test_nat_type, uid_list[i]);
+    }
+    var times = 0
+    var last_traverse_complete_count = 0;
+    var interval_obj = setInterval(function(){
+        if (times >= 3 || global.traverse_complete_count === socket_amount) {
+            clearInterval(interval_obj);
+            // 连续三次穿透的socket未增加或者已经全部穿透, 认为NAT穿透步骤结束
         }
-        /*
-        每个part_queue包含的parts数量有两种, more/less, more=less or less+1
-        提前分配好每个client.part_queue的part数量, 然后从第一个part开始分配
-        这样可以保证每一个part_queue里的partID都是连续的
-         */
-        var parts_less = parseInt(totalparts/available_clients.length);
-        var parts_more;
-        var clients_download_more_amount; // 下多parts的client数量
-        if (totalparts === parts_less * available_clients.length) {
-            parts_more = parts_less; // 正好分完, totalparts整除length
-            clients_download_more_amount = 0;
-        }else {
-            clients_download_more_amount = totalparts - parts_less * available_clients.length;
-            parts_more = parts_less + 1;
+        else if (global.traverse_complete_count > last_traverse_complete_count) {
+            last_traverse_complete_count = global.traverse_complete_count;
+            times = 0;
         }
-        // 对每个client的part_queue做初始化
-        for (var i=0; i < clients_download_more_amount; i++) {
-            for (var j=0; j<parts_more; j++)
-                available_clients[i].part_queue.push(i*parts_more+j);
+        else {
+            times++;
         }
-        for (var i=clients_download_more_amount; i < available_clients.length; i++) {
-            for (var j=0; j<parts_less; j++)
-                available_clients[i].part_queue.push(clients_download_more_amount+i*parts_less+j);
+    }, 500);
+
+    var available_clients = global.available_clients;
+    for (var i = available_clients.length-1; i >= 0; i--) {
+        if (available_clients[i].is_available) {
+            available_clients[i].part_queue = [];
         }
+        else {
+            available_clients.splice(i, 1); // 从clients列表中删除不可用的clients
+        }
+    }
+    //****************************** NAT traverse END ********************************
+
+    /*
+    把要下载的part分配给各个可用的socket
+    每个part_queue包含的parts数量有两种, more/less, more=less or less+1
+    提前分配好每个client.part_queue的part数量, 然后从第一个part开始分配
+    这样可以保证每一个part_queue里的partID都是连续的
+     */
+    var parts_less = parseInt(totalparts/available_clients.length);
+    var parts_more;
+    var clients_download_more_amount; // 下多parts的client数量
+    if (totalparts === parts_less * available_clients.length) {
+        parts_more = parts_less; // 正好分完, totalparts整除length
+        clients_download_more_amount = 0;
+    }else {
+        clients_download_more_amount = totalparts - parts_less * available_clients.length;
+        parts_more = parts_less + 1;
+    }
+    // 对每个client的part_queue做初始化
+    for (var i=0; i < clients_download_more_amount; i++) {
+        for (var j=0; j<parts_more; j++)
+            available_clients[i].part_queue.push(i*parts_more+j);
+    }
+    for (var i=clients_download_more_amount; i < available_clients.length; i++) {
+        for (var j=0; j<parts_less; j++)
+            available_clients[i].part_queue.push(clients_download_more_amount+i*parts_less+j);
     }
 })();
 
 function create_download_client(test_nat_type, pool) {
-
-    var socket_amount = uid_list.length;
-    global.traverse_complete_count = 0
 
     // NAT type detection
     if (test_nat_type === null) {
@@ -110,22 +136,7 @@ function create_download_client(test_nat_type, pool) {
         var client = new nat_client.Client(NATTYPE[test_nat_type], pool);
         client.request_for_connection(test_nat_type);
     }
-    var times = 0
-    var last_traverse_complete_count = 0;
-    var interval_obj = setInterval(function(){
-        if (times >= 3 || global.traverse_complete_count === socket_amount) {
-            clearInterval(interval_obj);
-            // 连续三次穿透的socket未增加或者已经全部穿透, 开始数据传输
-            return client;
-        }
-        else if (global.traverse_complete_count > last_traverse_complete_count) {
-            last_traverse_complete_count = global.traverse_complete_count;
-            times = 0;
-        }
-        else {
-            times++;
-        }
-    }, 500);
+    global.available_clients.push(client);
 };
 
 
