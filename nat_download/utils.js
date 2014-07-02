@@ -2,7 +2,7 @@ var fs = require('fs');
 var settings = require('./settings');
 var xxhash = require('xxhash');
 var crc = require('crc');
-
+var tobe_check = global.tobe_check;
 
 function hasFileContent(jsonData){
     return "content" in jsonData;

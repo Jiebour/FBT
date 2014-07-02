@@ -125,7 +125,10 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
                             }
                         });
                         console.time("checking");
-                        check(socket, ip, port);  // 开始校验
+                        global.complete_socket++;
+                        if (global.complete_socket == global.available_clients.length) {
+                            global.Status.emit("complete");
+                        }
                     }
                 }
             }
@@ -136,27 +139,6 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
     }, 200);
 }
 
-
-function check(socket, ip, port) {
-    /* 下载完之后对所有block进行校验 */
-    if (tobe_check.length === 0) { // 所有block都通过校验
-        console.log("checking complete");
-        console.timeEnd("checking");
-        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
-        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
-        setTimeout(function(){
-            process.exit(0);
-        }, unit_delay_time);
-    }
-    else {
-        utils.diff_block(tobe_check, function(){
-            tobe_check.forEach(function(blockID){
-                download_block(socket, blockID, ip, port);
-            });
-            setTimeout(check(socket, ip, port), 300);
-        });
-    }
-}
 
 function socket_download(socket, ip, port){
     socket.removeAllListeners("message");
@@ -171,3 +153,4 @@ function socket_download(socket, ip, port){
 }
 
 exports.socket_download = socket_download;
+exports.download_block = download_block;

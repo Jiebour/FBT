@@ -1,7 +1,8 @@
 var nat_client = require("./nat-client.js"),
     settings = require("./settings.js"),
     download = require("./download.js"),
-    nat_client = require("./nat-client.js");
+    nat_client = require("./nat-client.js"),
+    EventEmitter = require('events').EventEmitter;
 var NATTYPE = settings.NATTYPE;
 
 
@@ -15,10 +16,6 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
 var totalblocks = parseInt((filesize+BLOCK_SIZE-1)/BLOCK_SIZE);
 var partsize = BLOCK_IN_PART * BLOCK_SIZE;
 var totalparts = parseInt((filesize+partsize-1)/partsize);
-
-var download_record = [],// 记录下载过的块, download_record[blockID]=1
-    last_download_record = [],
-    tobe_check = [];  // 记录未校验过的块, 校验通过则删除这个blockID
 
 
 /*
@@ -119,14 +116,44 @@ function check_input() {
     global.download_record = [];// 记录下载过的块, download_record[blockID]=1
     global.last_download_record = [];
     global.tobe_check = [];// 记录未校验过的块, 校验通过则删除这个blockID
+    global.complete_socket = 0; // 下载完了自己的part_queue的socket计数
+    global.Status = EventEmitter(); // 是否下载完成
     for (var i=0; i<totalblocks; i++) {
         global.tobe_check[i] = i;
     }
+    global.Status.on("complete", function() {
+        check(available_clients, global.tobe_check);  // 下载完成, 开始校验
+    })
     available_clients.forEach(function(client) {
         download.socket_download(client.socket, client.target.ip, client.target.port);
     })
 
 })();
+
+
+function check(available_clients, tobe_check) {
+    /* 下载完之后对所有block进行校验 */
+    if (tobe_check.length === 0) { // 所有block都通过校验
+        console.log("checking complete");
+        console.timeEnd("checking");
+        console.log(get_sourcefile_hash()); // TODO
+        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+        setTimeout(function(){
+            process.exit(0);
+        }, unit_delay_time);
+    }
+    else {
+        utils.diff_block(tobe_check, function(){
+            tobe_check.forEach(function(blockID){
+                var random_client = available_clients[Math.floor(Math.random()*available_clients.length)];
+                // 校验未通过的块, 随机选择一个socket来下载
+                download.download_block(random_client.socket, blockID, ip, port);
+            });
+            setTimeout(check(available_clients, tobe_check), 300);
+        });
+    }
+}
+
 
 function create_download_client(test_nat_type, pool) {
 
