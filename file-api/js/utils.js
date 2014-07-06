@@ -34,6 +34,7 @@ var fs = require('fs')
 
 
 var mode = "run";
+var BLOCK_SIZE = settings.BLOCK_SIZE;
 
 if (mode == "test")
     var xxhash = require('xxhash');     // xxhash for node
@@ -52,21 +53,25 @@ function mock_store_res_hash(file, res_hash_collection) {
 function store_res_hash(filepath, seed, res_hash_collection, todo) {
     try {
         var readable = fs.createReadStream(filepath),
-            filesize = fs.statSync(filepath)['size'],
-            M = 1024 * 1024;
+            filesize = fs.statSync(filepath)['size'];
 
         var count=0, oneMdata, hash, hashlist = [], hashstring = '', final_hash;
-        var flag = (filesize - count * M > M) ? 0 : 1;  // 如果不满1M数据, 那么flag=1, 直接读取最后一块
+
+        // 不足一块数据, 那么flag=1, 直接读取最后一块
+        var flag = (filesize - count * BLOCK_SIZE > BLOCK_SIZE) ? 0 : 1;
 
         readable.on('readable', function () {
-            while (filesize - count * M > M) {
-                if (null != (oneMdata = readable.read(1024))) {  //异步读取
+            while (filesize - count * BLOCK_SIZE > BLOCK_SIZE) {
+                if (null !== (oneMdata = readable.read(BLOCK_SIZE))) {
                     count++;
                     hash = xxhash.hash(oneMdata, seed);
                     hashlist.push(hash);
                     hashstring += hash;
                 }
-                if (filesize - count * M <= M)
+                else
+                    break;
+
+                if (filesize - count * BLOCK_SIZE <= BLOCK_SIZE)
                     flag = 1;  // 退出循环前, 把flag置1, 保证之后可以读取最后一块
             }
 
@@ -75,6 +80,7 @@ function store_res_hash(filepath, seed, res_hash_collection, todo) {
                 oneMdata = readable.read();
                 console.log('block count:' + ++count + ", last block size: " + oneMdata.length);
                 hash = xxhash.hash(oneMdata, seed);
+                console.log(hashlist);
                 hashlist.push(hash);
                 hashstring += hash;
                 final_hash = xxhash.hash(Buffer(hashstring), seed);
@@ -84,6 +90,7 @@ function store_res_hash(filepath, seed, res_hash_collection, todo) {
                     'hash': final_hash,
                     'seed': seed
                 };
+                console.log(newDoc);
                 res_hash_collection.update(
                     { 'path': path.normalize(filepath) },
                     newDoc,
