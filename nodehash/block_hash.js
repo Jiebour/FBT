@@ -14,12 +14,12 @@ direct_file_hash 直接hash文件得到, 用于检验文件是否被修改
 var xxhash = require('xxhash')
   , fs = require('fs')
   , path = require('path')
-  , Datastore = require('nedb')
-  , crc = require('crc');
+  , Datastore = require('nedb');
 
 
 function dohash(filepath, seed) {
     // 清理数据库
+    console.time("hash");
     var db = new Datastore({ filename: 'nedb_data/nedb.data', autoload: true });
     var old_data = [];
     db.find({}, function(err, docs) {
@@ -38,13 +38,16 @@ function dohash(filepath, seed) {
     var count = 0, fourK_data, hash, hashlist=[], hashstring='', final_hash;
     readable.on('readable', function() {
         while (filesize - count * 4096 > 4096) {
-            if (null != (fourK_data=readable.read(4096))) {  //异步读取
+            fourK_data=readable.read(4096)
+            if (null !== fourK_data) {  //异步读取
                 count ++;
-//                hash = xxhash.hash(fourK_data, seed);
-                hash = crc.crc32(fourK_data)
+                hash = xxhash.hash(fourK_data, seed);
                 hashlist.push(hash);
                 hashstring += hash;
             }
+            else
+                break; // break if
+
             if (filesize - count * 4096 <= 4096) {
                 flag = 1;  // 退出循环前, 把flag置1, 保证之后可以读取最后一块
             }
@@ -55,8 +58,7 @@ function dohash(filepath, seed) {
             fourK_data = readable.read();
             console.log('block count:' + ++count);
             console.log("last block size: " + fourK_data.length);
-//            hash = xxhash.hash(fourK_data, seed);
-            hash = crc.crc32(fourK_data)
+            hash = xxhash.hash(fourK_data, seed);
             hashlist.push(hash);
             hashstring += hash;
             final_hash = xxhash.hash(Buffer(hashstring), seed);
@@ -67,6 +69,7 @@ function dohash(filepath, seed) {
             }, function(err, newDoc) {
                 console.log("\nnew record: " + JSON.stringify(newDoc));
             });
+            console.timeEnd("hash");
         }
     });
 
@@ -77,7 +80,7 @@ function dohash(filepath, seed) {
         })
         .on('end', function(){
             var hashvalue = hasher.digest();
-            console.log(hashvalue);
+            console.log("verify: " + hashvalue);
             db.update({'filename': path.basename(filepath)}, {'$set': {'verify': hashvalue}}, {});
         });
 }
