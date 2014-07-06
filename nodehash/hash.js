@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 
 var filepath = 'C:/Users/dell/Downloads/[SumiSora&CASO][Hanasakuiroha][BDRIP]';
-var filepath2 = "files/484M";
+var filepath2 = "files/test.mp4";
 //files = fs.readdirSync(filepath2);
 //
 //var filelist = [];
