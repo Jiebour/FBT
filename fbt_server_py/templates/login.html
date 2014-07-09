@@ -1,125 +1,255 @@
 <!DOCTYPE html>
 <!-- saved from url=(0034)http://www.bootcss.com/p/flat-ui/# -->
-<html lang="en" class="dk_fouc has-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en" class="dk_fouc has-js">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
-    <title>FBT UI</title>
+    <title>FBT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Loading Bootstrap -->
-    <link href="{{ static_url("css/bootstrap.min.css") }}" rel="stylesheet">
-
+    <link href="{{ static_url("Flat-UI-master/bootstrap/css/bootstrap.css") }}" rel="stylesheet">
     <!-- Loading Flat UI -->
-    <link href="{{ static_url("css/flat-ui.css") }}" rel="stylesheet">
-    <link rel="shortcut icon" href="{{ static_url("img/favicon.ico") }}">
+    <link href="{{ static_url("Flat-UI-master/css/flat-ui.css") }}" rel="stylesheet">
+        <!-- Custom styles for this template -->
+    <link href="{{ static_url("Flat-UI-master/css/docs.css") }}" rel="stylesheet">
+    <link href="{{ static_url("css/fbt_common.css") }}" rel="stylesheet">
+
+    <link rel="shortcut icon" href="{{ static_url("images/user_icon/default.png") }}">
+
+    <script src="{{ static_url("js/jquery-1.11.min.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("js/bootstrap-alert.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("js/json.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("js/fbt_common.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("js/jquery.pin.js") }}" type="text/javascript"></script>
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
     <!--[if lt IE 9]>
       <script src="//cdnjs.bootcss.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
     <![endif]-->
    
-  </head>
-  <body youdao="bind">
-    <div style="display:hidden" id="wrap_hide"></div>
-<div id="wrap_all">
-
+</head>
+<body youdao="bind">
+    <div style="display:none" class="wrap_hide"></div>
+<div class="wrap_all">
   <style>
 .btn:focus {
     outline: 5px auto #FFF;
 }
 body{
-  background-image:url({{ static_url("img/bg.png") }}); 
-  background-repeat: repeat; 
-  background-attachment:fixed;
+  background-image:url('{{ static_url("images/bg.png") }}'); background-repeat: repeat; background-attachment:fixed;
 }
-.hide{
-  display: none;
-}
-.show{
-  display: block;
-}
+
+        /*这两行CSS模拟了flatUI典型的input样式*/
+input{border-radius: 6px;
+border: 2px solid #dce4ec;
+color: #34495e;
+font-family: "Lato", sans-serif;
+font-size: 14px;
+padding: 8px 0 9px 10px;
+text-indent: 1px;
+-webkit-border-radius: 6px;
+-moz-border-radius: 6px;
+border-radius: 6px;
+-webkit-box-shadow: none;
+-moz-box-shadow: none;
+box-shadow: none;
+transition: border linear .2s,box-shadow linear .2s;}
+input:focus{
+  border-color: #1abc9c; -webkit-box-shadow: none;-moz-box-shadow: none; box-shadow: none; outline: none;}
+input{display: block; margin-bottom: 6px; width: 100%; height: 42px;}
+
+h2{font-size: 30px; margin-top: 4px; color: #1abc9c;}
+h5{font-size: 22px; line-height: 30px;}
+
+.remeberPW{line-height: 60px;}
+.login-link{color: #aaaaaa;}
 </style> 
 <br>
-<br>
-<div class="container" style="border-bottom: dashed 1px #cccccc; padding-bottom: 10px;">
+<div class="container" style="border-bottom: dashed 1px #cccccc;">
   <div class="row">
-  <div class="span2"><h3 class="span2">FBT</h3></div>
-  <div class="span8"><input type="text" value="" placeholder="Click here to search" class="span8"></div>
-  <div class="span2"><button class="btn btn-large btn-primary span2">Search</button></div>
+  <div class="col-xs-1"></div>
+  <div class="col-xs-1"><h2>FBT</h2></div>
+  <div class="col-xs-8"><input type="text" value="" placeholder="点此搜索资源..."></div>
+  <div class="col-xs-2"><button class="btn btn-large btn-primary">搜索</button></div>
 </div>
 </div>
 
 <br>
 <br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<div class="alert alert-block alert-error fade">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>提示！</strong> <span id="hint"></span>
+</div>
     <div class="container">
       <div class="row">
-        <div class="span5" style="text-align: center; padding-top: 15px;">
-            <img src="{{ static_url("Flat UI_files/fbtLogo.png") }}" class="img-responsive center-block">
-            <h4>FBT: 快乐源于 <span style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span></h4>
+        <div class="col-xs-5" style="text-align: center; padding-top: 10px;">
+            <img src="{{ static_url("images/user_icon/fbtLogo.png") }}" class="img-responsive center-block">
+            <h5>FBT: 快乐源于 <span style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span></h5>
         </div>
-        <div class="span7">
+        <div class="col-xs-7">
 
-          <div class="alert alert-block alert-error fade in hide">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <strong>提示！</strong> <span id="hint"></span>
-          </div>
-          <div class="span7">
-            <input id="user" name="user" type="text" value="" placeholder="Username" class="span5">
-            
+          <div class="col-xs-7">
+            <input id="user" type="text" value="" placeholder="用户名">
           </div>  
-          <div class="span7">
-            <input id="pwd" name="pwd" type="text" value="" placeholder="Password" class="span5">
 
+          <div class="col-xs-7">
+            <input id="pwd" type="password" value="" placeholder="密码" onkeypress="press()">
           </div>
-          <div class="span7">
+
+          <div class="col-xs-7">
+
           <div class="row">
-            <div class="span2"></div>
-          <div class="toggle toggle-off span2">
-            <label class="toggle-radio" for="toggleOption4">记住密码? √</label>
-            <input type="radio" name="toggleOptions2" id="toggleOption3" value="option3">
-            <label class="toggle-radio" for="toggleOption3">记住密码? ×</label>
-            <input type="radio" name="toggleOptions2" id="toggleOption4" value="option4" checked="checked">
-          </div>
-          <div class="span2"></div>
+          <div class="col-xs-1"></div>
+          <div class="col-xs-4">记住密码：</div>
+          <div class="col-xs-6">
+            <div class="switch"
+               data-on-label="<i class='fui-check'></i>" data-off-label="<i class='fui-cross'></i>">
+            <input type="checkbox" />
           </div>
           </div>
+        
+          </div>
+          </div><!-- /checkboxes col-xs-7 -->
 
-            <button class="btn btn-large btn-primary span5" id="login">Login</button>
+          <div class="col-xs-7">
+            <button class="btn btn-large btn-primary btn-block" onclick="login_click()" id="login">登录</button>
+          </div><!-- /checkboxes col-xs-7 -->
+            
 
-        <div class="span7" style="text-align: center;">
-          <a data-toggle="collapse"  href="/registration">Register</a>
+        <div class="col-xs-7" style="text-align: center;">
+          <a data-toggle="collapse"  href="/registration">尚未注册?</a>
           &emsp;&emsp;&emsp;&emsp;
-          <a class="login-link" href="" style="display: inline-block;">Lost your password?</a>
+          <a class="login-link" href="" style="display: inline-block;">忘记密码?</a>
           &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
         </div>
 
         </div>
       </div>
     </div>
-    <script src="{{ static_url("js/fbt_login.js") }}" type="text/javascript"></script>
+    <script type="text/javascript">
+      if (!window.console) window.console = {};
+if (!window.console.log) window.console.log = function() {};
+$("#user").select();
+$(".alert").alert();
+(function checkIfRemember(){
+  var user = getCookie("fbt_u").replace('"',"");
+  var pwd = getCookie("fbt_pwd").replace('"',"");
+  if(user != undefined && pwd != undefined){
+    $("#user").val(user);
+    $("#pwd").val(pwd);
+  }
+})();
+function validate(){
+    if($("#user").val() == "" || $("#pwd").val() == "")
+    {
+        $("body > div.wrap_all #hint").html("用户名或者密码未填写.");
+        $(".alert").addClass('in');
+        return false;
+    }
+    return true;
+}
+function login() {
+    var message = {}
+    message["user"] = $("#user").val();
+    message["pwd"] = $("#pwd").val();
+    message["next"] = "/"
+    if($(".switch-animate").hasClass('switch-off'))
+      message["remember"] = "0"
+    else
+      message["remember"] = "1"
+    var disabled = $("#login");
+    disabled.disable();
+    $.postJSON("/login", message, function(response) {
+        if(response.charAt(0) != '{')
+        {
+          /*$.get('/', function(data) {
+                ws = new ReconnectingWebSocket('ws://localhost:8888/socket');
+                ws.onopen = function(){
+                    ws.send( "0"+response);
+                }
+                ws.onmessage = function(event) {
+                    alert("test")
+                    alert(event.data);
+                };
+                $(".wrap_hide").get(0).innerHTML = data;
+                var d = $("body > div.wrap_hide").find(".wrap_all").html();
+                $("body > div.wrap_all").html(d);
+                $(".wrap_hide").html("");
+            });*/
+            $(".wrap_hide").get(0).innerHTML = response;
+            var d = $("body > div.wrap_hide").find(".wrap_all").html();
+            $("body > div.wrap_all").html(d);
+            $(".wrap_hide").html("");
+            $("a").click(function(e){
+              if($(this).attr("href") && $(this).attr("href").charAt(0) == '/'){
+                  e.preventDefault();
+                  $.get($(this).attr("href"), function(data) {
+                      /*optional stuff to do after success */
+                      //$(".wrap_hide").html(data);
+                      $(".wrap_hide").get(0).innerHTML = data;
+                      var d = $("body > div.wrap_hide").find(".wrap_all").html();
+                      $("body > div.wrap_all").html(d);
+                      $(".wrap_hide").html("");
+                  });
+                  return false;
+              }
+              else{
+                  $(this).click();
+              }
+          });
+        }
+        else{
+          console.log(response);
+          $("body > div.wrap_all #hint").html("用户名或者密码错误.");
+          $(".alert").addClass('in');
+          $("#pwd").val("");
+        }
+        disabled.enable();
+    });
+}
+function login_click(){
+  if (validate()) {
+        login();
+    }
+    return false;
+}
+$("#pwd").keypress(function(event) {
+  /* Act on the event */
+  keynum = event.keyCode || event.which;
+  if (keynum == 13) {
+        if (validate()) {
+        login();
+    }
+        return false;
+    }
+});
+    </script>
 </div>
     
 
     <!-- Load JS here for greater good =============================-->
-    <script src="{{ static_url("js/jquery-1.11.min.js") }}" type="text/javascript"></script>
-    <script src="{{ static_url("Flat UI_files/jquery-ui-1.10.0.custom.min.js") }}">
+    <script src="{{ static_url("js/reconnecting-websocket.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("Flat-UI-master/js/bootstrap.min.js") }}" type="text/javascript"></script>
+    <script src="{{ static_url("Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js") }}">
     </script>
-    <script src="{{ static_url("Flat UI_files/jquery.dropkick-1.0.0.js") }}"></script>
-    <script src="{{ static_url("Flat UI_files/custom_checkbox_and_radio.js") }}"></script>
-    <script src="{{ static_url("Flat UI_files/custom_radio.js") }}"></script>
-    <script src="{{ static_url("Flat UI_files/bootstrap-tooltip.js") }}"></script>
-    <script src="{{ static_url("Flat UI_files/jquery.tagsinput.js") }}"></script>
-    <script src="{{ static_url("Flat UI_files/jquery.placeholder.min.js") }}"></script>
-    <script src="{{ static_url("Flat UI_files/video.js") }}"></script>
-    <script src="{{ static_url("js/fbt_common.js") }}" type="text/javascript"></script>
-    <script src="{{ static_url("js/bootstrap-alert.js") }}" type="text/javascript"></script>
-
+    <script src="{{ static_url("Flat-UI-master/js/jquery.ui.touch-punch.min.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/bootstrap-select.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/bootstrap-switch.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/flatui-checkbox.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/flatui-radio.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/jquery.tagsinput.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/jquery.placeholder.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/video.js") }}">
+    </script>
+    <script src="{{ static_url("Flat-UI-master/js/application.js") }}">
+    </script>
     <!--[if lt IE 8]>
       <script src="js/icon-font-ie7.js"></script>
       <script src="js/icon-font-ie7-24.js"></script>

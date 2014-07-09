@@ -11,7 +11,7 @@ var addr2bytes = function(addr, nat_type_id) {
 	// 因为id不会超过4, 所以写最后一个字节就行, 1=0x33, 注意是字符串不是Int
 	bytes.write(nat_type_id.toString(), 6);  
 	return bytes;
-}
+};
 
 var bytes2addr= function(bytes) {
 	var nat_type_id = bytes.readUInt8(6);  // 这是字符串不是Int
@@ -32,7 +32,7 @@ function test() {
     var port = result[1];
     var id = result[2];
     console.log(ip);
-    console.log(port)
+    console.log(port);
     console.log(id);
 }
 

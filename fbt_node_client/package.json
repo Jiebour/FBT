@@ -5,12 +5,15 @@
   "main": "main.html",
 
   "window": {
-    "icon": "Flat UI_files/fbtLogo.png",
+    "icon": "fbtLogo.png",
     "toolbar": false,
     "position": "center",
     "width": 360,
     "height": 300,
     "min_width": 220,
-    "min_height": 220
+    "min_height": 220,
+    "webkit": {
+      "plugin": true
+    }
   }
 }

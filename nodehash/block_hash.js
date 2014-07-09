@@ -19,6 +19,7 @@ var xxhash = require('xxhash')
 
 function dohash(filepath, seed) {
     // 清理数据库
+    console.time("hash");
     var db = new Datastore({ filename: 'nedb_data/nedb.data', autoload: true });
     var old_data = [];
     db.find({}, function(err, docs) {
@@ -32,28 +33,32 @@ function dohash(filepath, seed) {
 
     var readable = fs.createReadStream(filepath),
         filesize = fs.statSync(filepath)['size'],
-        M = 1024 * 1024,
         flag = 0;
 
-    var count = 0, oneMdata, hash, hashlist=[], hashstring='', final_hash;
+    var count = 0, fourK_data, hash, hashlist=[], hashstring='', final_hash;
     readable.on('readable', function() {
-        while (filesize - count * M > M) {
-            if (null != (oneMdata=readable.read(1024))) {  //异步读取
+        while (filesize - count * 4096 > 4096) {
+            fourK_data=readable.read(4096)
+            if (null !== fourK_data) {  //异步读取
                 count ++;
-                hash = xxhash.hash(oneMdata, seed);
+                hash = xxhash.hash(fourK_data, seed);
                 hashlist.push(hash);
                 hashstring += hash;
             }
-            if (filesize - count * M <= M)
+            else
+                break; // break if
+
+            if (filesize - count * 4096 <= 4096) {
                 flag = 1;  // 退出循环前, 把flag置1, 保证之后可以读取最后一块
+            }
         }
 
         if (flag) {  // 只要是readable的状态就会进入function, 所以必须限制使得读取完成之后回调函数不再起作用
             flag = 0;
-            oneMdata = readable.read();
+            fourK_data = readable.read();
             console.log('block count:' + ++count);
-            console.log("last block size: " + oneMdata.length);
-            hash = xxhash.hash(oneMdata, seed);
+            console.log("last block size: " + fourK_data.length);
+            hash = xxhash.hash(fourK_data, seed);
             hashlist.push(hash);
             hashstring += hash;
             final_hash = xxhash.hash(Buffer(hashstring), seed);
@@ -64,6 +69,7 @@ function dohash(filepath, seed) {
             }, function(err, newDoc) {
                 console.log("\nnew record: " + JSON.stringify(newDoc));
             });
+            console.timeEnd("hash");
         }
     });
 
@@ -74,12 +80,8 @@ function dohash(filepath, seed) {
         })
         .on('end', function(){
             var hashvalue = hasher.digest();
-            console.log(hashvalue);
-            db.update({'filename': path.basename(filepath)}, {'$set': {'verify': hashvalue}}, {}, function() {
-                db.find({}, function(err, docs){
-                    console.log(docs);
-                });
-            });
+            console.log("verify: " + hashvalue);
+            db.update({'filename': path.basename(filepath)}, {'$set': {'verify': hashvalue}}, {});
         });
 }
 
