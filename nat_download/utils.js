@@ -82,7 +82,7 @@ function diff_block(tobe_check, filesize, source_file, download_file, callback) 
         return;
     }
     var blocksize=settings.BLOCK_SIZE, source=source_file, download=download_file;
-    var totalblocks = parseInt((filesize-1)/settings.BLOCK_SIZE);
+    var totalblocks = global.totalblocks;
     var bf1 = Buffer(blocksize);
     var bf2 = Buffer(blocksize);
 
