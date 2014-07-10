@@ -2,8 +2,6 @@
 res_hash 存储格式
 {
     path: filepath,
-    hashlist: [block1hash, block2hash, ...],
-    hash: final_hash
     verify: direct_file_hash
 }
 final_hash 由分块 hash 的结果连起来做 hash 生成
@@ -45,56 +43,29 @@ else
 function mock_store_res_hash(file, res_hash_collection) {
     res_hash_collection.update(
         { 'path': path.normalize(file) },
-        { 'path': file, 'hashlist': [], 'hash': 111},
+        { 'path': file, 'verify': 111},
         { 'multi': true, 'upsert': true }
     );
 }
 
 function store_res_hash(filepath, seed, res_hash_collection, todo) {
     try {
-        var readable = fs.createReadStream(filepath),
-            filesize = fs.statSync(filepath)['size'];
-
-        var count=0, oneMdata, hash, hashlist = [], hashstring = '', final_hash;
-
-        // 不足一块数据, 那么flag=1, 直接读取最后一块
-        var flag = (filesize - count * BLOCK_SIZE > BLOCK_SIZE) ? 0 : 1;
-
-        readable.on('readable', function () {
-            while (filesize - count * BLOCK_SIZE > BLOCK_SIZE) {
-                if (null !== (oneMdata = readable.read(BLOCK_SIZE))) {
-                    count++;
-                    hash = xxhash.hash(oneMdata, seed);
-                    hashlist.push(hash);
-                    hashstring += hash;
-                }
-                else
-                    break;
-
-                if (filesize - count * BLOCK_SIZE <= BLOCK_SIZE)
-                    flag = 1;  // 退出循环前, 把flag置1, 保证之后可以读取最后一块
-            }
-
-            if (flag) {  // 只要是readable的状态就会进入function, 所以必须限制使得读取完成之后回调函数不再起作用
-                flag = 0;
-                oneMdata = readable.read();
-                console.log('block count:' + ++count + ", last block size: " + oneMdata.length);
-                hash = xxhash.hash(oneMdata, seed);
-                console.log(hashlist);
-                hashlist.push(hash);
-                hashstring += hash;
-                final_hash = xxhash.hash(Buffer(hashstring), seed);
+        // add verify field
+        var hasher = new xxhash(seed);
+        fs.createReadStream(filepath)
+            .on('data', function(data) {
+                hasher.update(data);
+            })
+            .on('end', function(){
+                var hashvalue = hasher.digest();
                 var newDoc = {
                     'path': path.normalize(filepath),
-                    'hashlist': hashlist,
-                    'hash': final_hash,
-                    'seed': seed
+                    'verify': hashvalue
                 };
-                console.log(newDoc);
                 res_hash_collection.update(
-                    { 'path': path.normalize(filepath) },
+                    {'path': path.normalize(filepath)},
                     newDoc,
-                    { 'multi': true, 'upsert': true },
+                    {'multi': true, 'upsert': true},
                     function (err, numReplaced) {
                         if (numReplaced != 1) {
                             console.log("found duplicate hash docs when storing");
@@ -103,18 +74,6 @@ function store_res_hash(filepath, seed, res_hash_collection, todo) {
                         todo(newDoc);
                     }
                 );
-            }
-
-            // add verify field
-            var hasher = new xxhash(seed);
-            fs.createReadStream(filepath)
-                .on('data', function(data) {
-                    hasher.update(data);
-                })
-                .on('end', function(){
-                    var hashvalue = hasher.digest();
-                    res_hash_collection.update({'path': filepath}, {'$set': {'verify': hashvalue}}, {});
-                });
             });
     }
     catch (err) {

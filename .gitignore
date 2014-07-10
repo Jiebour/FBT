@@ -3,7 +3,6 @@ nedb_data/
 nodehash/node_modules/
 file-api/node_modules/
 file-download/node_modules/
-file-download/*local*
-nodehash/files/484M
-file-download/test.mp4
 nat_download/node_modules/*
+file-download/*local*
+*.mp4
