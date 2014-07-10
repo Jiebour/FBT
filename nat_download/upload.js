@@ -5,7 +5,7 @@ var dgram = require("dgram"),
     settings = require('./settings');
 
 var BLOCK_SIZE = settings.BLOCK_SIZE,
-    source_file = settings.source_file;
+    source_file = settings.source_file; // TODO: how to know source_file
 
 
 function addEventListener(socket) {

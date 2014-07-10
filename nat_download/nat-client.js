@@ -9,14 +9,12 @@ var FullCone = settings.FullCone,  // 0
 var NATTYPE = [FullCone, RestrictNAT, RestrictPortNAT, SymmetricNAT];
 
 
-function Client(nat_type, pool) {
+function Client(nat_type, pool) { // nat_type, pool are both string
 	var master_ip = settings.nat_server_ip;
 	var master = {ip: master_ip, port: settings.nat_server_port};
-	var pool = pool;
 	var socket = null;
     var target = null; // 对面client
 	var peer_nat_type = null;
-    var nat_type = nat_type;
     var is_available = false; // 这个socket是否可用
 
 	this.request_for_connection = function (nat_type_id) {

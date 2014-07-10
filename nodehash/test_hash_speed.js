@@ -8,7 +8,8 @@ readstream.on('readable', function() {
 
     console.time("xxhas");
     for (var i=0; i<100000; i++) {
-        xxhash.hash(data, seed=0xAAA);
+        var value = xxhash.hash(data, seed=0xAAA);
+//        console.log(typeof(value)); // output: number
         if (i == 999)
             console.timeEnd("xxhas");
     }

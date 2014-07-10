@@ -4,7 +4,8 @@ var filepath1 = 'test.mp4',
     filepath2 = 'test-local.mp4',
     filesize = 126401476,// filepath1, 2, filesize获取的位置都得改
     BLOCK_SIZE = 4096,  // bytes
-    BLOCK_IN_PART = 1024,
+    BLOCK_IN_PART = 1024
+    partsize = BLOCK_IN_PART * BLOCK_SIZE,
     nat_server_ip = "205.147.105.205",
     nat_server_port = 1111;
 
@@ -45,15 +46,14 @@ var RestrictPortNAT = "Restrict Port NAT";  // 2
 var SymmetricNAT = "Symmetric NAT";  // 3
 var NATTYPE = [FullCone, RestrictNAT, RestrictPortNAT, SymmetricNAT];
 
+var DEBUG = true;
 
 exports.nat_server_ip = nat_server_ip;
 exports.nat_server_port = nat_server_port;
-exports.source_file = filepath1;
-exports.download_file = filepath2;
-exports.filesize = filesize;
 exports.BLOCK_SIZE = BLOCK_SIZE;
 exports.unit_delay_time = unit_delay_time;
 exports.BLOCK_IN_PART = BLOCK_IN_PART;
+exports.partsize = partsize;
 exports.server_ip = server_ip;
 exports.stun_exe = stun_exe;
 exports.FullCone = FullCone;
@@ -61,4 +61,4 @@ exports.RestrictNAT = RestrictNAT;
 exports.RestrictPortNAT = RestrictPortNAT;
 exports.SymmetricNAT = SymmetricNAT;
 exports.NATTYPE = NATTYPE;
-
+exports.DEBUG = DEBUG;
