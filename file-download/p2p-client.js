@@ -99,7 +99,7 @@ function verify_part(socket, partID) {
                 }
             }
             global.last_congestion = global.congestion; // 原来的congestion+redownloadcount
-            if (redownloadcount == 0){
+            if (redownloadcount === 0){
                 if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                     clearInterval(interval_obj);
                     var return_value = verify_part(socket, partID + 1); // 一般是undefined, 结束时是1

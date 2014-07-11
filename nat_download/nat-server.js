@@ -37,7 +37,7 @@ function ClientInfo(addr, nat_type_id) {
 
 function addrIndexOf(arr, o) {
     for (var i = 0; i < arr.length; i++) {
-        if (arr[i].address == o.address && arr[i].port == o.port) {
+        if (arr[i].address === o.address && arr[i].port === o.port) {
             return i;
         }
     }
@@ -60,7 +60,7 @@ function main(port) {
         /* 可能存在的转发逻辑,
         if message 以 "msg" 开头, 就转发
          */
-        if (addrIndexOf(received_addr, client_addr) == -1) { //第一次接收
+        if (addrIndexOf(received_addr, client_addr) === -1) { //第一次接收
             received_addr.push(client_addr);  // 把這個addr加入已知addr列表
             console.log("connection from %s:%d", rinfo.address, rinfo.port);
             pool = message.trim().split(' ')[0];
@@ -68,7 +68,7 @@ function main(port) {
             respond = new Buffer("ok " + pool);
             sock.send(respond, 0, respond.length, rinfo.port, rinfo.address);
             console.log("pool=%s, nat_type=%s, ok sent to client", pool, NATTYPE[parseInt(nat_type_id)]);
-        } else if (message == "ok") {
+        } else if (message === "ok") {
             //接收到客戶端的"ok",必須是經過了第一次的,即client_addr in received_addr
             console.log("request received for pool:" + pool);
             if (pool in poolqueue) {

@@ -28,10 +28,10 @@ function Client(nat_type, pool) { // nat_type, pool are both string
             /*本来是用switch, 但是不知道为什么就是有bug,只能转用多个条件判断*/
             message = msg.toString();
             console.log(message);
-            if (message == "ok " + pool) {
+            if (message === "ok " + pool) {
                 socket.send(sendmsg, 0, 2, master.port, master.ip);
                 console.log("request sent, waiting for partner in pool %s...", pool);
-            } else if (msg.length == 7) {
+            } else if (msg.length === 7) {
                 var result = utils.bytes2addr(msg);
                 target = {ip: result[0], port: result[1]};
                 peer_nat_type = NATTYPE[result[2]];
@@ -48,9 +48,9 @@ function Client(nat_type, pool) { // nat_type, pool are both string
 	};
 
     var punch = function(nat_type){
-        if ((nat_type == SymmetricNAT || peer_nat_type == SymmetricNAT) ||
-            (nat_type == SymmetricNAT || peer_nat_type == RestrictPortNAT) ||
-            (nat_type == RestrictPortNAT || peer_nat_type == SymmetricNAT))
+        if ((nat_type === SymmetricNAT || peer_nat_type === SymmetricNAT) ||
+            (nat_type === SymmetricNAT || peer_nat_type === RestrictPortNAT) ||
+            (nat_type === RestrictPortNAT || peer_nat_type === SymmetricNAT))
         {
             /*
             无法处理的情况: 1. 都是sym; 2. 一边是sym,一边是端口受限
@@ -58,12 +58,12 @@ function Client(nat_type, pool) { // nat_type, pool are both string
              */
             console.log("Can't download from socket " + pool);
         }
-        else if (nat_type == SymmetricNAT || nat_type == RestrictNAT || nat_type == RestrictPortNAT) {
+        else if (nat_type === SymmetricNAT || nat_type === RestrictNAT || nat_type === RestrictPortNAT) {
             console.log("Punching mode"); // 由这边发punching包
             punch_send();
         }
-        else if (nat_type == FullCone) {
-            if (peer_nat_type == FullCone) { // 两边都是fullcone, socket直接可用
+        else if (nat_type === FullCone) {
+            if (peer_nat_type === FullCone) { // 两边都是fullcone, socket直接可用
                 is_available = true;
                 global.traverse_complete_count++; // socket穿透完成, 如果是uploader, 那这个值达到1就OK了
                 console.log("FullCone mode");
@@ -120,7 +120,7 @@ function Client(nat_type, pool) { // nat_type, pool are both string
             }
             var msg = msg.toString('utf8');
             process.stdout.write("peer: " + msg);
-            if (msg == 'punching...\n') {
+            if (msg === 'punching...\n') {
                 var text = Buffer("end punching\n");
                 socket.send(text, 0, text.length, rinfo.port, target.ip);
                 target.port = rinfo.port;

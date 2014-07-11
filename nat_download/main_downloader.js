@@ -19,9 +19,9 @@ function check_debug_input() { // only apply in DEBUG mode
         console.log("usage: node main_downloader.js [test_nat_type]"); // 仅供测试
         process.exit(1);
     }
-    if (argv.length == 2) {
+    if (argv.length === 2) {
         test_nat_type = parseInt(argv[1]);  // test_nat_type is int
-        if ([0, 1, 2, 3].indexOf(test_nat_type) == -1) {
+        if ([0, 1, 2, 3].indexOf(test_nat_type) === -1) {
             console.log("test nat type should be [0,1,2,3]")
         }
     }

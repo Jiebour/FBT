@@ -105,7 +105,7 @@ function diff_block(tobe_check, callback) {
         }
     }
 
-   if (tobe_check[tobe_check.length-1] == totalblocks)
+   if (tobe_check[tobe_check.length-1] === totalblocks)
        compare_block(filesize % BLOCK_SIZE, tobe_check.length-1, global.fd2);
    else
        compare_block(BLOCK_SIZE, tobe_check.length-1, global.fd2);
