@@ -70,10 +70,10 @@ function diff_block(tobe_check, callback) {
     var totalblocks = parseInt((settings.filesize-1)/BLOCK_SIZE);
     var bf2 = Buffer(BLOCK_SIZE);
 
-    function compare_block(readsize, i, fd2) {
+    function compare_block(i, fd2) {
         try {
             var blockID = tobe_check[i];
-            fs.read(fd2, bf2, 0, readsize, blockID*BLOCK_SIZE, function (err, bytesRead, bf2) {
+            fs.read(fd2, bf2, 0, BLOCK_SIZE, blockID*BLOCK_SIZE, function (err, bytesRead, bf2) {
                 var result;
                 if (tobe_check[i] === totalblocks) {
                     bf2 = bf2.slice(0, bytesRead);
@@ -90,7 +90,7 @@ function diff_block(tobe_check, callback) {
                 }
                 if (i > 0) {
                     // 考虑到splice对index的影响, 采用逆序递归
-                    compare_block(BLOCK_SIZE, i - 1, fd2);
+                    compare_block(i - 1, fd2);
                 }
                 else {
                     callback();
@@ -102,10 +102,7 @@ function diff_block(tobe_check, callback) {
         }
     }
 
-   if (tobe_check[tobe_check.length-1] === totalblocks)
-       compare_block(settings.filesize % BLOCK_SIZE, tobe_check.length-1, global.fd2);
-   else
-       compare_block(BLOCK_SIZE, tobe_check.length-1, global.fd2);
+    compare_block(tobe_check.length-1, global.fd2);
 }
 
 exports.hasFileContent = hasFileContent;
