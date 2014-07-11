@@ -20,17 +20,19 @@ var totalparts = parseInt((filesize+partsize-1)/partsize);
 
 var download_record = [],// 记录下载过的块, download_record[blockID]=1
     last_download_record = [],
-    tobe_check = [];  // 记录未校验过的块, 校验通过则删除这个blockID
-
+    tobe_check = [],  // 记录未校验过的块, 校验通过则删除这个blockID
+    checksum_record = []; // 保存各块的校验和
 
 function addEventListener(socket, remoteFile, localFile) {
     var file = randomAccessFile(localFile);
     socket.on('message', function(data, rinfo) {
         var jsonData = BSON.parse(data);
         if (utils.hasFileContent(jsonData)){
-            var chunksData = jsonData["content"],
-                blockID = jsonData["index"];
+            var chunksData = jsonData["content"];
+            var blockID = jsonData["index"];
+            var checksum = jsonData["checksum"];
             download_record[blockID] = 1;
+            checksum_record[blockID] = checksum;
             file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
                 if(err)
                     console.log("blockID download err:" + blockID);
@@ -85,7 +87,7 @@ function verify_part(socket, partID) {
     global.congestion = global.last_congestion = BLOCK_IN_PART;
     download_part(socket, partID);
     var interval_obj = setInterval(function(){
-        // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
+        // global.congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 暂停重发进行空循环
         if (global.congestion <= global.last_congestion && utils.arrayEqual(download_record, last_download_record)){
             // 这一次接收已经结束
             var redownloadcount = 0; // 记录这一次重新下载的块的数量
@@ -98,7 +100,6 @@ function verify_part(socket, partID) {
             }
             global.last_congestion = global.congestion; // 原来的congestion+redownloadcount
             if (redownloadcount == 0){
-                console.log("redownload complete");
                 if (utils.allOne(download_record.slice(part_first_block, part_last_block))) {
                     clearInterval(interval_obj);
                     var return_value = verify_part(socket, partID + 1); // 一般是undefined, 结束时是1
@@ -138,11 +139,13 @@ function verify_part(socket, partID) {
 
 function check(socket) {
     /* 下载完之后对所有block进行校验 */
+    global.checksum_record = checksum_record;
     if (tobe_check.length === 0) { // 所有block都通过校验
         console.log("checking complete");
         console.timeEnd("checking");
-        console.log(xxhash.hash(fs.readFileSync(settings.source_file), 0xAAAA));
-        console.log(xxhash.hash(fs.readFileSync(settings.download_file), 0xAAAA));
+        console.log(xxhash.hash(fs.readFileSync(source_file), 0xAAAA));
+        console.log(xxhash.hash(fs.readFileSync(download_file), 0xAAAA));
+        console.timeEnd("Whole");
         setTimeout(function(){
             process.exit(0);
         }, unit_delay_time);
@@ -158,6 +161,7 @@ function check(socket) {
 }
 
 (function main(){
+    console.time("Whole");
     var socket = dgram.createSocket('udp4');
     socket.bind(9999);
 // 这个值目前双方都知道, 实际应该是通过STUN获知
@@ -168,11 +172,9 @@ function check(socket) {
         tobe_check[i] = i;
     }
 
-    fs.open(settings.source_file, "r", function (err, fd1) {
-        fs.open(settings.download_file, "a+", function(err, fd2) {
-            global.fd1 = fd1;  // 以防之后fd消失, 实际代码中是没有fd1的, 单机测试时需要
-            global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
-        });
+    fs.open(settings.download_file, "a+", function (err, fd2) {
+//            global.fd1 = fd1;  // 以防之后fd消失, 实际代码中是没有fd1的, 单机测试时需要
+        global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
     });
 
     verify_part(socket, 0);

@@ -1,8 +1,6 @@
 var fs = require('fs');
 var settings = require('./settings');
-var xxhash = require('xxhash');
 var crc = require('crc');
-
 
 function hasFileContent(jsonData){
     return "content" in jsonData;
@@ -48,56 +46,67 @@ function countOne(a) {
 }
 
 
+function get_checksum(bf) {
+    var crc32 = new crc.CRC32();
+    crc32.update(bf);
+    return crc32.checksum(); // int
+}
+
+
+function crc_check(data, checksum) {
+    var crc32 = new crc.CRC32();
+    crc32.update(data);
+    return crc32.checksum() === checksum;
+}
+
+
 function diff_block(tobe_check, callback) {
-    if (tobe_check.length == 0) {
+    if (tobe_check.length === 0) {
         // 这种情况在interval未到但是已经校验完该part的block时出现
         callback();
         return;
     }
-    var blocksize=settings.BLOCK_SIZE, source=settings.source_file, download=settings.download_file;
-    var totalblocks = parseInt((settings.filesize-1)/settings.BLOCK_SIZE);
-    var bf1 = Buffer(blocksize);
-    var bf2 = Buffer(blocksize);
+    var BLOCK_SIZE=settings.BLOCK_SIZE;
+    var totalblocks = parseInt((settings.filesize-1)/BLOCK_SIZE);
+    var bf2 = Buffer(BLOCK_SIZE);
 
-    function compare_block(readsize, i, fd1, fd2) {
-        // 有时候fd会莫名其妙地消失, 这时候只能重新调用diff_block生成fd1, fd2
+    function compare_block(readsize, i, fd2) {
         try {
-            var block_index = tobe_check[i];
-            fs.read(fd1, bf1, 0, readsize, block_index * blocksize, function (err, bytesRead, bf1) {
-                fs.read(fd2, bf2, 0, readsize, block_index * blocksize, function (err, bytesRead, bf2) {
-                    var result;
-                    if (tobe_check[i] == totalblocks)
-                        result = (crc.crc32(bf1.slice(0, bytesRead)) === crc.crc32(bf2.slice(0, bytesRead)))
-                            ? 0 : 1;
-                    else
-                        result = (crc.crc32(bf1) === crc.crc32(bf2)) ? 0 : 1;
-                    if (result !== 0) {
-                        console.log("block ", block_index, " not equal!");
-                        // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
-                    }
-                    else {
-                        tobe_check.splice(i, 1);
-//                        console.log("block ", block_index, " equal!");
-                    }
-                    if (i > 0) {
-                        // 考虑到splice对index的影响, 采用逆序递归
-                        compare_block(blocksize, i - 1, fd1, fd2);
-                    }
-                    else {
-                        callback();
-                    }
-                });
+            var blockID = tobe_check[i];
+            fs.read(fd2, bf2, 0, readsize, blockID*BLOCK_SIZE, function (err, bytesRead, bf2) {
+                var result;
+                if (tobe_check[i] === totalblocks) {
+                    bf2 = bf2.slice(0, bytesRead);
+                    result = crc_check(bf2, global.checksum_record[blockID]);
+                }
+                else
+                    result = crc_check(bf2, global.checksum_record[blockID]);
+                if (result === false) {
+                    console.log("block ", blockID, " not equal!");
+                    // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
+                }
+                else { // 校验通过, 最终写入
+                    tobe_check.splice(i, 1);
+//                    console.log("block ", blockID, " equal!");
+                }
+                if (i > 0) {
+                    // 考虑到splice对index的影响, 采用逆序递归
+                    compare_block(BLOCK_SIZE, i - 1, fd2);
+                }
+                else {
+                    callback();
+                }
             });
         }
         catch (e){
-            console.log(e.message)
+            console.log(e.message);
         }
     }
 
-   if (tobe_check[tobe_check.length-1] == totalblocks)
-       compare_block(settings.filesize % blocksize, tobe_check.length-1, global.fd1, global.fd2);
+   if (tobe_check[tobe_check.length-1] === totalblocks)
+       compare_block(settings.filesize % BLOCK_SIZE, tobe_check.length-1, global.fd2);
    else
-       compare_block(blocksize, tobe_check.length-1, global.fd1, global.fd2);
+       compare_block(BLOCK_SIZE, tobe_check.length-1, global.fd2);
 }
 
 exports.hasFileContent = hasFileContent;
@@ -106,3 +115,5 @@ exports.rand3 = rand3;
 exports.arrayEqual = arrayEqual;
 exports.allOne = allOne;
 exports.diff_block = diff_block;
+exports.get_checksum = get_checksum;
+exports.crc_check = crc_check;
