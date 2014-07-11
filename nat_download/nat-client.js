@@ -10,8 +10,7 @@ var NATTYPE = [FullCone, RestrictNAT, RestrictPortNAT, SymmetricNAT];
 
 
 function Client(nat_type, pool) { // nat_type, pool are both string
-	var master_ip = settings.nat_server_ip;
-	var master = {ip: master_ip, port: settings.nat_server_port};
+	var master = {ip: global.nat_server_ip, port: global.nat_server_port};
 	var socket = null;
     var target = null; // 对面client
 	var peer_nat_type = null;

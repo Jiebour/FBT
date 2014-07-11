@@ -30,6 +30,7 @@ function check_debug_input() { // only apply in DEBUG mode
 
 (function main() {
 
+    //*****************************  initialization START ********************************
     var uid_list = [];
     var test_nat_type = null; // DEBUG=false, test_nat_type就是null
     if (settings.DEBUG) { // laike9m测试中...
@@ -37,8 +38,11 @@ function check_debug_input() { // only apply in DEBUG mode
         global.download_file = 'test-local.mp4';
         global.filesize = 126401476;
         global.hash = 2450791387;
-        uid_list = [1, 2]; // TODO, 可供测试的机器有几个？
+        uid_list = [1, 2]; // TODO, 可供测试的机器有几台？
         test_nat_type = check_debug_input(); // DEBUG 模式下, 才需要指定test_nat_type
+
+        global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
+        global.nat_server_port = 1111;
     }
     else {
         var argv = process.argv;
@@ -53,6 +57,9 @@ function check_debug_input() { // only apply in DEBUG mode
         for (var i=7; i<argv.length-2; i++) {
             uid_list.push(argv[i]); // uid is used as pool, string type
         }
+
+        global.nat_server_ip = "205.147.105.205"; // TODO, 真实的服务器地址和端口
+        global.nat_server_port = 1111;
     }
 
     global.totalblocks = parseInt((global.filesize+BLOCK_SIZE-1)/BLOCK_SIZE);
@@ -61,6 +68,8 @@ function check_debug_input() { // only apply in DEBUG mode
     fs.open(global.download_file, "a+", function(err, fd2) {
         global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
     });
+    //*****************************  initialization END ********************************
+
 
     //****************************** NAT traverse START ********************************
     var socket_amount = uid_list.length;
@@ -134,7 +143,7 @@ function check_debug_input() { // only apply in DEBUG mode
         global.tobe_check[i] = i;
     }
     global.Status.on("complete", function() {
-        check(available_clients, global.tobe_check);  // 下载完成, 开始校验
+        check(available_clients, global.tobe_check);  // 下载完成, 回调函数中开始校验
     })
     available_clients.forEach(function(client) {
         download.socket_download(client.socket, client.target.ip, client.target.port);
@@ -191,5 +200,4 @@ function create_download_client(test_nat_type, pool) {
     }
     global.available_clients.push(client);
 };
-
 
