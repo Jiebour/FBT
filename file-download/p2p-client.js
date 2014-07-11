@@ -30,9 +30,9 @@ function addEventListener(socket, remoteFile, localFile) {
         if (utils.hasFileContent(jsonData)){
             var chunksData = jsonData["content"];
             var blockID = jsonData["index"];
-            var checksum = jsonData["checksum"];
+            checksum_record[blockID] = jsonData["checksum"];
             download_record[blockID] = 1;
-            checksum_record[blockID] = checksum;
+
             file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
                 if(err)
                     console.log("blockID download err:" + blockID);
@@ -112,8 +112,9 @@ function verify_part(socket, partID) {
                         socket.on('message', function(data, rinfo) {
                             var jsonData = BSON.parse(data);
                             if (utils.hasFileContent(jsonData)){
-                                var chunksData = jsonData["content"],
-                                    blockID = jsonData["index"];
+                                var chunksData = jsonData["content"];
+                                var blockID = jsonData["index"];
+                                global.checksum_record[blockID] = jsonData["checksum"];
                                 file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
                                     if(err)
                                         console.log("blockID download err:" + blockID);

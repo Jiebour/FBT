@@ -126,6 +126,7 @@ function check_debug_input() { // only apply in DEBUG mode
     global.download_record = [];// 记录下载过的块, download_record[blockID]=1
     global.last_download_record = [];
     global.tobe_check = [];// 记录未校验过的块, 校验通过则删除这个blockID
+    global.checksum_record = []; // 保存各块的校验和
     global.complete_socket = 0; // 下载完了自己的part_queue的socket计数
     global.Status = EventEmitter(); // 是否下载完成.
     /************每个文件下载开一个process, 所以弄成global也没问题***********************/
@@ -154,7 +155,7 @@ function check(available_clients, tobe_check) {
         }, unit_delay_time);
     }
     else {
-        utils.diff_block(tobe_check, global.filesize, global.source_file, global.download_file, function(){
+        utils.diff_block(tobe_check, function(){
             tobe_check.forEach(function(blockID){
                 var random_client = available_clients[Math.floor(Math.random()*available_clients.length)];
                 // 校验未通过的块, 随机选择一个socket来下载

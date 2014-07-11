@@ -18,9 +18,12 @@ function addEventListener(socket, remoteFile, localFile, congestion) {
     socket.on('message', function(data, rinfo) {
         var jsonData = BSON.parse(data);
         if (utils.hasFileContent(jsonData)){
-            var chunksData = jsonData["content"],
-                blockID = jsonData["index"];
+            var chunksData = jsonData["content"];
+            var blockID = jsonData["index"];
+            var checksum = jsonData["checksum"];
             global.download_record[blockID] = 1;
+            global.checksum_record[blockID] = checksum;
+
             file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
                 if(err)
                     console.log("blockID download err:" + blockID);
@@ -73,7 +76,7 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
 
     download_part(socket, part_queue[index], ip, port);
     var interval_obj = setInterval(function(){
-        // congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 不暂停重发
+        // congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 暂停重发进行空循环
         if (congestion.value <= last_congestion.value &&
         utils.arrayEqual(global.download_record, global.last_download_record)){
             // 这一次接收已经结束
@@ -87,7 +90,6 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
             }
             last_congestion.value = congestion.value; // 原来的congestion+redownloadcount
             if (redownloadcount == 0){
-                console.log("redownload complete");
                 if (utils.allOne(global.download_record.slice(part_first_block, part_last_block))) {
                     clearInterval(interval_obj);
                     // return_value一般是undefined, 结束时是1
@@ -102,8 +104,10 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
                         socket.on('message', function(data, rinfo) {
                             var jsonData = BSON.parse(data);
                             if (utils.hasFileContent(jsonData)){
-                                var chunksData = jsonData["content"],
-                                    blockID = jsonData["index"];
+                                var chunksData = jsonData["content"];
+                                var blockID = jsonData["index"];
+                                var checksum = jsonData["checksum"];
+                                global.checksum_record[blockID] = checksum;
                                 file.write(blockID*BLOCK_SIZE, chunksData, function(err) {
                                     if(err)
                                         console.log("blockID download err:" + blockID);

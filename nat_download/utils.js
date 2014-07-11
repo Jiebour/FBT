@@ -1,8 +1,8 @@
 var fs = require('fs');
 var settings = require('./settings');
-var xxhash = require('xxhash');
 var crc = require('crc');
 var tobe_check = global.tobe_check;
+
 
 function hasFileContent(jsonData){
     return "content" in jsonData;
@@ -47,66 +47,53 @@ function countOne(a) {
     return count;
 }
 
-var crc = require('crc');
 
-var bf = Buffer("test");
-
-charlist = crc.crc32(bf).toString();
-var k = []
-for (var i=0; i< 8; i++) {
-    k.push(parseInt(charlist[i], 16));
-}
-var checksum = Buffer(k);
-
-transfer_data = Buffer.concat([bf, checksum]);
-
-////////////////////// Network Transfer /////////////////////////
-
-received_data = transfer_data
-
-checksum = received_data.slice(-8);
-charlist = '';
-for (var i=0; i<8; i++) {
-    charlist += checksum.readUInt8(i).toString(16);
+function get_checksum(bf) {
+    var crc32 = new crc.CRC32();
+    crc32.update(bf);
+    return crc32.checksum(); // int
 }
 
-// these two should be equal if data received correctly
-console.log(crc.crc32(received_data.slice(0, -8)));
-console.log(charlist)
+
+function crc_check(data, checksum) {
+    var crc32 = new crc.CRC32();
+    crc32.update(data);
+    return crc32.checksum() === checksum;
+}
 
 
-function diff_block(tobe_check, filesize, source_file, download_file, callback) {
-    if (tobe_check.length == 0) {
+function diff_block(tobe_check, callback) {
+    if (tobe_check.length === 0) {
         // 这种情况在interval未到但是已经校验完该part的block时出现
         callback();
         return;
     }
-    var blocksize=settings.BLOCK_SIZE, source=source_file, download=download_file;
+    var BLOCK_SIZE = settings.BLOCK_SIZE;
     var totalblocks = global.totalblocks;
-    var bf1 = Buffer(blocksize);
     var bf2 = Buffer(blocksize);
+    var filesize = global.filesize;
 
     function compare_block(readsize, i, fd2) {
         try {
-            var block_index = tobe_check[i];
-            source_file_block_hash = get_block_hash()  // TODO
-            fs.read(fd2, bf2, 0, readsize, block_index * blocksize, function (err, bytesRead, bf2) {
+            var blockID = tobe_check[i];
+            fs.read(fd2, bf2, 0, readsize, blockID*BLOCK_SIZE, function (err, bytesRead, bf2) {
                 var result;
-                if (tobe_check[i] == totalblocks)
-                    result = source_file_block_hash === crc.crc32(bf2.slice(0, bytesRead)) ? 0 : 1;
+                if (tobe_check[i] === totalblocks) {
+                    bf2 = bf2.slice(0, bytesRead);
+                    result = crc_check(bf2, global.checksum_record[blockID]);
+                }
                 else
-                    result = (source_file_block_hash === crc.crc32(bf2)) ? 0 : 1;
-                if (result !== 0) {
-                    console.log("block ", block_index, " not equal!");
-                    // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
+                    result = crc_check(bf2, global.checksum_record[blockID]);
+                if (result === false) {
+                    console.log("block ", blockID, " not equal!");
                 }
                 else {
                     tobe_check.splice(i, 1);
-//                        console.log("block ", block_index, " equal!");
+//                    console.log("block ", blockID, " equal!");
                 }
                 if (i > 0) {
                     // 考虑到splice对index的影响, 采用逆序递归
-                    compare_block(blocksize, i - 1, fd2);
+                    compare_block(BLOCK_SIZE, i - 1, fd2);
                 }
                 else {
                     callback();
@@ -114,14 +101,14 @@ function diff_block(tobe_check, filesize, source_file, download_file, callback) 
             });
         }
         catch (e){
-            console.log(e.message)
+            console.log(e.message);
         }
     }
 
    if (tobe_check[tobe_check.length-1] == totalblocks)
-       compare_block(filesize % blocksize, tobe_check.length-1, global.fd2);
+       compare_block(filesize % BLOCK_SIZE, tobe_check.length-1, global.fd2);
    else
-       compare_block(blocksize, tobe_check.length-1, global.fd2);
+       compare_block(BLOCK_SIZE, tobe_check.length-1, global.fd2);
 }
 
 
@@ -139,6 +126,7 @@ function addr2bytes(addr, nat_type_id) {
     bytes.write(nat_type_id.toString(), 6);
     return bytes;
 }
+
 
 function bytes2addr(bytes) {
     var nat_type_id = bytes.readUInt8(6);  // 这是字符串不是Int
@@ -159,4 +147,6 @@ exports.hasFileIndex = hasFileIndex;
 exports.rand3 = rand3;
 exports.arrayEqual = arrayEqual;
 exports.allOne = allOne;
+exports.get_checksum = get_checksum;
+exports.crc_check = crc_check;
 exports.diff_block = diff_block;

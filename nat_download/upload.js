@@ -23,7 +23,12 @@ function addEventListener(socket) {
             );
             readStream.on('data', function(data) {
                 console.log('transfer data....', blockID);
-                toSend = bson.serialize({header: "media", index: blockID, content: data});
+                toSend = bson.serialize({
+                     header: "media",
+                     index: blockID,
+                     content: data,
+                     checksum: utils.get_checksum(data)
+                 });
                 socket.send(toSend, 0, toSend.length, rinfo.port, rinfo.address);
             });
 

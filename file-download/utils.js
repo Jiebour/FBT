@@ -83,9 +83,8 @@ function diff_block(tobe_check, callback) {
                     result = crc_check(bf2, global.checksum_record[blockID]);
                 if (result === false) {
                     console.log("block ", blockID, " not equal!");
-                    // 校验未通过, 重新把block的下载记录置0, 之后会重新下载
                 }
-                else { // 校验通过, 最终写入
+                else {
                     tobe_check.splice(i, 1);
 //                    console.log("block ", blockID, " equal!");
                 }
