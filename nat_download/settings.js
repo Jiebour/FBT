@@ -45,6 +45,15 @@ var NATTYPE = [FullCone, RestrictNAT, RestrictPortNAT, SymmetricNAT];
 var DEBUG = true;
 
 
+var DownloadState = {
+    DOWNLOAD_OVER: 0,
+    DOWNLOADING: 1,
+    CANCELED: 2,
+    PAUSED: 3,
+    DOWNLOAD_ERR: 4
+};
+
+
 exports.BLOCK_SIZE = BLOCK_SIZE;
 exports.unit_delay_time = unit_delay_time;
 exports.BLOCK_IN_PART = BLOCK_IN_PART;
@@ -56,3 +65,4 @@ exports.RestrictPortNAT = RestrictPortNAT;
 exports.SymmetricNAT = SymmetricNAT;
 exports.NATTYPE = NATTYPE;
 exports.DEBUG = DEBUG;
+exports.DownloadState = DownloadState;

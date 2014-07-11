@@ -121,7 +121,7 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
                         console.time("checking");
                         global.complete_socket++;
                         if (global.complete_socket === global.available_clients.length) {
-                            global.Status.emit("complete");
+                            global.StatusEmitter.emit("complete");
                         }
                     }
                 }

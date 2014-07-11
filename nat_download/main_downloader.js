@@ -3,13 +3,21 @@ var nat_client = require("./nat-client.js"),
     download = require("./download.js"),
     nat_client = require("./nat-client.js"),
     EventEmitter = require('events').EventEmitter,
-    path = require('path');
+    path = require('path'),
+    BSON = require('buffalo');
 
 var NATTYPE = settings.NATTYPE,
     BLOCK_SIZE = settings.BLOCK_SIZE,
     unit_delay_time = settings.unit_delay_time,
     BLOCK_IN_PART = settings.BLOCK_IN_PART,
     partsize = settings.partsize;
+
+//状态
+var DOWNLOAD_OVER = settings.DownloadState['DOWNLOAD_OVER'],
+    DOWNLOADING = settings.DownloadState['DOWNLOADING'],
+    CANCELED = settings.DownloadState['CANCELED'],
+    PAUSED = settings.DownloadState['PAUSED'],
+    DOWNLOAD_ERR = settings.DownloadState['DOWNLOAD_ERR'];
 
 
 function check_debug_input() { // only apply in DEBUG mode
@@ -31,6 +39,30 @@ function check_debug_input() { // only apply in DEBUG mode
 (function main() {
 
     //*****************************  initialization START ********************************
+    // 下载进程退出时, 向主进程传递必要的信息并且写入BSON文件
+    if (!settings.DEBUG) {
+        function record_download_states() {
+            var data_to_record = {
+                'download_record': global.download_record,
+                'tobe_check': global.tobe_check,
+                'checksum_record': global.checksum_record,
+                'complete_socket': global.complete_socket,
+                'status': global.status
+            }
+            process.send(data_to_record);
+            BSON.serialize(data_to_record);
+            // TODO 写入文件以及在初始化阶段读取states
+        }
+        process.on('uncaughtException', function (err) {
+            record_download_states();
+            console.log('Caught exception: ' + err);
+        });
+        process.on('exit', function (code) {
+            record_download_states();
+            console.log("Exit code: " + code);
+        });
+    }
+
     var uid_list = [];
     var test_nat_type = null; // DEBUG=false, test_nat_type就是null
     if (settings.DEBUG) { // laike9m测试中...
@@ -44,7 +76,7 @@ function check_debug_input() { // only apply in DEBUG mode
         global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
         global.nat_server_port = 1111;
     }
-    else {
+    else { // 实际运行, 从主控进程获取参数
         var argv = process.argv;
         global.source_file = argv[2];
         global.filesize = parseInt(argv[3]);
@@ -68,7 +100,7 @@ function check_debug_input() { // only apply in DEBUG mode
     fs.open(global.download_file, "a+", function(err, fd2) {
         global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
     });
-    //*****************************  initialization END ********************************
+    //****************************** initialization END ********************************
 
 
     //****************************** NAT traverse START ********************************
@@ -137,13 +169,14 @@ function check_debug_input() { // only apply in DEBUG mode
     global.tobe_check = [];// 记录未校验过的块, 校验通过则删除这个blockID
     global.checksum_record = []; // 保存各块的校验和
     global.complete_socket = 0; // 下载完了自己的part_queue的socket计数
-    global.Status = EventEmitter(); // 是否下载完成.
-    /************每个文件下载开一个process, 所以弄成global也没问题***********************/
+    global.StatusEmitter = EventEmitter(); // 是否下载完成.
+    global.status = DOWNLOADING;
+    /*********每个文件下载开一个process, 所以弄成global也没问题***********/
     for (var i=0; i<totalblocks; i++) {
         global.tobe_check[i] = i;
     }
-    global.Status.on("complete", function() {
-        check(available_clients, global.tobe_check);  // 下载完成, 回调函数中开始校验
+    global.StatusEmitter.on("complete", function() {
+        check(available_clients, global.tobe_check);  // 在下载完成的回调函数中开始校验
     })
     available_clients.forEach(function(client) {
         download.socket_download(client.socket, client.target.ip, client.target.port);
