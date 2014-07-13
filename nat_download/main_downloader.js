@@ -54,12 +54,24 @@ function check_debug_input() { // only apply in DEBUG mode
             // TODO 写入文件以及在初始化阶段读取states
         }
         process.on('uncaughtException', function (err) {
+            global.status = DOWNLOAD_ERR;
             record_download_states();
             console.log('Caught exception: ' + err);
         });
         process.on('exit', function (code) {
             record_download_states();
             console.log("Exit code: " + code);
+        });
+        process.on("message", function(msg) { // msg from control process
+            /* 主进程发送的控制信息
+            *  stop, continue,
+            */
+            if (msg === "stop")
+                global.status = PAUSED;
+            else if (msg === "continue")
+                global.status = DOWNLOADING;
+            else
+                console.log("get invalid control message");
         });
     }
 

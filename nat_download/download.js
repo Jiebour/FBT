@@ -6,11 +6,16 @@ var dgram = require('dgram'),
     settings = require('./settings'),
     xxhash = require('xxhash');
 
-
 var BLOCK_SIZE = settings.BLOCK_SIZE,
     unit_delay_time = settings.unit_delay_time,
     BLOCK_IN_PART = settings.BLOCK_IN_PART,
     partsize = settings.partsize;
+
+var DOWNLOAD_OVER = settings.DownloadState['DOWNLOAD_OVER'],
+    DOWNLOADING = settings.DownloadState['DOWNLOADING'],
+    CANCELED = settings.DownloadState['CANCELED'],
+    PAUSED = settings.DownloadState['PAUSED'],
+    DOWNLOAD_ERR = settings.DownloadState['DOWNLOAD_ERR'];
 
 
 function addEventListener(socket, remoteFile, localFile, congestion) {
@@ -77,6 +82,9 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
     download_part(socket, part_queue[index], ip, port);
     var interval_obj = setInterval(function(){
         // congestion代表将接收到的块数量, 如果太大, 说明重发请求多, 接收到的少, 暂停重发进行空循环
+        if (global.status !== DOWNLOADING)
+            return;
+
         if (congestion.value <= last_congestion.value &&
         utils.arrayEqual(global.download_record, global.last_download_record)){
             // 这一次接收已经结束
@@ -121,6 +129,7 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
                         console.time("checking");
                         global.complete_socket++;
                         if (global.complete_socket === global.available_clients.length) {
+                            global.status = DOWNLOAD_OVER;
                             global.StatusEmitter.emit("complete");
                         }
                     }
