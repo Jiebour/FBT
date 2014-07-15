@@ -163,6 +163,8 @@ outline: none;
         </ul>
       </li>
 
+      <li><a href="javascript:void(0)" data-toggle="modal" data-target="#settingModal"><span class="glyphicon glyphicon-cog"></span></a></li>
+
           </ul>
 
         </div><!--/.nav-collapse -->
@@ -456,6 +458,90 @@ outline: none;
 </div><!-- /.modal -->
 
 
+
+
+<!-- Modal设置 -->
+<div class="modal fade" id="settingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <div class="row">
+          <div class="col-xs-2"><img src="img/fbtLogo60.png" class="img-responsive"></div>
+          <div class="col-xs-9"><h5>FBT: 快乐源于 <span style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span></h5></div>
+        </div>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+
+      <div class="row">
+          <div class="col-xs-4">
+          <label class="checkbox" for="checkbox1">
+            <input type="checkbox" value="" id="checkbox1" data-toggle="checkbox">
+            开机时自动登录
+          </label>
+          </div>
+
+          <div class="col-xs-4">
+          <label class="checkbox" for="checkbox2">
+            <input type="checkbox" value="" id="checkbox2" data-toggle="checkbox">
+            退出时最小化到托盘
+          </label>
+          </div>
+
+          <div class="col-xs-4">
+          <label class="checkbox" for="checkbox3">
+            <input type="checkbox" value="" id="checkbox3" data-toggle="checkbox">
+            不接受陌生人消息
+          </label>
+          </div>
+      </div>
+
+
+      <div class="row">
+          <div class="col-xs-4">
+          <label class="checkbox" for="checkbox4">
+            <input type="checkbox" value="" id="checkbox4" data-toggle="checkbox">
+            开启免打扰模式
+          </label>
+          </div>
+
+          <div class="col-xs-4">
+          <label class="checkbox" for="checkbox5">
+            <input type="checkbox" value="" id="checkbox5" data-toggle="checkbox">
+            开启后台加速模式
+          </label>
+          </div>
+
+          <div class="col-xs-4">
+          <label class="checkbox" for="checkbox6">
+            <input type="checkbox" value="" id="checkbox6" data-toggle="checkbox">
+            下载完成后提醒
+          </label>
+          </div>
+      </div>
+
+
+
+        </div>
+
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default">恢复默认</button>
+        <button type="button" class="btn btn-primary" onclick="saveSettings();">保存设置</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+
+
+
 <!--
 <div style="width:100%; background-color: #ecf0f1; height: 66px;"></div>
 -->
@@ -522,6 +608,11 @@ function pause(th){
   }else{
     th.className = 'glyphicon glyphicon-play';
   }
+}
+
+function saveSettings(){
+  alert("保存成功！");
+  $('#settingModal').modal('hide');
 }
 </script>
 
