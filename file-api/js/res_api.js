@@ -84,10 +84,18 @@ function watch_allres(res_info_collection, window) {
         if (err)
             console.log(err.message);
         docs.forEach(function(doc){
-            utils.createMonitor(doc, global.monitors);
-            // use jquery in nodejs
-            $(window.document).find("#res").prepend("<input type=\"checkbox\" name=\"resources\" value=\""+
-                doc.path + "\">" + doc.path + "<br />");
+            fs.exists(doc.path, function(exists){
+                if (exists) {
+                    utils.createMonitor(doc, global.monitors);
+                    // use jquery in nodejs
+                    $(window.document).find("#res").prepend(
+                        "<input type=\"checkbox\" name=\"resources\" value=\""
+                        + doc.path + "\">" + doc.path + "<br />");
+                }
+                else {
+                    // 文件已删除, 但是数据库中还存在
+                }
+            });
         });
     });
 }

@@ -170,7 +170,7 @@ function update_page_content(json, extra) {
 function createMonitor(newDoc, monitors) {
 
     function is_watch_file(watchfile, f) {
-        return path.normalize(watchfile) == path.normalize(f);
+        return path.normalize(watchfile) === path.normalize(f);
     }
 
     function createEventListener(monitor, res_path) {
@@ -205,7 +205,7 @@ function createMonitor(newDoc, monitors) {
         watch_root = path.dirname(res_path);
 
     watch.createMonitor(watch_root, {'filter': function(f){
-        return (path.basename(res_path) == path.basename(f))
+        return (path.basename(res_path) === path.basename(f))
     }}, function(monitor){
         monitors[res_path] = monitor;
         createEventListener(monitor, res_path);
@@ -227,13 +227,15 @@ function update_monitors(events, monitors) {
             break;
         case 'remove':
             var path = events['remove'].path;
-            monitors[path].stop();
-            setTimeout(function(){
-                delete monitors[path];
-            }, 2000);
-            console.log("monitors after removing:");
-            for (var f in monitors)
-                console.log(monitors[f]);
+            if (path in monitors) {
+                monitors[path].stop();
+                setTimeout(function () {
+                    delete monitors[path];
+                }, 2000);
+                console.log("monitors after removing:");
+                for (var f in monitors)
+                    console.log(monitors[f]);
+            }
             break;
         case 'store':
             var newDoc = events['store'];  // newDoc is res_info
@@ -249,17 +251,19 @@ function check_res_update(res_info, res_hash, res_info_collection, res_hash_coll
     * this function should not operate on monitors, but only update db
      */
     var path = res_info.path;
-    try {
-        fs.stat(path, function(err, stats){
-            if (res_info.mtime != stats['mtime'].getTime()) {
-                // 一旦mtime不同, 再检查hash, 如果相同, 那么只需要更新res_info的mtime
-                // 否则得调用store_res_info, store_res_hash进行更新
-                var hasher = new xxhash(res_hash.seed);
-                fs.createReadStream(path)
-                    .on('data', function(data) {
+    fs.exists(path, function(exists){
+        if (exists) {
+            fs.stat(path, function(err, stats){
+                if (res_info.mtime != stats['mtime'].getTime()) {
+                    // 一旦mtime不同, 再检查hash, 如果相同, 那么只需要更新res_info的mtime
+                    // 否则得调用store_res_info, store_res_hash进行更新
+                    console.log(res_hash.seed);
+                    var hasher = new xxhash(res_hash.seed);
+                    fs.createReadStream(path)
+                    .on('data', function (data) {
                         hasher.update(data);
                     })
-                    .on('end', function(){
+                    .on('end', function () {
                         var hashvalue = hasher.digest();
                         if (hashvalue == res_hash.verify) {
                             console.log(path, "modified but not changed");
@@ -277,15 +281,14 @@ function check_res_update(res_info, res_hash, res_info_collection, res_hash_coll
                             store_res_hash(path, settings.seed, res_hash_collection);
                         }
                     });
-            }
-        });
-    }
-    catch(e) {
-        if (e.code === 'ENOENT')
+                }
+            });
+        }
+        else { // 文件不存在, 说明在客户端关闭期间已经删除, 故从数据库里也删除
+            remove_res_infohash(path, global.monitors, res_info_collection, res_hash_collection);
             console.log(path + ' has been removed.');
-        else
-            throw e;
-    }
+        }
+    });
 }
 
 
