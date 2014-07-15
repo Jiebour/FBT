@@ -144,8 +144,8 @@ function check(socket) {
     if (tobe_check.length === 0) { // 所有block都通过校验
         console.log("checking complete");
         console.timeEnd("checking");
-        console.log(xxhash.hash(fs.readFileSync(source_file), 0xAAAA));
-        console.log(xxhash.hash(fs.readFileSync(download_file), 0xAAAA));
+        console.log(xxhash.hash(fs.readFileSync(source_file), settings.seed));
+        console.log(xxhash.hash(fs.readFileSync(download_file), settings.seed));
         console.timeEnd("Whole");
         setTimeout(function(){
             process.exit(0);

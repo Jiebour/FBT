@@ -82,7 +82,7 @@ function check_debug_input() { // only apply in DEBUG mode
         global.download_file = 'test-local.mp4';
         global.filesize = 126401476;
         global.hash = 2450791387;
-        uid_list = [1, 2]; // TODO, 可供测试的机器有几台？
+        uid_list = ['1', '2']; // TODO, 可供测试的机器有几台？
         test_nat_type = check_debug_input(); // DEBUG 模式下, 才需要指定test_nat_type
 
         global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
@@ -120,7 +120,8 @@ function check_debug_input() { // only apply in DEBUG mode
     global.available_clients = [];
     global.traverse_complete_count = 0 // 完成穿透的socket计数, 和is_available同时更新
     for (var i = 0; i < uid_list.length; i++) {
-        create_download_client(test_nat_type, uid_list[i]);
+        pool = uid_list[i].toString() + ':' + global.hash.toString();
+        create_download_client(test_nat_type, pool);
     }
     var times = 0
     var last_traverse_complete_count = 0;
@@ -202,8 +203,8 @@ function check(available_clients, tobe_check) {
     if (tobe_check.length === 0) { // 所有block都通过校验
         console.log("checking complete");
         console.timeEnd("checking");
-        console.log(get_sourcefile_hash()); // TODO
-        console.log(xxhash.hash(fs.readFileSync(globbal.download_file), 0xAAAA));
+        console.log(global.hash);
+        console.log(xxhash.hash(fs.readFileSync(global.download_file), settings.seed));
         setTimeout(function(){
             process.exit(0);
         }, unit_delay_time);

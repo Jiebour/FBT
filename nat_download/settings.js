@@ -2,7 +2,8 @@ var fs = require('fs');
 
 var BLOCK_SIZE = 4096,  // bytes
     BLOCK_IN_PART = 1024,
-    partsize = BLOCK_IN_PART * BLOCK_SIZE;
+    partsize = BLOCK_IN_PART * BLOCK_SIZE,
+    seed = 0xAAAA;
 
 // delay time
 var unit_delay_time = 2000; // 该值最好和文件大小关联上
@@ -66,3 +67,4 @@ exports.SymmetricNAT = SymmetricNAT;
 exports.NATTYPE = NATTYPE;
 exports.DEBUG = DEBUG;
 exports.DownloadState = DownloadState;
+exports.seed = seed;
