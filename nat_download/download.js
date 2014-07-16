@@ -100,6 +100,14 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
             if (redownloadcount === 0){
                 if (utils.allOne(global.download_record.slice(part_first_block, part_last_block))) {
                     clearInterval(interval_obj);
+                    var part_index_in_parts_left = global.parts_left.indexOf(part_queue[index]);
+                    if (index > -1) {
+                        global.parts_left.splice(index, 1); // 更新parts_left
+                    }
+                    else {
+                        // 进入这里说明某个地方出错了
+                        console.log(part_queue[index] + " already been downloaded??");
+                    }
                     // return_value一般是undefined, 结束时是1
                     var return_value = verify_part(socket, index + 1, part_queue,
                                         ip, port, congestion, last_congestion);

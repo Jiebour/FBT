@@ -10,7 +10,8 @@ var NATTYPE = settings.NATTYPE,
     BLOCK_SIZE = settings.BLOCK_SIZE,
     unit_delay_time = settings.unit_delay_time,
     BLOCK_IN_PART = settings.BLOCK_IN_PART,
-    partsize = settings.partsize;
+    partsize = settings.partsize,
+    DOWNLOAD_PART_STATE_FILE = settings.DOWNLOAD_PART_STATE_FILE;
 
 //状态
 var DOWNLOAD_OVER = settings.DownloadState['DOWNLOAD_OVER'],
@@ -50,8 +51,7 @@ function check_debug_input() { // only apply in DEBUG mode
                 'status': global.status
             }
             process.send(data_to_record);
-            BSON.serialize(data_to_record);
-            // TODO 写入文件以及在初始化阶段读取states
+            saveDownloadState();
         }
         process.on('uncaughtException', function (err) {
             global.status = DOWNLOAD_ERR;
@@ -107,7 +107,18 @@ function check_debug_input() { // only apply in DEBUG mode
     }
 
     global.totalblocks = parseInt((global.filesize+BLOCK_SIZE-1)/BLOCK_SIZE);
-    global.totalparts = parseInt((global.filesize+partsize-1)/partsize);
+    var totalparts = parseInt((global.filesize+partsize-1)/partsize);
+    // 记录未下载的part, 更新filePartsDownloadLeft时使用
+    global.parts_left = loadDownloadState();
+    if (global.parts_left !== null) {
+        totalparts = global.parts_left.length; // totalparts设置成剩余part的数量
+    }
+    else {
+        global.parts_left = [];
+        for (var i=0; i<totalparts; i++) {
+            global.parts_left.push(i); // 全新的下载, parts_left为所有的parts
+        }
+    }
 
     fs.open(global.download_file, "a+", function(err, fd2) {
         global.fd2 = fd2;  // fd2用a+可在文件不存在时创建, 否则无法获取fd, 同时可以断点续传
@@ -162,18 +173,24 @@ function check_debug_input() { // only apply in DEBUG mode
     if (totalparts === parts_less * available_clients.length) {
         parts_more = parts_less; // 正好分完, totalparts整除length
         clients_download_more_amount = 0;
-    }else {
+    } else {
         clients_download_more_amount = totalparts - parts_less * available_clients.length;
         parts_more = parts_less + 1;
     }
     // 对每个client的part_queue做初始化
-    for (var i=0; i < clients_download_more_amount; i++) {
-        for (var j=0; j<parts_more; j++)
-            available_clients[i].part_queue.push(i*parts_more+j);
+    // 如果是全新的下载, 就直接计算partID, 如果是下载剩余部分, 就从parts_left中读取
+    var part_index;
+    for (var i = 0; i < clients_download_more_amount; i++) {
+        for (var j = 0; j < parts_more; j++) {
+            part_index = i * parts_more + j;
+            available_clients[i].part_queue.push(global.parts_left[part_index]);
+        }
     }
-    for (var i=clients_download_more_amount; i < available_clients.length; i++) {
-        for (var j=0; j<parts_less; j++)
-            available_clients[i].part_queue.push(clients_download_more_amount+i*parts_less+j);
+    for (var i = clients_download_more_amount; i < available_clients.length; i++) {
+        for (var j = 0; j < parts_less; j++) {
+            part_index = clients_download_more_amount + i * parts_less + j;
+            available_clients[i].part_queue.push(global.parts_left[part_index]);
+        }
     }
 
     /****************************** Download START **********************************/
@@ -190,10 +207,10 @@ function check_debug_input() { // only apply in DEBUG mode
     }
     global.StatusEmitter.on("complete", function() {
         check(available_clients, global.tobe_check);  // 在下载完成的回调函数中开始校验
-    })
+    });
     available_clients.forEach(function(client) {
         download.socket_download(client.socket, client.target.ip, client.target.port);
-    })
+    });
 
 })();
 
@@ -247,3 +264,28 @@ function create_download_client(test_nat_type, pool) {
     global.available_clients.push(client);
 };
 
+function loadDownloadState(){
+    if (fs.existsSync(DOWNLOAD_PART_STATE_FILE)) {
+        var data = fs.readFileSync(DOWNLOAD_PART_STATE_FILE);
+        var filePartsDownloadLeft = JSON.parse(data);
+        global.filePartsDownloadLeft = filePartsDownloadLeft;
+        if (global.hash in filePartsDownloadLeft) {
+            var parts_left = filePartsDownloadLeft[global.hash];
+            console.log("loadDownloadState ok. parts left: %j", parts_left);
+            return parts_left;
+        }
+    }
+    else {
+        global.filePartsDownloadLeft = {};
+    }
+    return null;
+}
+
+function saveDownloadState(){
+    // filePartsDownloadLeft 以文件hash作为key
+    global.filePartsDownloadLeft[global.hash] = global.parts_left;
+    fs.writeFileSync(
+        DOWNLOAD_PART_STATE_FILE,
+        JSON.stringify(global.filePartsDownloadLeft, null, 2)
+    );
+}
