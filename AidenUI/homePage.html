@@ -46,8 +46,8 @@
   textarea:focus{outline: #1abc9c auto 4px;}
   .tfh{padding-top: 6px;}
 
-  .score{float: left; width: 50%; padding-bottom: 6px; color: red;}
-  .pzx{display: inline-block; width: 50%; text-align: center; padding-bottom: 6px;}
+  .score{float: left; width: 33%; padding-bottom: 6px; color: red;}
+  .pzx{display: inline-block; width: 33%; text-align: center; padding-bottom: 6px;}
 
 
 .fileInput{border: none; font-size: 18px; width: 100%;}
@@ -91,6 +91,9 @@ outline: none;
         .badge{background: red;}
 
         .nPLR{padding-right: 0px; padding-left: 0px;}
+
+        .star{}
+        .pstar{font-size: 18px; color: red;}
 
 </style>  
 
@@ -188,6 +191,8 @@ outline: none;
                 评分：9.1 
                 <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment">(查看8888人评论)</a>
               </div>
+
+              <div class="pzx star"><span class="pstar">我来评分：</span></div>
 
             <div class="pzx">
             <a data-toggle="collapse" href="#collapseMyComment">评论| </a>
@@ -443,7 +448,7 @@ outline: none;
       <div class="row">
 
       <div class="col-xs-2 nPLR"><p>我来打分:</p></div>
-        <div class="col-xs-4 nPLR" id="star">
+        <div class="col-xs-4 nPLR star" id="star">
         </div>
         <div class="col-xs-1" id="result"></div>
           <div class="col-xs-3">
@@ -480,7 +485,7 @@ outline: none;
         <div class="row">
 
       <div class="row">
-        <h4>&emsp;常规设置</h4>
+        <h6>&emsp;常规设置</h6>
           <div class="col-xs-4">
           <label class="checkbox" for="checkbox1">
             <input type="checkbox" value="" id="checkbox1" data-toggle="checkbox">
@@ -505,7 +510,7 @@ outline: none;
 
 
       <div class="row">
-      <h4>&emsp;消息设置</h4>
+      <h6>&emsp;消息设置</h6>
           <div class="col-xs-4">
           <label class="checkbox" for="checkbox4">
             <input type="checkbox" value="" id="checkbox4" data-toggle="checkbox">
@@ -531,7 +536,7 @@ outline: none;
 
 
       <div class="row">
-      <h4>&emsp;下载设置</h4>
+      <h6>&emsp;下载设置</h6>
           <div class="col-xs-4">
           <label class="checkbox" for="checkbox7">
             <input type="checkbox" value="" id="checkbox7" data-toggle="checkbox">
@@ -589,7 +594,7 @@ outline: none;
 
 
 
-        $('#star').raty({
+        $('.star').raty({
 
             half: true,
 
