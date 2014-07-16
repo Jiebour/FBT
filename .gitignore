@@ -6,3 +6,11 @@ file-download/node_modules/
 nat_download/node_modules/*
 file-download/*local*
 *.mp4
+
+# add by bone
+.gitignore
+*.swp
+*~
+*.json
+*.pyc
+*.exe
