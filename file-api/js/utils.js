@@ -278,7 +278,16 @@ function check_res_update(res_info, res_hash, res_info_collection, res_hash_coll
                             console.log(path, "modified and changed");
                             store_res_info(path, [], res_info_collection, update_page_content);
                             // don't touch monitors
-                            store_res_hash(path, settings.seed, res_hash_collection);
+                            // 直接创建newDoc避免重复计算hashvalue
+                            var newDoc = {
+                                'path': path.normalize(path),
+                                'verify': hashvalue
+                            };
+                            res_hash_collection.update(
+                                {'path': path.normalize(path)},
+                                newDoc,
+                                {'upsert': true}
+                            );
                         }
                     });
                 }
