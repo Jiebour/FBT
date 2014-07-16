@@ -1,6 +1,6 @@
 var dgram = require("dgram"),
     fs = require("fs"),
-    bson = require('buffalo'),
+    BSON = require('buffalo'),
     utils = require('./utils'),
     settings = require('./settings');
 
@@ -9,9 +9,8 @@ var BLOCK_SIZE = settings.BLOCK_SIZE,
 
 
 function addEventListener(socket) {
-    var toSend = new Buffer(0);
     socket.on('message', function (data, rinfo){
-        var jsonData = bson.parse(data);
+        var jsonData = BSON.parse(data);
         if (utils.hasFileIndex(jsonData)) {
             var blockID = jsonData["index"];
             var readStream = fs.createReadStream(
@@ -23,7 +22,7 @@ function addEventListener(socket) {
             );
             readStream.on('data', function(data) {
                 console.log('transfer data....', blockID);
-                toSend = bson.serialize({
+                var toSend = BSON.serialize({
                      header: "media",
                      index: blockID,
                      content: data,
@@ -37,7 +36,7 @@ function addEventListener(socket) {
             });
         }
         else{
-            console.log("Waning: bson is not a file content...");
+            console.log("Waning: BSON is not a file content...");
         }
     });
     socket.on('close', function(){
@@ -51,7 +50,7 @@ function addEventListener(socket) {
 function main(socket){
     // 直接使用之前punch时的socket, 废除之前punching用的处理, 添加新处理
     socket.removeAllListeners("message");
-    addEventListener(server1);
+    addEventListener(socket);
     console.log("uploader listening on " + socket.address().port);
     console.log("prepare to upload");
 }

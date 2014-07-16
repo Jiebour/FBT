@@ -82,7 +82,7 @@ function check_debug_input() { // only apply in DEBUG mode
         global.download_file = 'test-local.mp4';
         global.filesize = 126401476;
         global.hash = 2450791387;
-        uid_list = ['1', '2']; // TODO, 可供测试的机器有几台？
+        uid_list = ['1']; // TODO, 可供测试的机器有几台？
         test_nat_type = check_debug_input(); // DEBUG 模式下, 才需要指定test_nat_type
 
         global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
@@ -250,10 +250,10 @@ function create_download_client(test_nat_type, pool) {
             console.log(nat_type);
             if (nat_type_id !== -1){
                 var client = new nat_client.Client(nat_type, pool);
-                client.request_for_connection(nat_type_id); // chat得
+                client.request_for_connection(nat_type_id);
             }
             else {
-                // 如果不是这四种NAT类型, 如何处理?
+                // TODO: 如果不是这四种NAT类型, 如何处理?
             }
         });
     }
