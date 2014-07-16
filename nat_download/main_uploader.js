@@ -100,7 +100,7 @@ function upload_main(source_file, uid, hash){
     global.traverse_complete_count = 0 // 完成穿透的socket计数, 和is_available同时更新
     var pool = uid.toString() + ':' + hash.toString();
     var upload_client = create_download_client(test_nat_type, pool);
-    
+
     var interval_obj = setInterval(function(){
         if (global.traverse_complete_count === 1) {
             clearInterval(interval_obj);

@@ -53,11 +53,11 @@ function check_debug_input() { // only apply in DEBUG mode
             process.send(data_to_record);
             saveDownloadState();
         }
-        process.on('uncaughtException', function (err) {
-            global.status = DOWNLOAD_ERR;
-            record_download_states();
-            console.log('Caught exception: ' + err);
-        });
+//        process.on('uncaughtException', function (err) {
+//            global.status = DOWNLOAD_ERR;
+//            record_download_states();
+//            console.log('Caught exception: ' + err);
+//        });
         process.on('exit', function (code) {
             record_download_states();
             console.log("Exit code: " + code);
