@@ -14,3 +14,4 @@ file-download/*local*
 *.json
 *.pyc
 *.exe
+run.bat
