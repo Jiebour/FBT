@@ -1,7 +1,0 @@
-运行方法，win下将此目录直接拖到nw.exe即可运行！
-
-如果是IPV6环境，修改AidenUI下homePage.html中代码：
-IPV4=true;//set false to IPV6
-为
-IPV4=false;
-
