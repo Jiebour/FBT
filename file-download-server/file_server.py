@@ -33,8 +33,10 @@ class Application(tornado.web.Application):
 
             (r"/upload_resource", ResourceUploaHandler),
             (r"/view_resource", ResourceViewHandler),
+            (r"/view_my_resource", MyResourceViewHandler),
             (r"/debug/view_resource", ResourceViewDebugHandler),
             (r"/download_resource", ResourceDownloadHandler),
+            (r"/download_over", ResourceDownloadOverHandler),
             (r"/search_resource", ResourceSearchHandler),
 
             (r"/request_ip", GetPublicIPHandler),
@@ -199,14 +201,12 @@ class ResourceDownloadHandler(tornado.web.RequestHandler):
         user = get_current_user(self)
         if not user:
             user = self.get_argument("user", None)  # mock user since node client has no cookie
-        uid = None
-        if user:
-            try:
-                uid = int(user)
-            except ValueError:
-                err = json.dumps({"err": 4, "what": "uid invalid"})
-                self.write(err)
-                return
+        try:
+            uid = int(user)
+        except:
+            err = json.dumps({"err": 4, "what": "uid invalid"})
+            self.write(err)
+            return
         file_hash = self.get_argument("file_hash", None)  #default is public
         if not file_hash:
             err = json.dumps({"err": 5, "what": "file hash err"})
@@ -217,15 +217,35 @@ class ResourceDownloadHandler(tornado.web.RequestHandler):
         ok = json.dumps({"err": 0, "file_info": res_header, "owners": online_owners})
         self.write(ok)
 
+class ResourceDownloadOverHandler(tornado.web.RequestHandler):
+    def get(self):
+        #user is uid
+        user = get_current_user(self)
+        if not user:
+            user = self.get_argument("user", None)  # mock user since node client has no cookie
+        try:
+            uid = int(user)
+        except:
+            err = json.dumps({"err": 4, "what": "uid invalid"})
+            self.write(err)
+            return
+        file_hash = self.get_argument("file_hash", None)  #default is public
+        if not file_hash:
+            err = json.dumps({"err": 5, "what": "file hash err"})
+            self.write(err)
+            return
+        ResourcesCache.add_owner(file_hash,uid)
+        ResourcesCache.increase_download_num(file_hash)
+        ok = json.dumps({"err": 0})
+        self.write(ok)
+
 class ResourceViewHandler(tornado.web.RequestHandler):
     def get(self):
         resource_list = ResourcesCache.get_resources_overview()
         resource_data = json.dumps({"err": 0, "resource_list": resource_list})
         self.write(resource_data)
 
-
-class ResourceViewDebugHandler(tornado.web.RequestHandler):
-    class SetEncoder(json.JSONEncoder):
+class SetEncoder(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, set):
                 return list(obj)
@@ -233,9 +253,26 @@ class ResourceViewDebugHandler(tornado.web.RequestHandler):
             #   return 'CustomSomethingRepresentation'
             return json.JSONEncoder.default(self, obj)
 
+class MyResourceViewHandler(tornado.web.RequestHandler):
+    def get(self):
+        #user is uid
+        user = get_current_user(self)
+        if not user:
+            user = self.get_argument("user", None)  # mock user since node client has no cookie
+        try:
+            uid = int(user)
+        except:
+            err = json.dumps({"err": 4, "what": "uid invalid"})
+            self.write(err)
+            return
+        resource_list = ResourcesCache.get_my_resource(uid)
+        resource_data = json.dumps({"err": 0, "resource_list": resource_list}, cls=SetEncoder)
+        self.write(resource_data)
+
+class ResourceViewDebugHandler(tornado.web.RequestHandler):
     def get(self):
         resource_list = ResourcesCache.get_resources_list()
-        resource_data = json.dumps({"err": 0, "resource_list": resource_list}, cls=ResourceViewHandler.SetEncoder)
+        resource_data = json.dumps({"err": 0, "resource_list": resource_list}, cls=SetEncoder)
         self.write(resource_data)
 
 

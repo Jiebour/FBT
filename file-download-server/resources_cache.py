@@ -19,6 +19,7 @@ class ResourcesCache(object):
     #   owners: {uid1: is_public,uid2: is_private,...}
     #   grades: {uid1: grade1, uid2: grade2,...}
     #   comments: [{who: user_name1, uid: uid1, content: the content of comment, ctime: 2014-4-3},...]
+    #   download_num: 123
     #   },
     #  file_hash2: ....}
     _resources_of_user = dict()  #such as {uid1:[file_hash1,file_hash2],uid2:[file_hash3,file_hash3]}
@@ -27,6 +28,13 @@ class ResourcesCache(object):
     @classmethod
     def get_resources_list(cls):
         return cls._all_resources
+
+    @classmethod
+    def get_my_resource(cls,uid):
+        my_resource=[]
+        if uid in cls._resources_of_user:
+            my_resource=list(cls._resources_of_user[uid])
+        return my_resource
 
     @classmethod
     def get_resources_overview(cls):
@@ -42,6 +50,9 @@ class ResourcesCache(object):
             ret[k]['avg_grade'] = (sum(cls._all_resources[k]['grades'].itervalues()) + 0.0) / (
                 len(cls._all_resources[k]['grades']))
             ret[k]['comments'] = cls._all_resources[k]['comments']
+            if "download_num" not in cls._all_resources[k]:
+                cls._all_resources[k]["download_num"]=0
+            ret[k]['download_num'] = cls._all_resources[k]['download_num']
         return ret
 
     @classmethod
@@ -82,6 +93,25 @@ class ResourcesCache(object):
         cls._add_resource_grade(file_hash, uid, res_grade)
         cls._add_resource_comment(file_hash, uid, user_name, comment)
         cls._add_tags_for_resource(file_hash, tags)
+
+    @classmethod
+    def add_owner(cls,file_hash, uid):
+        #ResourcesCache.add_owner(file_hash,uid)
+        #ResourcesCache.increase_download_num(file_hash)
+        assert (uid >= 0)
+        assert (len(file_hash) > 0)
+        if file_hash in cls._all_resources:
+            cls._all_resources[file_hash]["owners"][uid]=1 #default is public
+            cls._add_to_my_resource_list(uid, file_hash)
+
+    @classmethod
+    def increase_download_num(cls,file_hash):
+        assert (len(file_hash) > 0)
+        if file_hash in cls._all_resources:
+            if "download_num" not in cls._all_resources[file_hash]:
+                cls._all_resources[file_hash]["download_num"]=0
+            else:
+                cls._all_resources[file_hash]["download_num"]+=1
 
     @classmethod
     def _add_to_my_resource_list(cls, uid, file_hash):
