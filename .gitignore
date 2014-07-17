@@ -15,4 +15,3 @@ file-download/*local*
 *.pyc
 *.exe
 run.bat
-file-download-client.zip
