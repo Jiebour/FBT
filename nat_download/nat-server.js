@@ -11,7 +11,7 @@ var argv = process.argv.slice(1);// 去掉'node'就和py相同了
 function check_input() {
     if (argv.length != 2) {
         console.log("usage: ndoe server.js port");
-        exit(1);
+        process.exit(1);
     }
     else {
         function isNormalInteger(str) {
@@ -83,7 +83,7 @@ function main(port) {
                 respond = utils.addr2bytes(b, nat_type_id_b);
                 console.log(a);
                 sock.send(respond, 0, respond.length, a.port, a.ip);
-                console.log("linked" + pool);
+                console.log("linked " + pool);
                 delete poolqueue[pool];
             }
             else {

@@ -4,6 +4,7 @@ var nat_client = require("./nat-client.js"),
     nat_client = require("./nat-client.js"),
     EventEmitter = require('events').EventEmitter,
     path = require('path'),
+    fs = require('fs'),
     BSON = require('buffalo');
 
 var NATTYPE = settings.NATTYPE,
@@ -85,8 +86,9 @@ function check_debug_input() { // only apply in DEBUG mode
         uid_list = ['1']; // TODO, 可供测试的机器有几台？
         test_nat_type = check_debug_input(); // DEBUG 模式下, 才需要指定test_nat_type
 
-        global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
-        global.nat_server_port = 1111;
+        global.nat_server_ip = "127.0.0.1"; // local test
+//        global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
+        global.nat_server_port = 10000;
     }
     else { // 实际运行, 从主控进程获取参数
         var argv = process.argv;
@@ -136,10 +138,13 @@ function check_debug_input() { // only apply in DEBUG mode
     }
     var times = 0
     var last_traverse_complete_count = 0;
+    var traverse_complete_emitter = new EventEmitter();
     var interval_obj = setInterval(function(){
-        if (times >= 3 || global.traverse_complete_count === socket_amount) {
+        if (times >= 5 || global.traverse_complete_count === socket_amount) {
             clearInterval(interval_obj);
             // 连续三次穿透的socket未增加或者已经全部穿透, 认为NAT穿透步骤结束
+            console.log("traverse complete!");
+            traverse_complete_emitter.emit("complete");
         }
         else if (global.traverse_complete_count > last_traverse_complete_count) {
             last_traverse_complete_count = global.traverse_complete_count;
@@ -148,70 +153,71 @@ function check_debug_input() { // only apply in DEBUG mode
         else {
             times++;
         }
-    }, 500);
+    }, 5000);
 
-    var available_clients = global.available_clients;
-    for (var i = available_clients.length-1; i >= 0; i--) {
-        if (available_clients[i].is_available) {
-            available_clients[i].part_queue = [];
+    traverse_complete_emitter.on("complete", function() {
+        var available_clients = global.available_clients;
+        for (var i = available_clients.length - 1; i >= 0; i--) {
+            if (available_clients[i].is_available) {
+                available_clients[i].part_queue = [];
+            }
+            else {
+                available_clients.splice(i, 1); // 从clients列表中删除不可用的clients
+            }
         }
-        else {
-            available_clients.splice(i, 1); // 从clients列表中删除不可用的clients
-        }
-    }
-    //****************************** NAT traverse END ********************************
+        //****************************** NAT traverse END ********************************
 
-    /*
-    把要下载的part分配给各个可用的socket
-    每个part_queue包含的parts数量有两种, more/less, more=less or less+1
-    提前分配好每个client.part_queue的part数量, 然后从第一个part开始分配
-    这样可以保证每一个part_queue里的partID都是连续的
-     */
-    var parts_less = parseInt(totalparts/available_clients.length);
-    var parts_more;
-    var clients_download_more_amount; // 下多parts的client数量
-    if (totalparts === parts_less * available_clients.length) {
-        parts_more = parts_less; // 正好分完, totalparts整除length
-        clients_download_more_amount = 0;
-    } else {
-        clients_download_more_amount = totalparts - parts_less * available_clients.length;
-        parts_more = parts_less + 1;
-    }
-    // 对每个client的part_queue做初始化
-    // 如果是全新的下载, 就直接计算partID, 如果是下载剩余部分, 就从parts_left中读取
-    var part_index;
-    for (var i = 0; i < clients_download_more_amount; i++) {
-        for (var j = 0; j < parts_more; j++) {
-            part_index = i * parts_more + j;
-            available_clients[i].part_queue.push(global.parts_left[part_index]);
+        /*
+         把要下载的part分配给各个可用的socket
+         每个part_queue包含的parts数量有两种, more/less, more=less or less+1
+         提前分配好每个client.part_queue的part数量, 然后从第一个part开始分配
+         这样可以保证每一个part_queue里的partID都是连续的
+         */
+        var parts_less = parseInt(totalparts / available_clients.length);
+        var parts_more;
+        var clients_download_more_amount; // 下多parts的client数量
+        if (totalparts === parts_less * available_clients.length) {
+            parts_more = parts_less; // 正好分完, totalparts整除length
+            clients_download_more_amount = 0;
+        } else {
+            clients_download_more_amount = totalparts - parts_less * available_clients.length;
+            parts_more = parts_less + 1;
         }
-    }
-    for (var i = clients_download_more_amount; i < available_clients.length; i++) {
-        for (var j = 0; j < parts_less; j++) {
-            part_index = clients_download_more_amount + i * parts_less + j;
-            available_clients[i].part_queue.push(global.parts_left[part_index]);
+        // 对每个client的part_queue做初始化
+        // 如果是全新的下载, 就直接计算partID, 如果是下载剩余部分, 就从parts_left中读取
+        var part_index;
+        for (var i = 0; i < clients_download_more_amount; i++) {
+            for (var j = 0; j < parts_more; j++) {
+                part_index = i * parts_more + j;
+                available_clients[i].part_queue.push(global.parts_left[part_index]);
+            }
         }
-    }
+        for (var i = clients_download_more_amount; i < available_clients.length; i++) {
+            for (var j = 0; j < parts_less; j++) {
+                part_index = clients_download_more_amount + i * parts_less + j;
+                available_clients[i].part_queue.push(global.parts_left[part_index]);
+            }
+        }
 
-    /****************************** Download START **********************************/
-    global.download_record = [];// 记录下载过的块, download_record[blockID]=1
-    global.last_download_record = [];
-    global.tobe_check = [];// 记录未校验过的块, 校验通过则删除这个blockID
-    global.checksum_record = []; // 保存各块的校验和
-    global.complete_socket = 0; // 下载完了自己的part_queue的socket计数
-    global.StatusEmitter = EventEmitter(); // 是否下载完成.
-    global.status = DOWNLOADING;
-    /*********每个文件下载开一个process, 所以弄成global也没问题***********/
-    for (var i=0; i<totalblocks; i++) {
-        global.tobe_check[i] = i;
-    }
-    global.StatusEmitter.on("complete", function() {
-        check(available_clients, global.tobe_check);  // 在下载完成的回调函数中开始校验
+        /****************************** Download START **********************************/
+        global.download_record = [];// 记录下载过的块, download_record[blockID]=1
+        global.last_download_record = [];
+        global.tobe_check = [];// 记录未校验过的块, 校验通过则删除这个blockID
+        global.checksum_record = []; // 保存各块的校验和
+        global.complete_socket = 0; // 下载完了自己的part_queue的socket计数
+        global.StatusEmitter = new EventEmitter(); // 是否下载完成.
+        global.status = DOWNLOADING;
+        /*********每个文件下载开一个process, 所以弄成global也没问题***********/
+        for (var i = 0; i < totalblocks; i++) {
+            global.tobe_check[i] = i;
+        }
+        global.StatusEmitter.on("complete", function () {
+            check(available_clients, global.tobe_check);  // 在下载完成的回调函数中开始校验
+        });
+        available_clients.forEach(function (client) {
+            download.socket_download(client.socket, client.target.ip, client.target.port);
+        });
     });
-    available_clients.forEach(function(client) {
-        download.socket_download(client.socket, client.target.ip, client.target.port);
-    });
-
 })();
 
 
@@ -245,12 +251,14 @@ function create_download_client(test_nat_type, pool) {
     if (test_nat_type === null) {
         var python = require('child_process').spawn(settings.stun_exe);
         python.stdout.on('data', function(data) {
-            var nat_type = data.toString().split(':')[1].trim();
+            var nat_type = data.toString().split(',')[1]; //[space]'Full Cone')
+            nat_type = nat_type.slice(2, nat_type.length - 4);
             var nat_type_id = NATTYPE.indexOf(nat_type);
             console.log(nat_type);
             if (nat_type_id !== -1){
                 var client = new nat_client.Client(nat_type, pool);
                 client.request_for_connection(nat_type_id);
+                global.available_clients.push(client);
             }
             else {
                 // TODO: 如果不是这四种NAT类型, 如何处理?
@@ -260,8 +268,8 @@ function create_download_client(test_nat_type, pool) {
     else { // test mode
         var client = new nat_client.Client(NATTYPE[test_nat_type], pool);
         client.request_for_connection(test_nat_type);
+        global.available_clients.push(client);
     }
-    global.available_clients.push(client);
 };
 
 function loadDownloadState(){

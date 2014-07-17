@@ -14,11 +14,12 @@ function Client(nat_type, pool) { // nat_type, pool are both string
 	var socket = null;
     var target = null; // 对面client
 	var peer_nat_type = null;
-    var is_available = false; // 这个socket是否可用
+    this.is_available = false; // 这个socket是否可用
 
 	this.request_for_connection = function (nat_type_id) {
 		socket = dgram.createSocket("udp4");
 		var msg = new Buffer(pool + ' ' + nat_type_id);  // msg是Buffer
+        console.log(master.port);
         socket.send(msg, 0, msg.length, master.port, master.ip);
         var sendmsg = new Buffer('ok');
         var message;
@@ -33,7 +34,7 @@ function Client(nat_type, pool) { // nat_type, pool are both string
             } else if (msg.length === 7) {
                 var result = utils.bytes2addr(msg);
                 target = {ip: result[0], port: result[1]};
-                peer_nat_type = NATTYPE[result[2]];
+                peer_nat_type = NATTYPE[result[2] - 48]; // 是数字在ascii中的号
                 console.log("connected to %s:%s, its NAT type is %s",
                             result[0], result[1], peer_nat_type);
                 socket.removeListener('message', messageforconnect);
@@ -63,7 +64,7 @@ function Client(nat_type, pool) { // nat_type, pool are both string
         }
         else if (nat_type === FullCone) {
             if (peer_nat_type === FullCone) { // 两边都是fullcone, socket直接可用
-                is_available = true;
+                this.is_available = true;
                 global.traverse_complete_count++; // socket穿透完成, 如果是uploader, 那这个值达到1就OK了
                 console.log("FullCone mode");
             }
@@ -89,7 +90,7 @@ function Client(nat_type, pool) { // nat_type, pool are both string
             }
             if (msg === "done\n") {
                 global.traverse_complete_count++; // 三次握手, socket穿透完成
-                is_available = true;
+                this.is_available = true;
             }
         });
     };
@@ -115,7 +116,7 @@ function Client(nat_type, pool) { // nat_type, pool are both string
                 var text = Buffer("done\n");
                 socket.send(text, 0, text.length, rinfo.port, target.ip);
                 global.traverse_complete_count++;
-                is_available = true;
+                this.is_available = true;
             }
             var msg = msg.toString('utf8');
             process.stdout.write("peer: " + msg);

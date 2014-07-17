@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 
 var BLOCK_SIZE = 4096,  // bytes
     BLOCK_IN_PART = 1024,
