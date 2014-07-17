@@ -151,7 +151,8 @@ function verify_part(socket, index, part_queue, ip, port, congestion, last_conge
 }
 
 
-function socket_download(socket, ip, port){
+function socket_download(client, ip, port){
+    var socket = client.socket;
     socket.removeAllListeners("message");
     console.log("downloader listening on " + socket.address().port);
     console.log("prepare to download");
@@ -160,7 +161,7 @@ function socket_download(socket, ip, port){
     var congestion = {value: BLOCK_IN_PART};
     var last_congestion = {value: BLOCK_IN_PART};
     addEventListener(socket, global.source_file, global.download_file, congestion);
-    verify_part(socket, 0, socket.part_queue, ip, port, congestion, last_congestion);
+    verify_part(socket, 0, client.part_queue, ip, port, congestion, last_congestion);
 }
 
 exports.socket_download = socket_download;

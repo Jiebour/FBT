@@ -5,7 +5,9 @@ var nat_client = require("./nat-client.js"),
     EventEmitter = require('events').EventEmitter,
     path = require('path'),
     fs = require('fs'),
-    BSON = require('buffalo');
+    BSON = require('buffalo'),
+    utils = require('./utils')
+    xxhash = require('xxhash');
 
 var NATTYPE = settings.NATTYPE,
     BLOCK_SIZE = settings.BLOCK_SIZE,
@@ -140,7 +142,8 @@ function check_debug_input() { // only apply in DEBUG mode
     var last_traverse_complete_count = 0;
     var traverse_complete_emitter = new EventEmitter();
     var interval_obj = setInterval(function(){
-        if (times >= 5 || global.traverse_complete_count === socket_amount) {
+        if ((times >= 3 && global.traverse_complete_count>0)
+          || global.traverse_complete_count === socket_amount) {
             clearInterval(interval_obj);
             // 连续三次穿透的socket未增加或者已经全部穿透, 认为NAT穿透步骤结束
             console.log("traverse complete!");
@@ -215,7 +218,8 @@ function check_debug_input() { // only apply in DEBUG mode
             check(available_clients, global.tobe_check);  // 在下载完成的回调函数中开始校验
         });
         available_clients.forEach(function (client) {
-            download.socket_download(client.socket, client.target.ip, client.target.port);
+            console.log("start downloading from " + client.target.ip);
+            download.socket_download(client, client.target.ip, client.target.port);
         });
     });
 })();
@@ -237,7 +241,8 @@ function check(available_clients, tobe_check) {
             tobe_check.forEach(function(blockID){
                 var random_client = available_clients[Math.floor(Math.random()*available_clients.length)];
                 // 校验未通过的块, 随机选择一个socket来下载
-                download.download_block(random_client.socket, blockID, ip, port);
+                download.download_block(random_client.socket, blockID,
+                    random_client.target.ip, random_client.target.port);
             });
             setTimeout(check(available_clients, tobe_check), 300);
         });
@@ -257,7 +262,7 @@ function create_download_client(test_nat_type, pool) {
             console.log(nat_type);
             if (nat_type_id !== -1){
                 var client = new nat_client.Client(nat_type, pool);
-                client.request_for_connection(nat_type_id);
+                client.request_for_connection(nat_type_id, client);
                 global.available_clients.push(client);
             }
             else {
@@ -267,10 +272,11 @@ function create_download_client(test_nat_type, pool) {
     }
     else { // test mode
         var client = new nat_client.Client(NATTYPE[test_nat_type], pool);
-        client.request_for_connection(test_nat_type);
+        client.request_for_connection(test_nat_type, client);
         global.available_clients.push(client);
     }
 };
+
 
 function loadDownloadState(){
     if (fs.existsSync(DOWNLOAD_PART_STATE_FILE)) {

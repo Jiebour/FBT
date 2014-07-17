@@ -11,16 +11,17 @@ var NATTYPE = [FullCone, RestrictNAT, RestrictPortNAT, SymmetricNAT];
 
 function Client(nat_type, pool) { // nat_type, pool are both string
 	var master = {ip: global.nat_server_ip, port: global.nat_server_port};
-	var socket = null;
-    var target = null; // 对面client
+	this.socket = null;
+    this.target = null; // 对面client
 	var peer_nat_type = null;
     this.is_available = false; // 这个socket是否可用
+    var that = this;
 
-	this.request_for_connection = function (nat_type_id) {
-		socket = dgram.createSocket("udp4");
+	this.request_for_connection = function (nat_type_id, that) {
+		that.socket = dgram.createSocket("udp4");
 		var msg = new Buffer(pool + ' ' + nat_type_id);  // msg是Buffer
         console.log(master.port);
-        socket.send(msg, 0, msg.length, master.port, master.ip);
+        that.socket.send(msg, 0, msg.length, master.port, master.ip);
         var sendmsg = new Buffer('ok');
         var message;
 
@@ -29,25 +30,25 @@ function Client(nat_type, pool) { // nat_type, pool are both string
             message = msg.toString();
             console.log(message);
             if (message === "ok " + pool) {
-                socket.send(sendmsg, 0, 2, master.port, master.ip);
+                that.socket.send(sendmsg, 0, 2, master.port, master.ip);
                 console.log("request sent, waiting for partner in pool %s...", pool);
             } else if (msg.length === 7) {
                 var result = utils.bytes2addr(msg);
-                target = {ip: result[0], port: result[1]};
+                that.target = {ip: result[0], port: result[1]};
                 peer_nat_type = NATTYPE[result[2] - 48]; // 是数字在ascii中的号
                 console.log("connected to %s:%s, its NAT type is %s",
                             result[0], result[1], peer_nat_type);
-                socket.removeListener('message', messageforconnect);
-                punch(nat_type);
+                that.socket.removeListener('message', messageforconnect);
+                punch(nat_type, that);
             } else {
                 console.log("pool %d Got invalid response: ", pool, msg);
-                socket.close(); // 这个socket废了
+                that.socket.close(); // 这个socket废了
             }
         };
-		socket.on('message', messageforconnect);
+		that.socket.on('message', messageforconnect);
 	};
 
-    var punch = function(nat_type){
+    var punch = function(nat_type, that){
         if ((nat_type === SymmetricNAT || peer_nat_type === SymmetricNAT) ||
             (nat_type === SymmetricNAT || peer_nat_type === RestrictPortNAT) ||
             (nat_type === RestrictPortNAT || peer_nat_type === SymmetricNAT))
@@ -64,7 +65,7 @@ function Client(nat_type, pool) { // nat_type, pool are both string
         }
         else if (nat_type === FullCone) {
             if (peer_nat_type === FullCone) { // 两边都是fullcone, socket直接可用
-                this.is_available = true;
+                that.is_available = true;
                 global.traverse_complete_count++; // socket穿透完成, 如果是uploader, 那这个值达到1就OK了
                 console.log("FullCone mode");
             }
@@ -78,28 +79,28 @@ function Client(nat_type, pool) { // nat_type, pool are both string
         }
     };
 
-    var punch_receive = function() {
-        socket.on('message', function(msg, rinfo) {
+    var punch_receive = function(that) {
+        that.socket.on('message', function(msg, rinfo) {
             var msg = msg.toString('utf8');
             process.stdout.write("peer: " + msg);
             if (msg === 'punching...\n') {
                 var text = new Buffer("end punching\n");
                 // 收到punching包, 得回给rinfo.port, 因为若对方是sym, 那rinfo.port!=target.port
-                socket.send(text, 0, text.length, rinfo.port, target.ip);
-                target.port = rinfo.port;
+                that.socket.send(text, 0, text.length, rinfo.port, that.target.ip);
+                that.target.port = rinfo.port;
             }
             if (msg === "done\n") {
                 global.traverse_complete_count++; // 三次握手, socket穿透完成
-                this.is_available = true;
+                that.is_available = true;
             }
         });
     };
 
-    var punch_send = function() {
+    var punch_send = function(that) {
         var periodic_running = true;
         function send(count) {
             var text = Buffer("punching...\n");
-            socket.send(text, 0, text.length, target.port, target.ip);
+            that.socket.send(text, 0, text.length, that.target.port, that.target.ip);
             console.log("UDP punching package %d sent", count);
             setTimeout(function(){
                 if (periodic_running)
@@ -107,23 +108,23 @@ function Client(nat_type, pool) { // nat_type, pool are both string
             }, 500);
         }
         send(0);
-        socket.on('message', function(msg, rinfo) {
+        that.socket.on('message', function(msg, rinfo) {
             if (periodic_running) {
                 // 这里收到的应该是"end punching\n"
                 // 发出了的包有回应, 说明穿透成功
                 console.log("punching succeed");
                 periodic_running = false;
                 var text = Buffer("done\n");
-                socket.send(text, 0, text.length, rinfo.port, target.ip);
+                that.socket.send(text, 0, text.length, rinfo.port, that.target.ip);
                 global.traverse_complete_count++;
-                this.is_available = true;
+                that.is_available = true;
             }
             var msg = msg.toString('utf8');
             process.stdout.write("peer: " + msg);
             if (msg === 'punching...\n') {
                 var text = Buffer("end punching\n");
-                socket.send(text, 0, text.length, rinfo.port, target.ip);
-                target.port = rinfo.port;
+                that.socket.send(text, 0, text.length, rinfo.port, that.target.ip);
+                that.target.port = rinfo.port;
             }
         });
     };
