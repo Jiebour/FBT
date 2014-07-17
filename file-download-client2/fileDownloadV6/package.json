@@ -1,0 +1,22 @@
+{
+  "name": "p2p-file-share",
+  "version": "0.0.1",
+  "repository": "https://github.com/laike9m/FBT/tree/master/file-download",
+  "license": "LGPL",
+  "description": "node p2p file share",
+  "keywords": [
+    "file",
+    "share",
+    "p2p"
+  ],
+  "author": "bonelee <lizhihua2000@gmail.com>",
+  "dependencies": {
+    "mime":  "1.2.11",
+    "random-access-file": "0.3.1",
+    "mocha": "1.20.1"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec test/*-test.js"
+  }
+}
+

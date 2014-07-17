@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>FBT个人中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0">
+
+    <link href="Flat-UI-master/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/docs.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/fbtLogo.png">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+
+
+
+
+    <style>
+        .contentContainer{min-height: 2000px;}
+        .demo-row{padding-top: 68px; padding-bottom: 0px;}
+        .other{padding-top: 0px;padding-bottom: 12px;}
+        body{padding-top: 70px;min-height: 2000px;}
+        h1,h2,h3,h4{color: #1abc9c;}
+        p{color: #7f8c8d;}
+        .order{color: #1abc9c;}
+        .divLine{height: 1px; width: 50%; border: dashed 1px;}
+        .imgDiv{padding-top: 30px;}
+        .navbar-default .navbar-brand {color: #1abc9c;}
+        .myActive{background-color: #bbbbbb;}
+        .comment{background-color: #cccccc; margin-top: 20px;}
+        .time{font-size: 12px; color: black;}
+        .QQDiv{position: relative;
+                background-color: #eeeeee; min-height: 500px; 
+                border: solid 3px #1abc9c; border-radius: 4px; 
+                padding-top: 10px; margin-top: 53px;}
+        .avatarDiv{padding-bottom: 10px; border-bottom: solid 1px white;}
+        .name{font-size: 16px; color: #1abc9c;}
+        .shuoShuo{padding-top: 10px;}
+        .navUl{margin: 10px 0px 10px 0px;}
+
+        .myTextArea{width: 100%; border: solid 2px #1abc9c;}
+        textarea:focus{outline: #1abc9c auto 5px;}
+        .publishButton{height: 100px; width: 100px; font-size: 100%;}
+        .zpz{font-size: 100%; padding: 0;}
+        .zan{text-align: center;}
+
+        /*这两行CSS模拟了flatUI典型的input样式*/
+        input{width: 100%; border: 2px solid #dce4ec; color: #34495e; border-radius: 6px;
+              transition: border linear .2s,box-shadow linear .2s;}
+        input:focus{border-color: #1abc9c; -webkit-box-shadow: none;
+                    -moz-box-shadow: none; box-shadow: none; outline: none;}
+
+        .textInSearch{font-size: 14px;}  
+        .divInSearch{border: solid 2px #1abc9c; border-radius: 3px; width: 32%; margin: 3px 3px 3px 3px;}
+        .noPaddingLR{padding-left: 2px; padding-right: 2px; padding-top: 2px;}
+        .addFriendDiv{text-align: right; background: #eeeeee;}
+
+        .searchDiv{padding-bottom: 10px; border-bottom: solid 1px #d8d8d8;}
+        .friendDiv{padding-top: 8px;}
+
+        .moreOperations{}
+        .textOfUnfriend{line-height: 24px; font-size: 12px; text-decoration: underline;}
+        .nameInFriendList{margin-bottom: 6px; border-bottom: dashed 1px #eeeeee;}
+
+.modal-dialog{
+    width: 60%; /* respsonsive width */
+    margin-left:10%; /* width/2) */ 
+}
+
+.modal-content{}        
+
+.glyphicon-th{font-size: 12px;}
+
+.nameOfLocalSearch{margin-bottom: 6px;}
+
+.bottomBar{position: absolute; bottom: 0;}
+
+    </style>  
+
+
+  </head>
+  <body class="containerBody">
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">FBT</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#"></a></li>
+            <li><a href="#resume">资源主页</a></li>
+            <li  class="myActive"><a href="#area">个人中心</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container contentContainer">
+      <div class="row">
+
+        <div class="col-lg-8">
+
+          <!--这里放的是心情发布的东西-->
+          <div class="row">
+            <div class="col-lg-10">
+              <textarea rows="4" class="myTextArea" placeholder="说点啥吧..."></textarea>
+            </div>
+            <div class="col-lg-2">
+              <button class="btn btn-large btn-block btn-primary publishButton">
+                发布
+              </button>
+            </div>
+          </div>
+
+          <!--这里放的是我发布的历史数据1-->
+          <div class="row comment">
+
+            <div class="col-lg-12"><h5>我评论了
+              <a href="#">《美国队长2》</a>:
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star-empty"></span>
+              <span class="glyphicon glyphicon-star-empty"></span>
+              <span class="time">18:32&emsp;&emsp;07-04-2014</span> </h5>
+            </div>
+            <div class="col-lg-12">
+            <p>&emsp;帅到死的红骷髅雨果哥领衔了一群肌肉男和德国军装让人花痴，但剧情弱智的令人发指，打斗场面都快不如同家族的钢铁侠合理了。。雨果哥一出来我就自动V客附身，还有红唇小帽长腿舞娘，以及钢铁侠那长得克拉克盖博一样的斯达克老爸，还有和伊万很像的斯坦，当然，在德国军装面前，一切都是浮云：） </p>
+            </div>
+
+            <div class="col-xs-8"></div>
+            <div class="col-xs-2 zpz zan"><a href="#">赞(28)</a></div>
+            <div class="col-xs-1 zpz"><a href="#">评论</a></div>
+            <div class="col-xs-1 zpz"><a href="#">转发</a></div>
+
+          </div>
+
+          <!--这里放的是我发布的历史数据2-->
+          <div class="row comment">
+
+            <div class="col-lg-12"><h5>我评论了
+              <a href="#">《白老妇》</a>:
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star-empty"></span>
+              <span class="time">18:32&emsp;&emsp;07-04-2014</span> </h5>
+            </div>
+            <div class="col-lg-12">
+            <p>&emsp;剧情和佐伯家无关，属于外传性质，当然了，咒怨风格依然，嘎嘎声也健在，片名副标题取“白老妇”我觉得不大妥当，单单一个“白”字就可以了</p>
+            </div>
+
+            <div class="col-xs-8"></div>
+            <div class="col-xs-2 zpz zan"><a href="#">赞(908)</a></div>
+            <div class="col-xs-1 zpz"><a href="#">评论</a></div>
+            <div class="col-xs-1 zpz"><a href="#">转发</a></div>
+
+          </div>
+
+          <!--这里放的是我发布的历史数据3-->
+          <div class="row comment">
+
+            <div class="col-lg-12">
+              <h5>我评论了
+              <a href="#">《Mr. Peabody & Sherman》</a>:
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star"></span>
+              <span class="glyphicon glyphicon-star-empty"></span>
+              </h5>
+              <h5><span class="time">18:32&emsp;&emsp;07-04-2014</span></h5>
+            </div>
+            <div class="col-lg-12">
+            <p>&emsp;一直在掉又心酸又心痛的眼泪，我家玛雅除了吃饭拉屎睡觉，最人性化的技能就是打呼噜磨牙放屁说梦话～～～我都不指望你养我，我把自己锁在屋外你能给我开门也行啊！！！</p>
+            </div>
+
+            <div class="col-xs-8"></div>
+            <div class="col-xs-2 zpz zan"><a href="#">赞(1243)</a></div>
+            <div class="col-xs-1 zpz"><a href="#">评论</a></div>
+            <div class="col-xs-1 zpz"><a href="#">转发</a></div>
+
+          </div>
+
+
+        </div>
+
+        <div class="col-lg-1">
+        </div>
+
+        <div class="col-lg-3 QQDiv pinned">
+
+<!--
+            <div class="col-xs-10">
+              <input id="nameOfLocalSearch" type="text" value="" placeholder="搜索我的好友...">
+            </div>
+            <div class="col-xs-2">
+              <a href="javascript:void(0)" onclick="showLocalSearchResult()">
+                <span class="glyphicon glyphicon-search"></span>
+              </a>
+            </div>        
+-->
+
+          <!--这里是头像、名字、心情-->
+          <div class="row avatarDiv">
+            <div class="col-lg-4">
+              <img src="img/avatar.png" class="img-responsive img-rounded">
+            </div>
+            <div class="col-lg-8"><span class="name">波多野结衣</span></div>
+            <div class="col-lg-12 shuoShuo">今年我得了最佳AV女优奖！</div>
+          </div>
+
+          <!--这个是导航tab nav-->
+          <ul id="tab" class="nav nav-tabs navUl">
+            <li class="active"><a href="#home" data-toggle="tab">动态</a></li>
+            <li><a href="#news" data-toggle="tab">好友</a></li>
+            <li><a href="#blog" data-toggle="tab">圈子</a></li>
+          </ul>
+
+          <input class="nameOfLocalSearch" id="nameOfLocalSearch" type="text" value="" placeholder="输入昵称搜索我的好友...">
+
+<!--这个是经典的折叠collapse-->
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          第一分组(2/10)
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+      <div id="accordion1" class="row">
+        <div class="col-xs-10 nameInFriendList">张东杰</div>
+        <div class="col-xs-2 nameInFriendList">
+          <a data-toggle="collapse" data-toggle="collapse" data-parent="#accordion1" href="#name1">
+            <span class="glyphicon glyphicon-th"></span>
+          </a>
+        </div>
+        <div id="name1" class="col-xs-12 panel-collapse collapse moreOperations">
+          <a class="textOfUnfriend" href="javascript:void(0)" onclick="unfriend()">
+            <span class="glyphicon glyphicon-trash"></span>删除好友
+          </a>
+          &emsp;
+          <a class="textOfUnfriend" href="javascript:void(0)" onclick="unfriend()">
+            <span class="glyphicon glyphicon-star"></span>星标好友
+          </a>
+        </div>      
+      </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+          第二分组（3/20）
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+      <div class="panel-body">
+        左遥<br>
+        张东杰
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+          第三分组（2/5）
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse">
+      <div class="panel-body">
+        左遥<br>
+        张东杰
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="row bottomBar">
+  <a class="textOfUnfriend" href="javascript:void(0)" data-toggle="modal" data-target="#searchModal">
+    <span class="glyphicon glyphicon-search"></span>FBT好友
+  </a>
+</div>
+
+
+
+
+        </div>
+      </div>
+    </div>
+ 
+
+
+   <!-- Modal of 搜索FBT好友 -->
+   <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h4 class="modal-title" id="myModalLabel">搜索好友:</h4>
+         </div>
+         <div class="modal-body">
+          <div class="row searchDiv">
+            <div class="col-xs-3"></div>
+            <div class="col-xs-5">
+              <input id="nameOfSearch" type="text" value="" placeholder="昵称/关键字...">
+            </div>
+            <div class="col-xs-1">
+              <a href="javascript:void(0)" onclick="showSearchResult()">
+                <span class="glyphicon glyphicon-search"></span>
+              </a>
+            </div>
+            <div class="col-xs-3"></div>
+          </div>
+            <div class="row friendDiv">
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div> 
+
+              <!--一个好友占一个div-->
+              <div class="col-xs-4 divInSearch noPaddingLR">
+                <div class="col-xs-4 noPaddingLR">
+                  <img src="img/avatarInSearch.png" style="width:70px; height:70px;">
+                </div>
+                <div class="col-xs-8 textInSearch">波多野结衣</div>
+                <div class="col-xs-12 noPaddingLR addFriendDiv">
+                  <button class="btn btn-primary btn-xs">+好友</button>
+                </div>
+              </div>                           
+                
+            </div>
+         </div>
+       </div><!-- /.modal-content -->
+     </div><!-- /.modal-dialog -->
+   </div><!-- /.modal -->
+
+
+
+<!--
+<div style="width:100%; background-color: #ecf0f1; height: 66px;"></div>
+-->
+
+    <!-- Load JS here for greater good =============================-->
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <!--<script src="js/jquery-1.8.3.min.js"></script>-->
+    <script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="js/jquery.ui.touch-punch.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-select.js"></script>
+    <script src="js/bootstrap-switch.js"></script>
+    <script src="js/flatui-checkbox.js"></script>
+    <script src="js/flatui-radio.js"></script>
+    <script src="js/jquery.tagsinput.js"></script>
+    <script src="js/jquery.placeholder.js"></script>
+
+    <script src="js/jquery.pin.js"></script>
+
+
+    <!-- PIN ALL THE THINGS! -->
+    <script>
+      //$(".pinned").pin();
+      $(".pinned").pin({containerSelector: ".container"});
+    </script>
+    <!-- That's all - pretty easy, right? -->
+
+  </body>
+</html>

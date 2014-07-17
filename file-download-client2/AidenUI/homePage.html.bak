@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FBT主页</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0">
+
+    <link href="Flat-UI-master/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+    <link href="Flat-UI-master/css/docs.css" rel="stylesheet">
+    <link href="css/navbarFixedTop.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/fbtLogo.png">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+
+
+    <style>
+        .item {
+            border-bottom: solid 1px #d8d8d8;
+            padding-top: 18px;
+            padding-bottom: 18px;
+        }
+
+
+       
+
+  .navbar-default .navbar-brand {color: #1abc9c;}
+  h2{font-size: 30px; margin-top: 4px;}
+  h5{font-size: 22px; line-height: 30px;}
+  a:hover, a:focus {text-decoration: underline;}
+
+  .downloadingDiv{padding-right: 0px; height: 40px;}
+  .downloadingRow{padding-top: 10px;}
+  .downloadingCancelDiv{color: red; height: 40px;}
+  .downloadingCancelA{color: red;}
+  .downloadingRow12{}
+  .doneWithComment{text-align: right;}
+  .glyphicon-play{color: #16a085;}
+
+  .myTextArea{width: 100%; border: solid 2px #1abc9c;}
+  textarea:focus{outline: #1abc9c auto 4px;}
+  .tfh{padding-top: 6px;}
+       
+
+  .score{float: left; width: 50%; padding-bottom: 6px; color: red;}
+  .pzx{display: inline-block; width: 50%; text-align: center; padding-bottom: 6px;}
+      
+
+.fileInput{border: none; font-size: 18px; width: 100%;}
+        input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {
+            outline: none;
+        }
+
+        .button::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+
+        .button:before {
+            content: '选择文件';
+            display: inline-block;
+            background: #1abc9c;
+            border-radius: 3px;
+            padding: 5px 8px;
+            outline: none;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            cursor: pointer;
+            width: 100%;
+            height: 40px;
+            text-align: center;
+            font-size: 15px;
+            color: white;
+        }
+
+        .button:hover:before {
+            border-color: black;
+        }
+
+        .button:active:before {
+            background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+        }
+
+        /*这两行CSS模拟了flatUI典型的input样式*/
+        input{border: 2px solid #dce4ec; color: #34495e; border-radius: 6px;
+              transition: border linear .2s,box-shadow linear .2s;}
+        input:focus{border-color: #1abc9c; -webkit-box-shadow: none;
+                    -moz-box-shadow: none; box-shadow: none; outline: none;}
+        input{display: block; margin-bottom: 6px; width: 100%; height: 42px;}
+
+        .badge{background: red;}
+      .nPLR{padding-right: 0px; padding-left: 0px;}
+
+    </style>
+
+
+</head>
+<body class="containerBody">
+
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">FBT</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-hdd"></span>&nbsp;资源库<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">电影</a></li>
+                        <li><a href="#">动漫</a></li>
+                        <li><a href="#">竞技</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li class="dropdown-header">其它</li>
+                        <li><a href="#">软件</a></li>
+                        <li><a href="#">学习</a></li>
+                    </ul>
+                </li>
+
+                <li class="myActive"><a href="myInformation.html">
+                    <span class="glyphicon glyphicon-folder-close"></span>&nbsp;我的资源</a>
+                </li>
+
+                <li class="myActive"><a href="javascript:void(0)" data-toggle="modal" data-target="#uploadModal">
+                    <span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;上传资源</a>
+                </li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#"><span class="glyphicon glyphicon-user"></span>个人中心</a></li>
+                <!--
+                <li><a href="javascript:void(0)" onclick="showDownloads()">
+                      <span class="glyphicon glyphicon-cloud-download"></span>我的下载
+                    </a>
+                </li>
+                -->
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+
+                        <span class="glyphicon glyphicon-bell"></span>
+                        通知
+                        <span class="badge" id="text_messages_num">42</span>
+                    </a>
+                    <ul class="dropdown-menu" id="list_tips">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+<li><a href="javascript:void(0)" data-toggle="modal" data-target="#settingModal"><span class="glyphicon glyphicon-cog"></span></a></li>
+
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+
+
+<div class="container" id="container_resources">
+	<center><h3 id="text_tips">正在请求资源列表...</h3></center>
+</div>
+<!-- /container -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <div class="row">
+                    <div class="col-xs-2"><img src="img/fbtLogo60.png" class="img-responsive"></div>
+                    <div class="col-xs-9"><h5>FBT: 快乐源于 <span
+                            style="background-color: #1abc9c; color:white; font-weight: bold;">&emsp;分享!&emsp;</span>
+                    </h5></div>
+                </div>
+            </div>
+            <div class="modal-body">
+
+                <div class="row">
+                    <!--
+                      <div class="col-xs-4">
+                        <img src="img/mgdz.png" class="img-responsive img-rounded" alt="Responsive image">
+                          <span class="glyphicon glyphicon-star"></span>
+                          <span class="glyphicon glyphicon-star"></span>
+                          <span class="glyphicon glyphicon-star"></span>
+                          <span class="glyphicon glyphicon-star-empty"></span>
+                          <span class="glyphicon glyphicon-star-empty"></span>
+                      </div>
+                      -->
+                    <div class="col-xs-12">
+                        <div class="row" style="padding-bottom: 6px;">
+                            <div class="col-xs-4">
+                                <input type="file" class="button fileInput" id="btn_uploadFileInput" title="do">
+                            </div>
+
+                            <div class="col-xs-4">
+                                <select class="form-control" id="select_main_type">
+                                    <option value="0">TODO 频道1</option>
+                                    <option value="1">TODO 频道2</option>
+                                    <option value="2">TODO 频道3</option>
+                                </select>
+                            </div>
+
+                            <div class="col-xs-4">
+                                <select class="form-control" id="select_sub_type">>
+                                    <option value="0">TODO 标清(默认)</option>
+                                    <option value="1">TODO 高清</option>
+                                    <option value="2">TODO 超高清</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input id="editbox_resourceName" type="text" value="" placeholder="请填写名称"/>
+                        <input id="editbox_resourceLabels" type="text" value="" placeholder="请填写资源标签,如科幻、漫画改编"/>
+
+                        <!--
+                        <input type="text" class="tags" value="Amsterdam,Washington,Sydney,Beijing,Cairo" placeholder="Add tags" />-->
+                        <textarea id="editbox_comment" rows="4" class="myTextArea"
+                                  placeholder="一句话点评下？140字:-)"></textarea>
+                        <!--<button class="btn btn-large btn-primary btn-block" style="width: 90%;">发布</button>-->
+                        <label><input type="checkbox" id="checkbox_is_public" value="1">仅好友可见</label>
+
+                        <div>资源评分：
+                            <label><input name="radio_grade" type="radio" value="1"/>1</label>
+                            <label><input name="radio_grade" type="radio" value="2"/>2</label>
+                            <label><input name="radio_grade" type="radio" value="3" checked="checked"/>3</label>
+                            <label><input name="radio_grade" type="radio" value="4"/>4</label>
+                            <label><input name="radio_grade" type="radio" value="5"/>5</label>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <div id="err_tips" style="color: red"></div>
+                <button type="button" class="btn btn-large btn-primary" id="btn_upload">发 布</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+
+<!--
+<div style="width:100%; background-color: #ecf0f1; height: 66px;"></div>
+-->
+
+<!-- Load JS here for greater good =============================-->
+<script src="Flat-UI-master/js/jquery-1.8.3.min.js"></script>
+<script src="Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+<script src="Flat-UI-master/js/bootstrap.min.js"></script>
+<script src="Flat-UI-master/js/bootstrap-select.js"></script>
+<script src="Flat-UI-master/js/bootstrap-switch.js"></script>
+<script src="Flat-UI-master/js/flatui-checkbox.js"></script>
+<script src="Flat-UI-master/js/flatui-radio.js"></script>
+<script src="Flat-UI-master/js/jquery.tagsinput.js"></script>
+<script src="Flat-UI-master/js/jquery.placeholder.js"></script>
+<script src="Flat-UI-master/js/jquery.stacktable.js"></script>
+<script src="Flat-UI-master/js/video.js"></script>
+<script src="Flat-UI-master/js/application.js"></script>
+
+<script>
+    $('.doneWithCommentBtn').click(function () {
+        alert("完成评论！:)");
+        $("#collapseMyComment").collapse('hide');
+    });
+</script>
+
+<script type="text/javascript">
+    //global variable are here
+    //fbtHost = '192.168.1.106';
+	IPV4=true;//set false to IPV6
+	fbtHost = '2400:6180:0:d0::8d:1';//for ipv6
+	if(IPV4){
+		fbtHost = '128.199.222.27';//for ipv4
+	}
+    fbtPort = 8888;
+    fbtUID = mockUserID(); //TODO FIXME
+
+    function mockUserID() {
+        //TODO FIXME
+        var mockedUID = Date.now();//gives milliseconds since epoch.
+        return mockedUID;
+    }
+</script>
+
+<!-- 
+//上传的js代码在这里
+-->
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ResourceUploader = require('./shareResource/uploadResource.js');
+
+        //upload file
+        $('#btn_upload').click(function () {
+            $('#err_tips').html("");
+
+            var filePath = $('#btn_uploadFileInput').val();
+            if (!filePath) {
+                $('#err_tips').html("请选择分享的文件");
+                return;
+            }
+
+            var mainType = $('#select_main_type').val();
+            var subType = $('#select_sub_type').val();
+            var fileName = $('#editbox_resourceName').val();
+            if (!fileName) {
+                $('#err_tips').html("请输入文件名");
+                $('#editbox_resourceName').focus();
+                return;
+            }
+            var tags = $('#editbox_resourceLabels').val();
+            tags = tags.replace(/、/g, ' ');
+            tags.trim();
+            if (!tags) {
+                $('#err_tips').html("请输入文件标签");
+                $('#editbox_resourceLabels').focus();
+                return;
+            }
+            var isPublic = 1;
+            if ($("#checkbox_is_public").is(':checked')) {
+                isPublic = 0;
+            }
+
+            var grade = $("input:radio[name ='radio_grade']:checked").val();
+            var comment = $('#editbox_comment').val();
+            if (!comment) {
+                $('#err_tips').html("请输入评论");
+                $('#editbox_comment').focus();
+                return;
+            }
+
+            var uploadStateCallback = function (err, uploadedFile) {
+                //TODO FIXME
+                //add to "通知"
+                var tips = null;
+                if (err) {
+                    tips = "文件上传失败：" + uploadedFile;
+                } else {
+                    tips = "文件上传成功：" + uploadedFile;
+                }
+                $('#text_messages_num').text(parseInt($('#text_messages_num').text()) + 1);
+                $('#list_tips').append('<li><a href="#"><span class="tab">' + tips + '</span></a></li>');
+            };
+            ResourceUploader.uploadResource(fbtHost, fbtPort, fbtUID, fileName, filePath, mainType, subType, grade, comment, tags, isPublic, uploadStateCallback);
+			//hide the file upload dialog
+			$('#uploadModal').modal('hide');
+        });
+
+        $('#btn_uploadFileInput').on('change', function () {
+            var filePath = $(this).val();
+            $('#editbox_resourceName').val(require('path').basename(filePath));
+            //$('#editbox_resourceName').val(filePath);
+        });
+        //});
+
+        //$(document).ready(function () {
+        var path = require('path');
+
+        //Run http server in LAN mode and IPv6 mode
+        var httpServer = require('./fileDownloadV6/run.js');
+        httpServer.start({fbtHost: fbtHost, fbtPort: fbtPort, fbtUser: fbtUID, resourceDB: ResourceUploader.resourceDB}); //may be need file share dir!
+        //fbtUser is user unique id
+    });
+</script>
+<!-- over -->
+
+<!-- 开启websocket的代码在这里 -->
+<script type="text/javascript">
+    //when login OK!
+    function openSocket() {        
+		url = "ws://[" + fbtHost + "]:" + fbtPort + "/websocket"; //for ipv6
+		if(IPV4) var url = "ws://" + fbtHost + ":" + fbtPort + "/websocket";//for ipv4
+        var socket = new WebSocket(url);
+        socket.onopen = function (event) {
+            //$("#tips").html('websocket opened');//debug
+            socket.send(JSON.stringify({uid: fbtUID})); //fbt user are here
+            //$('#text_messages_num').text(parseInt($('#text_messages_num').text()) + 1);
+            //$('#list_tips').append('<li><a href="#"><span class="tab">' + "websocket开启" + '</span></a></li>');
+        };
+        socket.onclose = function (event) {
+            //$("#tips").html('websocket closed');//debug
+        };
+        socket.onerror = function (event) {
+            //$("#tips").html('websocket opend error');//debug
+        };
+        socket.onmessage = function (event) {
+            //pass
+            //showMessage(JSON.parse(event.data));
+            //$("#tips").html('websocket message:'+event.data);
+        };
+    }
+
+    $(document).ready(function () {
+        openSocket();
+    });
+</script>
+<!-- over -->
+
+<!-- 下载资源的代码在这里 -->
+<script type="text/javascript">   
+        var fileDownload = require('./fileDownloadV6/downloadFile.js');
+		
+        function downloadFile(whichHtmlElement, fileHash) {
+			var ResourceDownloadInfoRequester = require('./shareResource/requestDownloadInfo.js');
+            function downloadFileCallback(err, fileDownloadInfo) {
+                if (err) {
+                    $('#download_progress'+whichHtmlElement).html("获取下载信息失败");
+                    return;
+                }
+                //------------------------------------------------------//
+                //FROM SERVER
+                var remoteFile = fileDownloadInfo["file_name"];
+                var fileSize = fileDownloadInfo["file_size"];
+                var fileHash = fileDownloadInfo["file_hash"];
+                var fileInfo = {file: remoteFile, size: fileSize, hash: fileHash};
+                var fileOwners = fileDownloadInfo["owners"];
+                if(fileOwners.length ==0){
+                    $('#download_progress'+whichHtmlElement).html("无资源下载用户");
+                    return;
+                }
+                //------------------------------------------------------//
+
+                var M = 1024 * 1024;
+                var fileSizeMB = (fileSize / M).toFixed(1);
+
+                //TODO
+                //FIXME
+                //var saveDir=require('path').join(__dirname,'downloads');
+                //var saveDir='F:/node-webkit-bin/my-sample/downloads';
+				//MUST SET THIS
+                var saveDir = 'D:/';//default to save to D:/
+                var downloadOverCallback = function (err, savedPostion) {
+                    if (err) {
+                        //console.log("err in file download:"+err);//TODO FIXME
+                        $('#download_progress'+whichHtmlElement).html("0/" + fileSizeMB + "MB&emsp;下载失败");
+                    } else {
+                        $('#download_progress'+whichHtmlElement).html(fileSizeMB + "/" + fileSizeMB + "MB&emsp;100%");
+						//TODO FIXME 通知栏里加文件下载成功
+						$('#text_messages_num').text(parseInt($('#text_messages_num').text()) + 1);
+						$('#list_tips').append('<li><a href="#"><span class="tab">文件下载完毕：' + savedPostion+ '</span></a></li>');
+                        //alert("file download success. save to "+savedPostion);
+                    }
+                }
+                var downloadProgressCallback = function (downloadedBlocks, progress) {
+                    var progressVal = (progress * 100).toFixed(1);
+                    $('#download_progress'+whichHtmlElement).html(downloadedBlocks + "/" + fileSizeMB + "MB&emsp;" + progressVal + "%");
+                    $('#download_progress_bar'+whichHtmlElement).css('width', progressVal + '%').attr('aria-valuenow', progressVal);
+                };
+
+                fileDownload.addToDownloadQueue(fileInfo, fileOwners, saveDir, downloadOverCallback, downloadProgressCallback);
+            };
+
+            //$('#download_progress' + whichHtmlElement).html("获取下载信息中...");
+            //fileHash=fileHash.toString();
+            ResourceDownloadInfoRequester.requestResourceDownloadInfo(fbtHost, fbtPort,fbtUID, fileHash, downloadFileCallback);
+        }
+
+
+        function pauseFileDownload(fileHash) {
+            //var fileHash = '0';
+            fileDownload.pauseFileDownload(fileHash);
+            //$('#download_progress').html("已暂停下载");//TODO FIXME, CHANGE THE BUTTON STATE, UI's bug!!!
+        }
+
+        function resumeFileDownload(fileHash) {
+            //$('#download_progress').html("恢复下载中");
+            //var fileHash = '0';
+            fileDownload.resumeFileDownload(fileHash);
+            //$('#download_progress').html("继续下载");//TODO FIXME, CHANGE THE BUTTON STATE, UI's bug!!!
+        }
+
+        function cancelFileDownload(whichHtmlElement,fileHash) {
+            //var fileHash = '0';
+            fileDownload.removeFileDownload(fileHash,
+                    function (err) {
+                        if (!err) {
+                            $('#download_progress'+whichHtmlElement).html("已删除");
+                            var progressVal = 0;
+                            $('#download_progress_bar'+whichHtmlElement).css('width', progressVal + '%').attr('aria-valuenow', progressVal);
+                        }else{
+							$('#download_progress'+whichHtmlElement).html("删除失败");
+						}
+                    }
+            );
+        }
+</script>
+	
+
+<!-- 资源列表渲染的代码 -->
+<script src="js/ejs.js"></script>
+<script id="resourceListTemplate" type="text/template">
+    <% if (Object.keys(resourceList).length) { %>
+    <% var num=0; %>
+    <% for(fileHash in resourceList){ %>
+    <div class="row item"><!--一个电影row的开始-->
+        <div class="col-xs-3">
+            <img src="img/movie.jpg" class="img-responsive center-block img-rounded">
+        </div>
+        <div class="col-xs-8">
+
+            <a href="#"><h2><%= resourceList[fileHash]['file_name'] %> </h2></a>
+
+            <p><strong>标签</strong>：<%= resourceList[fileHash]['tags'] %> </p>
+
+            <div class="score">
+                评分：<%= resourceList[fileHash]['avg_grade'] %>
+                <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment<%= num %>">(查看<%=
+                    resourceList[fileHash]['comments'].length %> 人评论)</a>
+            </div>
+
+            <div class="pzx">
+                <a data-toggle="collapse" href="#collapseMyComment<%= num %>">评论| </a>
+                <a href="#">转发| </a>
+                <a data-toggle="collapse" href="#collapseMyDownload<%= num %>" id="download_file_hash<%= num %>"
+                   onclick="downloadFile(<%= num %>,'<%= fileHash %>')">下载</a>
+            </div>
+
+            <div id="collapseAllComment<%= num %>" class="collapse">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <% function viewComment(comment) { %>
+                        <strong><%= comment['who'] %></strong>(<%= toLocalTime(comment['ctime']) %>)： <%=
+                        comment['content'] %>
+                        <br/>
+                        <% } %>
+                        <% resourceList[fileHash]['comments'].map(viewComment) %>
+                    </div>
+                </div>
+            </div>
+
+            <div id="collapseMyComment<%= num %>" class="collapse myCollapse">
+                <div class="row">
+                    <div class="col-xs-10">
+                        <textarea rows="4" class="myTextArea" placeholder="发表观后感吧(1000字最多)..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-6 tfh">
+                        <span class="glyphicon glyphicon-picture">图片</span>
+                        <span class="glyphicon glyphicon-paperclip">附件</span>
+                        <span>@好友</span>
+                    </div>
+
+                    <div class="col-xs-2 checkbox">
+                        <!--
+                          <label>
+                            <input type="checkbox">转发给粉丝
+                          </label>
+                          -->
+                    </div>
+
+                    <div class="col-xs-2 doneWithComment">
+                        <button type="button" class="btn btn-sm btn-success doneWithCommentBtn">完成评论</button>
+                    </div>
+                </div>
+                <!--评论第二行-->
+
+            </div>
+            <!--collapseMyComment-->
+
+            <div id="collapseMyDownload<%= num %>" class="collapse">
+                <br>
+
+                <div class="row downloadingRow12">
+                    <div class="col-xs-3 downloadingDiv downloadCol" id="download_progress<%= num %>">
+                        0M/<%= (resourceList[fileHash]['file_size']/1024/1024).toFixed(2) %>MB&emsp;0%
+                    </div>
+                    <!-- TODO FIXME substitute with real file size-->
+                    <div class="col-xs-6 downloadingRow">
+
+                        <div class="progress progress-striped">
+                            <div id="download_progress_bar<%= num %>" class="progress-bar progress-bar-success"
+                                 role="progressbar"
+                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                <span class="sr-only"></span><!-- aria-valuenow="40" -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-2 downloadingCancelDiv downloadCol">
+                        <div id="paused<%= num %>" style="display:none">1</div><!-- save user click state -->
+                        <a class="downloadingCancelA" href="javascript:void(0)" id="button_pause_download<%= num %>"
+                                onclick="
+                                    if($('#paused<%= num %>').text()=='0'){
+                                        pauseFileDownload('<%= fileHash %>');
+                                        $('#paused<%= num %>').text('1');
+                                    }else{
+                                       resumeFileDownload('<%= fileHash %>');
+                                       $('#paused<%= num %>').text('0');
+                                    }
+                                "
+                                >
+                            <span class="glyphicon glyphicon-pause"></span>
+                            &emsp;
+                        </a>
+
+                        <a class="downloadingCancelA" href="javascript:void(0)" id="button_cancel_download=<%= num %>"
+                                onclick="cancelFileDownload(<%= num %>,'<%= fileHash %>')">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+            <!--col-9-->
+        </div>
+    </div>
+    <% num+=1; %>
+    <% } %>
+    <% } else { %>
+		<center><h3>列表资源为空！</h3></center>
+	<% } %>
+</script>
+
+
+<!-- 请求资源列表的代码在这里 -->
+<script type="text/javascript">    
+    function toLocalTime(utcSeconds) {
+        //var utcSeconds = 1234567890;
+        var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+        if (!utcSeconds) {
+            return "未知时间";
+        }
+        d.setUTCSeconds(parseInt(utcSeconds));
+        var month = d.getMonth() + 1; //Months are zero based
+        var year = d.getFullYear();
+        var day = d.getDate();
+        var hour = d.getHours();
+        var minute = d.getMinutes();
+        var second = d.getSeconds();
+        return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+    }
+
+    function getResListCallback(err, resourceList) {
+		//mock resource list, just for debug
+		//var resourceList={"-1425779317": {"tags": "test", "file_name": "homePage.html", "file_size": "26287", "comments": [{"content": "hih", "who": "TODO FIXME", "uid": 1405257577958, "ctime": 1405257571}], "avg_grade": 3.0, "mtime": 1405257571, "main_type": 0, "sub_type": 0}, "-1034380555": {"tags": "kkl", "file_name": "nw.pak", "file_size": "4063611", "comments": [{"content": "\u5609\u9675\u6c5f", "who": "TODO FIXME", "uid": 1405261629219, "ctime": 1405261568}], "avg_grade": 3.0, "mtime": 1405261568, "main_type": 0, "sub_type": 0}, "1605211370": {"tags": "test dfsa fdas", "file_name": "alliance.zip", "file_size": "22215202", "comments": [{"content": "test2", "who": "TODO FIXME", "uid": 1405258045801, "ctime": 1405258046}, {"content": "fasd", "who": "TODO FIXME", "uid": 1405259955700, "ctime": 1405259949}, {"content": "fdas", "who": "TODO FIXME", "uid": 1405260498546, "ctime": 1405260515}], "avg_grade": 3.0, "mtime": 1405260515, "main_type": 0, "sub_type": 0}};	
+        if (!err) {
+            var resourceListTemplate = $('#resourceListTemplate').html();
+            var html = ejs.render(resourceListTemplate, { resourceList: resourceList, toLocalTime: toLocalTime});
+            $('#container_resources').html(html);
+        } else {
+            $('#container_resources').html("<center><h3>资源列表请求失败！</h3></center>");
+        }
+    }
+
+    $(document).ready(function () {	
+		var ResourceViewer = require('./shareResource/viewResource.js');
+        ResourceViewer.requestResourceList(fbtHost, fbtPort, getResListCallback);		
+    });
+</script>
+
+</body>
+</html>

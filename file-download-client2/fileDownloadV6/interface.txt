@@ -1,0 +1,84 @@
+文件下载接口，和ui的交互就如下4个（ui上无需汇报下载速度）：
+exports.addToDownloadQueue=addToDownloadQueue;
+exports.pauseFileDownload=pauseFileDownload;
+exports.resumeFileDownload=resumeFileDownload;
+exports.removeFileDownload=removeFileDownload;
+
+我分别解释下这四个接口的作用，
+
+function addToDownloadQueue(fileInfo, fileOwners, saveDir, downloadOverCallback, downloadProgressCallback)
+/**
+ * add to file download queue
+ *
+ * arguments:
+ * fileInfo: a hash such as {file: name of the file,hash: hash of the file, size: file size}
+ * fileOwners: the owner of the file, is an array such as [{host: ip1, port: port1},{host: ip2, port: port2}]
+ * saveDir: the dir to save the file
+ * downloadOverCallback: the callback for invoker when the file download is over
+ * downloadProgressCallbacks: the download progress callback
+ *
+ */
+
+下载的逻辑是采用一个队列来维护下载信息，包括上面的fileInfo，fileOwners，saveDir等。
+
+而下载的配置文件：
+var config={ BLOCK_SIZE: 1024*1024, //单块大小为1M
+             MAX_HTTP_CONNECTION_CNT: 30, //每次发起http连接的最大数目
+             MAX_DOWNLOAD_CNT: 3, //allowed download number at the same time，并发的下载数目，ui上即体现为同时下载的最大文件数
+             DOWNLOAD_STATE_FILE: 'data/download-state.json' //保存下载状态的json，做离线之用，每次开启软件解析该文件，每次退出软件保存该文件
+           };
+
+所以我这边每次下载的时候，是仅仅去队列中的MAX_DOWNLOAD_CNT个下载信息来并发下载！一旦下载完毕，队列中该信息便从队列中删除！
+而当任何一个文件下载完毕以后，都会去从队列中获取下一次并发的下载信息，并开始新的下载！
+
+function removeFileDownload(fileHash, callback);
+/**
+ * remove file download from queue, delete downloaded file at the same time.
+ *
+ * fileHash: hash of file to remove from download queue
+ * callback: callback when complete
+ */
+
+
+function pauseFileDownload(fileHash){
+/**
+ * pause a file download
+ *
+ * fileHash: hash of file
+ */
+
+
+
+/**
+ * resume a file download
+ *
+ * fileHash: hash of file
+ */
+function resumeFileDownload(fileHash)
+
+
+文件下载中的状态机：
+var DownloadState={DOWNLOAD_OVER: 0, DOWNLOADING: 1, CANCELED: 2, PAUSED: 3, DOWNLOAD_ERR: 4};
+
+/* state machine
+ *
+                                    |  -------------------------------------|
+                                   \|/                                      |
+                          DOWNLOAD_OVER--------user click download again---->
+                             /|\
+                              | all file blocks downloaded ok
+                              |
+  begin file download-------->DOWNLOADING-----------user click pause----------->PAUSED-------user click resume--->
+                             /|\                                                                                |
+                              |                                                                                 |
+                              ---------------------------------------------------------------------------------                                                                                 
+NOTE1: if user removes the  file download, set the download state to CANCELED.
+NOTE2: if error occurs while downloading, set the download state to DOWNLOAD_ERR.
+*/
+
+此外，我这边下载暂停和继续是当用户点击“暂停”，通过设置下载状态变量，而在真正的下载文件逻辑中，我会在每个函数（例如负责下载的关键函数，download各个文件块的函数，还有最耗时的其他函数如发起http连接后数据传输完毕的逻辑处理回调函数）入口检测文件的状态，如果是下载被暂停了，则函数直接返回！这样上层ui就可以直接看到下载被暂停了！因为ui上的一些回调函数，如进度更新函数不再触发！
+而用户点击继续下载，也是设置每个文件的下载状态来完成的，因为我使用一个变量downloadBlocksLeft来记录每个文件下载待下载的块，虽然用户暂停了下载，但是它保存了文件下载的进度信息，这样用户继续下载以后，通过它就知道哪些块是待下载的了！
+
+如果有问题，大家可以和一起探讨！
+
+

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="viewport" content="width=device-width">
+	
+<script type="text/javascript" src="Flat-UI-master/js/jquery-1.8.3.min.js"></script>
+</head>
+
+<h2>test</h2>
+<div id="container_resources">hello</div>
+
+<!-- 资源列表渲染的代码 -->
+<script src="js/ejs.js"></script>
+<script id="resourceListTemplate" type="text/template">
+    <% if (Object.keys(resourceList).length) { %>
+    <% var num=0; %>
+    <% for(fileHash in resourceList){ %>
+    <div class="row item"><!--一个电影row的开始-->
+        <div class="col-xs-3">
+            <img src="img/movie.jpg" class="img-responsive center-block img-rounded">
+        </div>
+        <div class="col-xs-8">
+
+            <a href="#"><h2><%= resourceList[fileHash]['file_name'] %> </h2></a>
+
+            <p><strong>标签</strong>：<%= resourceList[fileHash]['tags'] %> </p>
+
+            <div class="score">
+                评分：<%= resourceList[fileHash]['avg_grade'] %>
+                <a data-toggle="collapse" data-toggle="collapse" href="#collapseAllComment<%= num %>">(查看<%=
+                    resourceList[fileHash]['comments'].length %> 人评论)</a>
+            </div>
+
+            <div class="pzx">
+                <a data-toggle="collapse" href="#collapseMyComment<%= num %>">评论| </a>
+                <a href="#">转发| </a>
+                <a data-toggle="collapse" href="#collapseMyDownload<%= num %>" id="download_file_hash<%= num %>"
+                   onclick="downloadFile(<%= num %>,'<%= fileHash %>')">下载</a>
+            </div>
+
+            <div id="collapseAllComment<%= num %>" class="collapse">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <% function viewComment(comment) { %>
+                        <strong><%= comment['who'] %></strong>(<%= toLocalTime(comment['ctime']) %>)： <%=
+                        comment['content'] %>
+                        <br/>
+                        <% } %>
+                        <% resourceList[fileHash]['comments'].map(viewComment) %>
+                    </div>
+                </div>
+            </div>
+
+            <div id="collapseMyComment<%= num %>" class="collapse myCollapse">
+                <div class="row">
+                    <div class="col-xs-10">
+                        <textarea rows="4" class="myTextArea" placeholder="发表观后感吧(1000字最多)..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-6 tfh">
+                        <span class="glyphicon glyphicon-picture">图片</span>
+                        <span class="glyphicon glyphicon-paperclip">附件</span>
+                        <span>@好友</span>
+                    </div>
+
+                    <div class="col-xs-2 checkbox">
+                        <!--
+                          <label>
+                            <input type="checkbox">转发给粉丝
+                          </label>
+                          -->
+                    </div>
+
+                    <div class="col-xs-2 doneWithComment">
+                        <button type="button" class="btn btn-sm btn-success doneWithCommentBtn">完成评论</button>
+                    </div>
+                </div>
+                <!--评论第二行-->
+
+            </div>
+            <!--collapseMyComment-->
+
+            <div id="collapseMyDownload<%= num %>" class="collapse">
+                <br>
+
+                <div class="row downloadingRow12">
+                    <div class="col-xs-3 downloadingDiv downloadCol" id="download_progress<%= num %>">
+                        0M/<%= (resourceList[fileHash]['file_size']/1024/1024).toFixed(2) %>MB&emsp;0%
+                    </div>
+                    <!-- TODO FIXME substitute with real file size-->
+                    <div class="col-xs-6 downloadingRow">
+
+                        <div class="progress progress-striped">
+                            <div id="download_progress_bar<%= num %>" class="progress-bar progress-bar-success"
+                                 role="progressbar"
+                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                <span class="sr-only"></span><!-- aria-valuenow="40" -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-2 downloadingCancelDiv downloadCol">
+                        <div id="paused<%= num %>" style="display:none">1</div><!-- save user click state -->
+                        <a class="downloadingCancelA" href="javascript:void(0)" id="button_pause_download<%= num %>"
+                                onclick="
+                                    if($('#paused<%= num %>').text()=='0'){
+                                        pauseFileDownload('<%= fileHash %>');
+                                        $('#paused<%= num %>').text('1');
+                                    }else{
+                                       resumeFileDownload('<%= fileHash %>');
+                                       $('#paused<%= num %>').text('0');
+                                    }
+                                "
+                                >
+                            <span class="glyphicon glyphicon-pause"></span>
+                            &emsp;
+                        </a>
+
+                        <a class="downloadingCancelA" href="javascript:void(0)" id="button_cancel_download=<%= num %>"
+                                onclick="cancelFileDownload(<%= num %>,'<%= fileHash %>')">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+            <!--col-9-->
+        </div>
+    </div>
+    <% num+=1; %>
+    <% } %>
+    <% } %>
+</script>
+
+
+<!-- 请求资源列表的代码在这里 -->
+<script type="text/javascript">    
+    function toLocalTime(utcSeconds) {
+        //var utcSeconds = 1234567890;
+        var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+        if (!utcSeconds) {
+            return "未知时间";
+        }
+        d.setUTCSeconds(parseInt(utcSeconds));
+        var month = d.getMonth() + 1; //Months are zero based
+        var year = d.getFullYear();
+        var day = d.getDate();
+        var hour = d.getHours();
+        var minute = d.getMinutes();
+        var second = d.getSeconds();
+        return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+    }
+
+    function getResListCallback(err, resourceList) {
+        if (!err) {
+            var resourceListTemplate = $('#resourceListTemplate').html();
+            var html = ejs.render(resourceListTemplate, { resourceList: resourceList, toLocalTime: toLocalTime});
+            $('#container_resources').html(html);
+        } else {
+            $('#container_resources').html("<h3>列表资源为空！</h3>");
+        }
+    }
+    function requestResourceList() {
+		//var ResourceViewer = require('./shareResource/viewResource.js');
+        //ResourceViewer.requestResourceList(fbtHost, fbtPort, getResListCallback);
+		var resourceList={"-1425779317": {"tags": "test", "file_name": "homePage.html", "file_size": "26287", "comments": [{"content": "hih", "who": "TODO FIXME", "uid": 1405257577958, "ctime": 1405257571}], "avg_grade": 3.0, "mtime": 1405257571, "main_type": 0, "sub_type": 0}, "-1034380555": {"tags": "kkl", "file_name": "nw.pak", "file_size": "4063611", "comments": [{"content": "\u5609\u9675\u6c5f", "who": "TODO FIXME", "uid": 1405261629219, "ctime": 1405261568}], "avg_grade": 3.0, "mtime": 1405261568, "main_type": 0, "sub_type": 0}, "1605211370": {"tags": "test dfsa fdas", "file_name": "alliance.zip", "file_size": "22215202", "comments": [{"content": "test2", "who": "TODO FIXME", "uid": 1405258045801, "ctime": 1405258046}, {"content": "fasd", "who": "TODO FIXME", "uid": 1405259955700, "ctime": 1405259949}, {"content": "fdas", "who": "TODO FIXME", "uid": 1405260498546, "ctime": 1405260515}], "avg_grade": 3.0, "mtime": 1405260515, "main_type": 0, "sub_type": 0}};		
+		var resourceListTemplate = $('#resourceListTemplate').html();
+        var html = ejs.render(resourceListTemplate, { resourceList: resourceList, toLocalTime: toLocalTime});
+        $('#container_resources').html(html);
+    }
+
+    $(document).ready(function () {	
+        requestResourceList();
+    });
+</script>
+
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "resource_upload",
+  "version": "0.0.1",
+  "repository": "https://github.com/laike9m/FBT/",
+  "license": "LGPL",
+  "description": "node file upload",
+  "keywords": [
+    "file",
+    "share",
+    "p2p"
+  ],
+  "author": "bonelee <lizhihua2000@gmail.com>",
+  "dependencies": {
+    "log":  "1.4.0",
+    "mocha": "1.20.1"
+  },
+  "scripts": {
+    "test": "mocha --reporter spec test/*-test.js"
+  }
+}
+
