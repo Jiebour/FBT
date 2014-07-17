@@ -67,7 +67,7 @@ function diff_block(tobe_check, callback) {
         return;
     }
     var BLOCK_SIZE=settings.BLOCK_SIZE;
-    var totalblocks = parseInt((settings.filesize-1)/BLOCK_SIZE);
+    var totalblocks = parseInt((settings.filesize-1)/BLOCK_SIZE); // 注意这里和nat_download有区别, 已-1
     var bf2 = Buffer(BLOCK_SIZE);
 
     function compare_block(i, fd2) {
@@ -85,6 +85,9 @@ function diff_block(tobe_check, callback) {
                     console.log("block ", blockID, " not equal!");
                 }
                 else {
+                    if (blockID === 30859) {
+                        console.log(global.checksum_record[30859]);
+                    }
                     tobe_check.splice(i, 1);
 //                    console.log("block ", blockID, " equal!");
                 }
