@@ -1,7 +1,8 @@
 var nat_client = require("./nat-client.js"),
     settings = require("./settings.js"),
     BSON = require('buffalo'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    fs = require('fs');
 
 var NATTYPE = settings.NATTYPE,
     BLOCK_SIZE = settings.BLOCK_SIZE,
@@ -66,7 +67,7 @@ function addEventListener(socket, source_file) {
 }
 
 
-function create_download_client(test_nat_type, pool) {
+function create_download_client(test_nat_type, pool, client_id) {
 
     // NAT type detection
     if (test_nat_type === null) {
@@ -78,7 +79,11 @@ function create_download_client(test_nat_type, pool) {
             console.log(nat_type);
             if (nat_type_id !== -1){
                 var client = new nat_client.Client(nat_type, pool);
-                client.request_for_connection(nat_type_id);
+                client.request_for_connection(nat_type_id, client);
+                if (typeof(global.upload_clients) === "undefined") {
+                    global.upload_clients = {};
+                }
+                global.upload_clients[client_id] = client;
             }
             else {
                 // TODO: 如果不是这四种NAT类型, 如何处理?
@@ -87,9 +92,12 @@ function create_download_client(test_nat_type, pool) {
     }
     else { // test mode
         var client = new nat_client.Client(NATTYPE[test_nat_type], pool);
-        client.request_for_connection(test_nat_type);
+        client.request_for_connection(test_nat_type, client);
+        if (typeof(global.upload_clients) === "undefined") {
+            global.upload_clients = {};
+        }
+        global.upload_clients[client_id] = client;
     }
-    return client;
 };
 
 
@@ -103,12 +111,21 @@ function upload_main(source_file, uid, hash){
 
     global.traverse_complete_count = 0 // 完成穿透的socket计数, 和is_available同时更新
     var pool = uid.toString() + ':' + hash.toString();
-    var upload_client = create_download_client(test_nat_type, pool);
+
+    // 因为会开多个upload_client, 所以要记录
+    var client_id;
+    if (typeof(global.upload_client_count) !== "undefined")
+        client_id = global.upload_client_count + 1;
+    else {
+        global.upload_client_count = 1;
+        client_id = 1;
+    }
+    create_download_client(test_nat_type, pool, client_id);
 
     var interval_obj = setInterval(function(){
         if (global.traverse_complete_count === 1) {
             clearInterval(interval_obj);
-            var socket = upload_client.socket;
+            var socket = global.upload_clients[client_id].socket;
             socket.removeAllListeners("message");
             addEventListener(socket, source_file);
             console.log("uploader listening on " + socket.address().port);

@@ -70,7 +70,7 @@ function diff_block(tobe_check, callback) {
     }
     var BLOCK_SIZE = settings.BLOCK_SIZE;
     var totalblocks = global.totalblocks;
-    var bf2 = Buffer(blocksize);
+    var bf2 = Buffer(BLOCK_SIZE);
     var filesize = global.filesize;
 
     function compare_block(i, fd2) {
@@ -78,7 +78,7 @@ function diff_block(tobe_check, callback) {
             var blockID = tobe_check[i];
             fs.read(fd2, bf2, 0, BLOCK_SIZE, blockID*BLOCK_SIZE, function (err, bytesRead, bf2) {
                 var result;
-                if (tobe_check[i] === totalblocks) {
+                if (tobe_check[i] === totalblocks - 1) {
                     bf2 = bf2.slice(0, bytesRead);
                     result = crc_check(bf2, global.checksum_record[blockID]);
                 }
