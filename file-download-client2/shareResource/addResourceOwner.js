@@ -6,21 +6,21 @@ var utils = require('../fbtUtils/fbtUtils');
 var http = require('http');
 var querystring = require('querystring');
 
-function requestResourceDownloadInfo(fbtHost, fbtPort, uid, fileHash,getResourceDownloadInfoCallback){
+function addResourceOwner(fbtHost, fbtPort, uid, fileHash, callback){
     utils.assert(fbtHost.length > 0);
     utils.assert(fbtPort > 0);
     utils.assert(uid >= 0);
     utils.assert(fileHash.length > 0,"file hash length=0:"+fileHash);
 
     // URL:
-    // http://128.199.222.27:8888/download_resource?user=21&file_hash=714371632
-    var downloadInfo={'user':uid,
+    // http://128.199.222.27:8888/download_over?user=21&file_hash=714371632
+    var queryInfo={'user':uid,
         'file_hash': fileHash};
 
     var options = {
         hostname: fbtHost,
         port: fbtPort,
-        path: '/download_resource?' + querystring.stringify(downloadInfo),
+        path: '/download_over?' + querystring.stringify(queryInfo),
         method: 'GET'
     };
 
@@ -45,24 +45,27 @@ function requestResourceDownloadInfo(fbtHost, fbtPort, uid, fileHash,getResource
             var chunksData = Buffer.concat(chunks);
             var json=JSON.parse(chunksData);
             if('err' in json && json['err']==0){
-                utils.assert("file_info" in json);
-                utils.assert("owners" in json);
                 //{"owners": [], "file_info": {"file_hash": "714371632", "file_name": "README.txt", "file_size": "3906"}, "err": 0}
-                var file_info=json["file_info"];
-                file_info["owners"]=json["owners"];
-                getResourceDownloadInfoCallback(null,file_info);
+                global.log.info("add an owner ok file hash:"+fileHash+" owner:"+uid);
+                if(callback){
+                    callback(null);
+                }
             }else{
+                if(callback){
+                    callback("json err:"+json);
+                }
                 global.log.info("json err:",json);
-                getResourceDownloadInfoCallback("json format error");
             }
         });
     });
 
     httpWritingStream.on('error', function requestError(err) {
         //handle error if server not connect
+        if(callback){
+            callback("http err:"+err);
+        }
         global.log.info("error in http GET:"+err);
-        getResourceDownloadInfoCallback('http request error:'+err);
     });
 }
 
-exports.requestResourceDownloadInfo = requestResourceDownloadInfo;
+exports.addResourceOwner = addResourceOwner;

@@ -164,7 +164,7 @@ function lengOfHash(h){//hash keys length
 }
 
 function setResourceDB(DB){
-    utils.assert(lengOfHash(DB)>0);
+    utils.assert(lengOfHash(DB)>=0);
     resourceDB=DB;
     global.log.info("set resource DB OK.");
 }

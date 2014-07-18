@@ -14,9 +14,8 @@ var querystring = require('querystring');
 //log.error('failed to send email');
 //log.debug('preparing');
 
-var resourceDB={};
+global.resourceDB={};
 var config={RESOURCE_INFO_FILE: path.join(__dirname, 'resourceInfo.json')};
-
 
 loadResourceInfo();
 
@@ -34,13 +33,13 @@ function myCleanup() {
 function loadResourceInfo(){
   if (fs.existsSync(config.RESOURCE_INFO_FILE)) {
     var data = fs.readFileSync(config.RESOURCE_INFO_FILE);
-    resourceDB = JSON.parse(data);
-    global.log.info("load resourceDB ok. resourceDB:",resourceDB);
+    global.resourceDB = JSON.parse(data);
+    global.log.info("load global.resourceDB ok. global.resourceDB:",global.resourceDB);
   }
 }
 
 function saveResouceInfo() {
-  fs.writeFileSync(config.RESOURCE_INFO_FILE, JSON.stringify(resourceDB, null, 2));
+  fs.writeFileSync(config.RESOURCE_INFO_FILE, JSON.stringify(global.resourceDB, null, 2));
 }
 
 // TODO
@@ -57,10 +56,10 @@ function mockFileHash(filePath,hashOKCallback) {
         hash  = ((hash << 5) - hash) + chr;
         hash |= 0; // Convert to 32bit integer
       }
-      return hash;
+      return hash.toString();
     };
     var mockHash=hashCode(path.basename(filePath));
-    resourceDB[mockHash]=filePath;//save to json DB
+    global.resourceDB[mockHash]=filePath;//save to json DB
     hashOKCallback(null,mockHash);
 }
 
@@ -195,5 +194,18 @@ function uploadFileInfoToServer(fbtHost, fbtPort, uid, fileName, fileHash,fileSi
     });
 }
 
+function insertResource(fileHash, filePosition){
+    utils.assert(fileHash.length>0);
+    fs.exists(filePosition, function (exists) {
+        if (exists) {
+            global.resourceDB[fileHash]=filePosition;
+        }else{
+            //impossiable error
+            throw Error("file position not exist. fileHash:"+fileHash+" filePosition:"+filePosition);
+        }
+    });
+}
+
 exports.uploadResource = uploadResource;
-exports.resourceDB = resourceDB; //DB export for file share
+exports.insertResource = insertResource;
+//exports.global.resourceDB = global.resourceDB; //DB export for file share

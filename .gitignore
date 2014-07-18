@@ -16,3 +16,4 @@ file-download/*local*
 *.exe
 run.bat
 file-download-client.zip
+file-download-server.tar.gz

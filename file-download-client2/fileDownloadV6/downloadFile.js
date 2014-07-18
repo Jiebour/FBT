@@ -203,7 +203,6 @@ function downloadFile(fileHash){
       var concurrentHttpCnt=Math.min(fileBlocksCnt,config.MAX_HTTP_CONNECTION_CNT);
       global.log.info("concurrentHttpCnt:"+concurrentHttpCnt);
       for(var blockID=0;blockID<concurrentHttpCnt;++blockID){
-
         downloadBlock(fileInfo,savedFile,blockID);
       }    
     } else {

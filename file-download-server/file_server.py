@@ -17,7 +17,6 @@ from resources_cache import ResourcesCache
 from http_server_info_cache import HttpServerInfoCache
 from download_medium import DownloadMedium
 
-
 from tornado.options import define, options
 
 define("port", default=8888, help="run on the given port", type=int)
@@ -33,8 +32,6 @@ class Application(tornado.web.Application):
 
             (r"/upload_resource", ResourceUploaHandler),
             (r"/view_resource", ResourceViewHandler),
-            (r"/view_my_resource", MyResourceViewHandler),
-            (r"/debug/view_resource", ResourceViewDebugHandler),
             (r"/download_resource", ResourceDownloadHandler),
             (r"/download_over", ResourceDownloadOverHandler),
             (r"/search_resource", ResourceSearchHandler),
@@ -42,10 +39,12 @@ class Application(tornado.web.Application):
             (r"/request_ip", GetPublicIPHandler),
             (r"/report_http_server_info", HttpServerInfoHandler),
 
-            (r"/users", UsersListHandler),
-            (r"/http_server_info", ViewHttpServerInfoHandler),
-
             (r"/websocket", FbtWebSocketHandler),
+
+            (r"/debug/users", UsersListHandler),
+            (r"/debug/http_server_info", ViewHttpServerInfoHandler),
+            (r"/debug/view_my_resource", MyResourceViewHandler),
+            (r"/debug/view_resource", ResourceViewDebugHandler),
         ]
         settings = dict(
             cookie_secret="123",

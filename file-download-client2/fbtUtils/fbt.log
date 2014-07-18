@@ -1,5 +1,5 @@
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO loadSetting ok.fileBlocksDownloadLeft: [object Object]
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO load resourceDB ok. resourceDB: { '198571345': 'D:\\迅雷下载\\Visio2003_SP3.zip',
+[Fri Jul 18 2014 22:08:08 GMT+0800 (中国标准时间)] INFO loadSetting ok.fileBlocksDownloadLeft: [object Object]
+[Fri Jul 18 2014 22:08:08 GMT+0800 (中国标准时间)] INFO load global.resourceDB ok. global.resourceDB: { '198571345': 'D:\\迅雷下载\\Visio2003_SP3.zip',
   '213117714': 'D:\\bone\\fbt-server.tar.gz',
   '535262428': 'F:\\fbt_about\\Drupal 社区团队 _ 中国最好的 Drupal 团队！_files\\join-us.png',
   '613483177': 'C:\\Documents and Settings\\fbt\\桌面\\会议纪要2.txt',
@@ -17,6 +17,8 @@
   '1605211370': 'D:\\alliance.zip',
   '1644960319': 'D:\\bone\\my-sample.tar.gz',
   '1701555102': 'F:\\my-sample.zip',
+  '2013806101': 'c:\\Documents and Settings\\fbt\\FBTDownload\\xpsp3.iso',
+  '2089095270': 'F:\\FBT\\file-download-client2.zip',
   '-549717139': 'F:\\fbt_about\\Drupal 社区团队 _ 中国最好的 Drupal 团队！_files\\js_3jHghlMLrjr9xXAC0JufqSSch3oAbkZstSqYdc4uuck.js',
   '-1425779317': 'C:\\Documents and Settings\\fbt\\桌面\\homePage.html',
   '-171310523': 'C:\\Documents and Settings\\user\\url.log',
@@ -24,14 +26,14 @@
   '-722676385': 'D:\\bone\\node-webkit-v0.9.2-win-ia32.zip',
   '-1689342160': 'D:\\迅雷下载\\office2003.zip',
   '-452240909': 'D:\\my_share\\eclipse-standard-kepler-R-win32.zip',
-  '-45350713': 'D:\\my_share\\test\\Python core.pdf' }
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO LAN IP:192.168.1.107
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO set resource DB OK.
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO Http server has started for host==>192.168.1.107 port==>8884
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO public IP:192.168.1.107
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO It is not an public ipv6 address. IP:192.168.1.107
-[Fri Jul 18 2014 00:24:32 GMT+0800 (中国标准时间)] INFO upload http server ip and host to server. host:192.168.1.107 port:8884
-[Fri Jul 18 2014 00:24:41 GMT+0800 (中国标准时间)] INFO file size:0
-[Fri Jul 18 2014 00:24:41 GMT+0800 (中国标准时间)] INFO json err: { what: 'argument missing error', err: 1 }
-[Fri Jul 18 2014 00:25:13 GMT+0800 (中国标准时间)] INFO file size:10
-[Fri Jul 18 2014 00:25:50 GMT+0800 (中国标准时间)] INFO My cleanup...save download state OK!
+  '-45350713': 'D:\\my_share\\test\\Python core.pdf',
+  '-1421098417': 'D:\\my_share\\test\\empty.txt',
+  '-1147906284': 'F:\\FBT\\file-download-client2\\shareResource\\test.txt',
+  '-125214805': 'c:\\Documents and Settings\\fbt\\FBTDownload\\evince-2.32.0.145.msi' }
+[Fri Jul 18 2014 22:08:08 GMT+0800 (中国标准时间)] INFO LAN IP:192.168.1.107
+[Fri Jul 18 2014 22:08:08 GMT+0800 (中国标准时间)] INFO set resource DB OK.
+[Fri Jul 18 2014 22:08:08 GMT+0800 (中国标准时间)] INFO Http server has started for host==>192.168.1.107 port==>8884
+[Fri Jul 18 2014 22:08:09 GMT+0800 (中国标准时间)] INFO public IP:124.205.93.176
+[Fri Jul 18 2014 22:08:09 GMT+0800 (中国标准时间)] INFO It is not an public ipv6 address. IP:124.205.93.176
+[Fri Jul 18 2014 22:08:09 GMT+0800 (中国标准时间)] INFO upload http server ip and host to server. host:192.168.1.107 port:8884
+[Fri Jul 18 2014 22:08:39 GMT+0800 (中国标准时间)] INFO My cleanup...save download state OK!

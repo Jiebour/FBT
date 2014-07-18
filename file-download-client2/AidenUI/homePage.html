@@ -540,14 +540,8 @@
 
 <script type="text/javascript">
     //global variable are here
-    //fbtHost = '192.168.1.106';
-    IPV4 = true;//set false to IPV6
-    //IPV4 = false;//set false to IPV6
-    fbtHost = '2400:6180:0:d0::8d:1';//for ipv6
-    if (IPV4) {
-        //fbtHost = '128.199.222.27';//for ipv4
-        fbtHost ='192.168.1.102';
-    }
+    fbtHost = 'www.friendsbt.com';//for real env
+    //fbtHost ='192.168.1.102';//for local  test, comment this
     fbtPort = 8888;
     fbtUID = mockUserID(); //TODO FIXME
 
@@ -563,7 +557,8 @@
 -->
 <script type="text/javascript">
     $(document).ready(function () {
-        var ResourceUploader = require('./shareResource/uploadResource.js');
+        ResourceUploader = require('./shareResource/uploadResource.js');
+        ResourceOwnerAdder = require('./shareResource/addResourceOwner.js');
 
         //upload file
         $('#btn_upload').click(function () {
@@ -640,7 +635,7 @@
 
         //Run http server in LAN mode and IPv6 mode
         var httpServer = require('./fileDownloadV6/run.js');
-        httpServer.start({fbtHost: fbtHost, fbtPort: fbtPort, fbtUser: fbtUID, resourceDB: ResourceUploader.resourceDB}); //may be need file share dir!
+        httpServer.start({fbtHost: fbtHost, fbtPort: fbtPort, fbtUser: fbtUID, resourceDB: global.resourceDB}); //may be need file share dir!
         //fbtUser is user unique id
     });
 </script>
@@ -650,8 +645,7 @@
 <script type="text/javascript">
     //when login OK!
     function openSocket() {
-        url = "ws://[" + fbtHost + "]:" + fbtPort + "/websocket"; //for ipv6
-        if (IPV4) var url = "ws://" + fbtHost + ":" + fbtPort + "/websocket";//for ipv4
+        var url = "ws://" + fbtHost + ":" + fbtPort + "/websocket";
         var socket = new WebSocket(url);
         socket.onopen = function (event) {
             //$("#tips").html('websocket opened');//debug
@@ -728,8 +722,14 @@
                     $('#text_messages_num').text(parseInt($('#text_messages_num').text()) + 1);
                     $('#list_tips').append('<li><a href="#"><span class="tab">文件下载完毕：' + savedPostion + '</span></a></li>');
                     //alert("file download success. save to "+savedPostion);
+                    //TODO FIXME
+                    //add resource to DB
+                    ResourceUploader.insertResource(fileHash,savedPostion);
+                    //资源下载完毕上传供水者到服务器
+                    ResourceOwnerAdder.addResourceOwner(fbtHost, fbtPort, fbtUID, fileHash);
+                    //upload owners
                 }
-            }
+            };
             var downloadProgressCallback = function (downloadedBlocks, progress) {
                 var progressVal = (progress * 100).toFixed(1);
                 $('#download_progress' + whichHtmlElement).html(downloadedBlocks + "/" + fileSizeMB + "MB&emsp;" + progressVal + "%");
