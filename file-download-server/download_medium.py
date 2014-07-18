@@ -8,6 +8,10 @@ from http_server_info_cache import HttpServerInfoCache
 
 class DownloadMedium(object):
     @classmethod
+    def get_online_user_cnt(cls,file_hash):
+        return len(filter(UserIPCache.user_online, ResourcesCache.get_resource_owners(file_hash)))
+
+    @classmethod
     def get_online_file_owner(cls, my_uid, file_hash):
         assert len(file_hash) > 0
         assert my_uid >= 0

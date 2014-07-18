@@ -241,6 +241,8 @@ class ResourceDownloadOverHandler(tornado.web.RequestHandler):
 class ResourceViewHandler(tornado.web.RequestHandler):
     def get(self):
         resource_list = ResourcesCache.get_resources_overview()
+        for file_hash in resource_list:
+            resource_list[file_hash]["online_owners_num"]=DownloadMedium.get_online_user_cnt(file_hash)
         resource_data = json.dumps({"err": 0, "resource_list": resource_list})
         self.write(resource_data)
 

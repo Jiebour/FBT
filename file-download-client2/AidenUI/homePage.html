@@ -748,14 +748,12 @@
     function pauseFileDownload(fileHash) {
         //var fileHash = '0';
         fileDownload.pauseFileDownload(fileHash);
-        //$('#download_progress').html("已暂停下载");//TODO FIXME, CHANGE THE BUTTON STATE, UI's bug!!!
     }
 
     function resumeFileDownload(fileHash) {
         //$('#download_progress').html("恢复下载中");
         //var fileHash = '0';
         fileDownload.resumeFileDownload(fileHash);
-        //$('#download_progress').html("继续下载");//TODO FIXME, CHANGE THE BUTTON STATE, UI's bug!!!
     }
 
     function cancelFileDownload(whichHtmlElement, fileHash) {
@@ -807,11 +805,10 @@
                 <strong>类型</strong>：<%= getResourceType(resourceList[fileHash]['main_type'],resourceList[fileHash]['sub_type']) %>
                 &emsp;
                 <strong>上传时间</strong>：<%= toLocalTime(resourceList[fileHash]['mtime']) %>
-            </p>
-            <p>
+                &emsp;
                 <strong>下载次数</strong>：<%= resourceList[fileHash]['download_num'] %>
                 &emsp;
-                <strong>资源数</strong>：TODO FIXME
+                <strong>资源数</strong>：<%= resourceList[fileHash]['online_owners_num'] %>/<%= resourceList[fileHash]['total_owners_num'] %>
             </p>
 
             <div class="score">
@@ -962,6 +959,7 @@
         //mock resource list, just for debug
         //var resourceList={"-1425779317": {"tags": "test", "file_name": "homePage.html", "file_size": "26287", "comments": [{"content": "hih", "who": "TODO FIXME", "uid": 1405257577958, "ctime": 1405257571}], "avg_grade": 3.0, "mtime": 1405257571, "main_type": 0, "sub_type": 0}, "-1034380555": {"tags": "kkl", "file_name": "nw.pak", "file_size": "4063611", "comments": [{"content": "\u5609\u9675\u6c5f", "who": "TODO FIXME", "uid": 1405261629219, "ctime": 1405261568}], "avg_grade": 3.0, "mtime": 1405261568, "main_type": 0, "sub_type": 0}, "1605211370": {"tags": "test dfsa fdas", "file_name": "alliance.zip", "file_size": "22215202", "comments": [{"content": "test2", "who": "TODO FIXME", "uid": 1405258045801, "ctime": 1405258046}, {"content": "fasd", "who": "TODO FIXME", "uid": 1405259955700, "ctime": 1405259949}, {"content": "fdas", "who": "TODO FIXME", "uid": 1405260498546, "ctime": 1405260515}], "avg_grade": 3.0, "mtime": 1405260515, "main_type": 0, "sub_type": 0}};
         if (!err) {
+            $('#container_resources').html("<center><h3>资源列表请求成功！</h3></center>");
             var resourceListTemplate = $('#resourceListTemplate').html();
             var html = ejs.render(resourceListTemplate, { resourceList: resourceList, toLocalTime: toLocalTime, getResourceType: getResourceType});
             $('#container_resources').html(html);

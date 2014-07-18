@@ -53,6 +53,7 @@ class ResourcesCache(object):
             if "download_num" not in cls._all_resources[k]:
                 cls._all_resources[k]["download_num"]=0
             ret[k]['download_num'] = cls._all_resources[k]['download_num']
+            ret[k]['total_owners_num'] = len(cls.get_resource_owners(k))
         return ret
 
     @classmethod
