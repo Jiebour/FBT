@@ -88,7 +88,7 @@ function check_debug_input() { // only apply in DEBUG mode
         uid_list = ['1']; // TODO, 可供测试的机器有几台？
         test_nat_type = check_debug_input(); // DEBUG 模式下, 才需要指定test_nat_type
 
-        global.nat_server_ip = "127.0.0.1"; // local test
+        global.nat_server_ip = "192.241.219.173";
 //        global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
         global.nat_server_port = 10000;
     }
@@ -256,8 +256,7 @@ function create_download_client(test_nat_type, pool) {
     if (test_nat_type === null) {
         var python = require('child_process').spawn(settings.stun_exe);
         python.stdout.on('data', function(data) {
-            var nat_type = data.toString().split(',')[1]; //[space]'Full Cone')
-            nat_type = nat_type.slice(2, nat_type.length - 4);
+            var nat_type = data.toString().split(':')[1];
             var nat_type_id = NATTYPE.indexOf(nat_type);
             console.log(nat_type);
             if (nat_type_id !== -1){

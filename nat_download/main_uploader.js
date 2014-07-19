@@ -73,8 +73,7 @@ function create_download_client(test_nat_type, pool, client_id) {
     if (test_nat_type === null) {
         var python = require('child_process').spawn(settings.stun_exe);
         python.stdout.on('data', function(data) {
-            var nat_type = data.toString().split(',')[1]; //[space]'Full Cone')
-            nat_type = nat_type.slice(2, nat_type.length - 4);
+            var nat_type = data.toString().split(':')[1];
             var nat_type_id = NATTYPE.indexOf(nat_type);
             console.log(nat_type);
             if (nat_type_id !== -1){
@@ -102,7 +101,7 @@ function create_download_client(test_nat_type, pool, client_id) {
 
 
 function upload_main(source_file, uid, hash){
-    global.nat_server_ip = "127.0.0.1"; // local test
+    global.nat_server_ip = "192.241.219.173"; // local test
 //        global.nat_server_ip = "205.147.105.205"; // 用现有的VPS作测试
     global.nat_server_port = 10000;
     var test_nat_type = null;

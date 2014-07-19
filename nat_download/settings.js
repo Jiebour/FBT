@@ -24,7 +24,7 @@ switch (process.platform) {
         break;
     }
     case LINUX: {
-        stun_exe = "stun_Linux";
+        stun_exe = "./stun_Linux";
         break;
     }
     case WIN: {
